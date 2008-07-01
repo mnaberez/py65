@@ -1,0 +1,10 @@
+Instructions needing unit tests:
+  bit
+  cmp
+  cpx
+  cpy
+  dec
+  eor
+  inc
+  lsr
+  sbc
