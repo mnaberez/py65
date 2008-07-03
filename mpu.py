@@ -87,7 +87,7 @@ class MPU:
       a1 = self.WordAt(self.ByteAt(self.pc))
       a2 = (a1+self.y)&0xffff
       if ((a1&0xff00) != (a2&0xff00)):
-        self.extracyles += 1
+        self.extracycles += 1
       return a2
     else:
       return (self.WordAt(self.ByteAt(self.pc))+self.y)&0xffff
@@ -100,7 +100,7 @@ class MPU:
       a1 = self.WordAt(self.pc)
       a2 = (a1+self.x)&0xffff
       if ((a1&0xff00)!=(a2&0xff00)):
-        self.extracyles += 1;
+        self.extracycles += 1
       return a2
     else:
       return (self.WordAt(self.pc)+self.x)&0xffff
@@ -110,7 +110,7 @@ class MPU:
       a1 = self.WordAt(self.pc)
       a2=(a1+self.y)&0xffff
       if ((a1&0xff00)!=(a2&0xff00)):
-        self.extracyles += 1;
+        self.extracycles += 1
       return a2
     else:
       return (self.WordAt(self.pc)+self.y)&0xffff
