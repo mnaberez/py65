@@ -6,5 +6,4 @@ Instructions needing unit tests:
   dec
   eor
   inc
-  lsr
   sbc

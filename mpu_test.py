@@ -1835,6 +1835,201 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(cpu.ZERO, cpu.flags & cpu.ZERO)
     self.assertEquals(0, cpu.flags & cpu.NEGATIVE)
 
+  # LSR Accumulator
+
+  def test_lsr_accumulator_rotates_in_zero_not_carry(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000] = (0x4A) #=> LSR A
+    mpu.a = 0x00
+    mpu.step()
+    self.assertEquals(0x0001, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_lsr_accumulator_sets_carry_and_zero_flags_after_rotation(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000] = (0x4A) #=> LSR A
+    mpu.a = 0x01
+    mpu.step()
+    self.assertEquals(0x0001, mpu.pc) 
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    
+  def test_lsr_accumulator_rotates_bits_right(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000] = (0x4A) #=> LSR A
+    mpu.a = 0x04
+    mpu.step()    
+    self.assertEquals(0x0001, mpu.pc)   
+    self.assertEquals(0x02, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+
+  # LSR Absolute
+
+  def test_lsr_absolute_rotates_in_zero_not_carry(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0002] = (0x4E, 0xCD, 0xAB) #=> LSR $ABCD
+    mpu.memory[0xABCD] = 0x00
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_lsr_absolute_sets_carry_and_zero_flags_after_rotation(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0002] = (0x4E, 0xCD, 0xAB) #=> LSR $ABCD
+    mpu.memory[0xABCD] = 0x01
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)    
+    self.assertEquals(0x00, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    
+  def test_lsr_absolute_rotates_bits_right(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0002] = (0x4E, 0xCD, 0xAB) #=> LSR $ABCD
+    mpu.memory[0xABCD] = 0x04
+    mpu.step()    
+    self.assertEquals(0x0003, mpu.pc)    
+    self.assertEquals(0x02, mpu.memory[0xABCD])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+
+  # LSR Zero Page
+
+  def test_lsr_zp_rotates_in_zero_not_carry(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0001] = (0x46, 0x10) #=> LSR $0010
+    mpu.memory[0x0010] = 0x00
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_lsr_zp_sets_carry_and_zero_flags_after_rotation(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0001] = (0x46, 0x10) #=> LSR $0010
+    mpu.memory[0x0010] = 0x01
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)    
+    self.assertEquals(0x00, mpu.memory[0x0010])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    
+  def test_lsr_zp_rotates_bits_right(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0001] = (0x46, 0x10) #=> LSR $0010
+    mpu.memory[0x0010] = 0x04
+    mpu.step()    
+    self.assertEquals(0x0002, mpu.pc)    
+    self.assertEquals(0x02, mpu.memory[0x0010])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+  
+  # LSR Absolute, X-Indexed
+
+  def test_lsr_absolute_x_indexed_rotates_in_zero_not_carry(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0002] = (0x5E, 0xCD, 0xAB) #=> LSR $ABCD,X
+    mpu.memory[0xABCD + mpu.x] = 0x00
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_lsr_absolute_x_indexed_sets_carry_and_zero_flags_after_rotation(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0002] = (0x5E, 0xCD, 0xAB) #=> LSR $ABCD,X
+    mpu.memory[0xABCD + mpu.x] = 0x01
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)    
+    self.assertEquals(0x00, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    
+  def test_lsr_absolute_x_indexed_rotates_bits_right(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.memory[0x0000:0x0002] = (0x5E, 0xCD, 0xAB) #=> LSR $ABCD,X
+    mpu.memory[0xABCD + mpu.x] = 0x04
+    mpu.step()    
+    self.assertEquals(0x0003, mpu.pc)    
+    self.assertEquals(0x02, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+
+  # LSR Zero Page, X-Indexed
+
+  def test_lsr_zp_x_indexed_rotates_in_zero_not_carry(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0001] = (0x56, 0x10) #=> LSR $0010,X
+    mpu.memory[0x0010 + mpu.x] = 0x00
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_lsr_zp_x_indexed_sets_carry_and_zero_flags_after_rotation(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0001] = (0x56, 0x10) #=> LSR $0010,X
+    mpu.memory[0x0010 + mpu.x] = 0x01
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)    
+    self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    
+  def test_lsr_zp_x_indexed_rotates_bits_right(self):
+    mpu = MPU()
+    mpu.flags &= mpu.CARRY
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0001] = (0x56, 0x10) #=> LSR $0010,X
+    mpu.memory[0x0010 + mpu.x] = 0x04
+    mpu.step()    
+    self.assertEquals(0x0002, mpu.pc)    
+    self.assertEquals(0x02, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.CARRY)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+
   # NOP
   
   def test_nop_does_nothing(self):
