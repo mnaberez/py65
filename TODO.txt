@@ -4,6 +4,5 @@ Instructions needing unit tests:
   cpx
   cpy
   dec
-  eor
   inc
   sbc

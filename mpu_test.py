@@ -1279,7 +1279,217 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0x00, mpu.y)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
-    
+  
+  # EOR Absolute
+  
+  def test_eor_absolute_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.memory[0x0000:0x0002] = (0x4D, 0xCD, 0xAB)
+    mpu.memory[0xABCD] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_absolute_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0002] = (0x4D, 0xCD, 0xAB)
+    mpu.memory[0xABCD] = 0xFF
+    mpu.step()    
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  # EOR Zero Page
+  
+  def test_eor_zp_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.memory[0x0000:0x0001] = (0x45, 0x10)
+    mpu.memory[0x0010] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0x0010])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_zp_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0002] = (0x45, 0x10)
+    mpu.memory[0x0010] = 0xFF
+    mpu.step()    
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0x0010])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  # EOR Immediate
+  
+  def test_eor_immediate_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.memory[0x0000:0x0001] = (0x49, 0xFF)
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_immediate_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0002] = (0x49, 0xFF)
+    mpu.step()    
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  # EOR Absolute, X-Indexed
+  
+  def test_eor_absolute_x_indexed_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0002] = (0x5D, 0xCD, 0xAB)
+    mpu.memory[0xABCD + mpu.x] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_absolute_x_indexed_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0002] = (0x5D, 0xCD, 0xAB)
+    mpu.memory[0xABCD + mpu.x] = 0xFF
+    mpu.step()    
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  # EOR Absolute, Y-Indexed
+  
+  def test_eor_absolute_y_indexed_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.y = 0x03
+    mpu.memory[0x0000:0x0002] = (0x59, 0xCD, 0xAB)
+    mpu.memory[0xABCD + mpu.y] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.y])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_absolute_y_indexed_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.y = 0x03
+    mpu.memory[0x0000:0x0002] = (0x59, 0xCD, 0xAB)
+    mpu.memory[0xABCD + mpu.y] = 0xFF
+    mpu.step()    
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.y])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  # EOR Indirect, Indexed (X)
+
+  def test_eor_indirect_indexed_x_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0001] = (0x41, 0x10) #=> EOR ($0010,X)
+    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    mpu.memory[0xABCD] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_indirect_indexed_x_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0001] = (0x41, 0x10) #=> EOR ($0010,X)
+    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    mpu.memory[0xABCD] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)      
+
+  # EOR Indexed, Indirect (Y)
+  
+  def test_eor_indexed_indirect_y_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.y = 0x03
+    mpu.memory[0x0000:0x0001] = (0x51, 0x10) #=> EOR ($0010),Y
+    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    mpu.memory[0xABCD + mpu.y] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.y])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)    
+
+  def test_eor_indexed_indirect_y_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.y = 0x03
+    mpu.memory[0x0000:0x0001] = (0x51, 0x10) #=> EOR ($0010),Y
+    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    mpu.memory[0xABCD + mpu.y] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.y])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)      
+
+  # EOR Zero Page, X-Indexed
+  
+  def test_eor_zp_x_indexed_flips_bits_over_setting_z_flag(self):
+    mpu = MPU()
+    mpu.a = 0xFF
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0001] = (0x55, 0x10)
+    mpu.memory[0x0010 + mpu.x] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_eor_zp_x_indexed_flips_bits_over_setting_n_flag(self):
+    mpu = MPU()
+    mpu.a = 0x00
+    mpu.x = 0x03
+    mpu.memory[0x0000:0x0002] = (0x55, 0x10)
+    mpu.memory[0x0010 + mpu.x] = 0xFF
+    mpu.step()    
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.a)
+    self.assertEquals(0xFF, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+        
   # INX
 
   def test_inx_increments_x(self):

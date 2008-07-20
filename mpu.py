@@ -240,8 +240,8 @@ class MPU:
     self.RAM[addr] = tbyte & 0xFF
 
   def opEOR(self, x):
-    self.a^=self.ByteAt(x())
-    self.FlagsNZ(a)
+    self.a ^= self.ByteAt(x())
+    self.FlagsNZ(self.a)
 
   def opADC(self, x):
     data=self.ByteAt(x())
