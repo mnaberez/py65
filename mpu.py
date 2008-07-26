@@ -23,8 +23,8 @@ class MPU:
     self.breakFlag = False
     self.excycles = 0
     self.addcycles = False
-    self.processorCycles = 0;
-    self.internalCycleDelay=0;
+    self.processorCycles = 0
+    self.internalCycleDelay = 0
 
     # init
     self.clearMemory()
@@ -44,7 +44,7 @@ class MPU:
     self.addcycles = self.extracycles[instructCode]
     self.instruct[instructCode](self)
     self.processorCycles += self.cycletime[instructCode]+self.excycles
-    self.pc &=0xffff
+    self.pc &= 0xffff
     return self
 
   def reset(self):
@@ -85,8 +85,8 @@ class MPU:
   def IndirectYAddr(self):
     if self.addcycles:
       a1 = self.WordAt(self.ByteAt(self.pc))
-      a2 = (a1+self.y)&0xffff
-      if ((a1&0xff00) != (a2&0xff00)):
+      a2 = (a1+self.y) & 0xffff
+      if (a1 & 0xff00) != (a2 & 0xff00):
         self.extracycles += 1
       return a2
     else:
@@ -98,8 +98,8 @@ class MPU:
   def AbsoluteXAddr(self):
     if self.addcycles:
       a1 = self.WordAt(self.pc)
-      a2 = (a1+self.x)&0xffff
-      if ((a1&0xff00)!=(a2&0xff00)):
+      a2 = (a1 + self.x) & 0xffff
+      if (a1 & 0xff00) != (a2 & 0xff00):
         self.extracycles += 1
       return a2
     else:
@@ -108,8 +108,8 @@ class MPU:
   def AbsoluteYAddr(self):
     if self.addcycles:
       a1 = self.WordAt(self.pc)
-      a2=(a1+self.y)&0xffff
-      if ((a1&0xff00)!=(a2&0xff00)):
+      a2 = (a1 + self.y) & 0xffff
+      if (a1 & 0xff00) != (a2 & 0xff00):
         self.extracycles += 1
       return a2
     else:
@@ -133,8 +133,8 @@ class MPU:
   # stack
 
   def stPush(self,z):
-    self.RAM[self.sp+256] = z&255;
-    self.sp -= 1;
+    self.RAM[self.sp+256] = z&255
+    self.sp -= 1
     self.sp &= 255
 
   def stPop(self):
@@ -151,14 +151,14 @@ class MPU:
     z += 256*self.stPop()
     return z
 
-  # operations
-
-  def FlagsNZ(self, z):
+  def FlagsNZ(self, value):
     self.flags &= ~(self.ZERO + self.NEGATIVE)
-    if z == 0:
+    if value == 0:
       self.flags |= self.ZERO
     else:
-      self.flags |= z & 128
+      self.flags |= value & self.NEGATIVE
+
+  # operations
 
   def opORA(self, x):
     self.a |= self.ByteAt(x())
@@ -166,15 +166,14 @@ class MPU:
 
   def opASL(self, x):
     addr = x()
-    tbyte = self.ByteAt(addr);
+    tbyte = self.ByteAt(addr)
     self.flags &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
 
-    if (tbyte&128):
+    if tbyte & 128:
       self.flags |= self.CARRY
       
     tbyte = (tbyte << 1) & 0xFF
-
-    if (tbyte):
+    if tbyte:
       self.flags |= tbyte & 128
     else:
       self.flags |= self.ZERO
@@ -187,8 +186,8 @@ class MPU:
     self.flags &=~(self.CARRY+self.NEGATIVE+self.ZERO)
     self.flags |=tbyte&1
 
-    tbyte=tbyte>>1
-    if (tbyte):
+    tbyte = tbyte >> 1
+    if tbyte:
       pass # {}
     else:
       self.flags |= self.ZERO
@@ -201,7 +200,7 @@ class MPU:
       self.BranchRelAddr()
 
   def opBST(self, x):
-    if (self.flags&x):
+    if self.flags & x:
       self.BranchRelAddr()
     else:
       self.pc+=1
@@ -219,12 +218,12 @@ class MPU:
   def opBIT(self, x):
     tbyte = self.ByteAt(x())
     self.flags &=~(self.ZERO+self.NEGATIVE+self.OVERFLOW)
-    if ((self.a&tbyte)==0):
-      self.flags |=self.ZERO;
-    self.flags |=tbyte&(128+64)
+    if (self.a & tbyte) == 0:
+      self.flags |= self.ZERO
+    self.flags |= tbyte&(128+64)
 
   def opROL(self, x):
-    addr = x();
+    addr = x()
     tbyte = self.ByteAt(addr)
     if self.flags & self.CARRY:
       if tbyte & 128:
@@ -245,28 +244,28 @@ class MPU:
 
   def opADC(self, x):
     data=self.ByteAt(x())
-    if (self.flags&self.DECIMAL):
-      if (self.flags&self.CARRY):
+    if self.flags & self.DECIMAL:
+      if self.flags & self.CARRY:
         tmp = 1
       else:
         tmp = 0
       data = self.bcd2dec[data]+self.bcd2dec[self.a]+tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-      if (data>99):
-        self.flags|=self.CARRY+self.OVERFLOW;
-        data -=100
+      if data > 99:
+        self.flags |= self.CARRY + self.OVERFLOW
+        data -= 100
 
-      if (data==0):
-        self.flags|=self.ZERO
+      if data == 0:
+        self.flags |= self.ZERO
       else:
-        self.flags |=data&128
-      self.a=self.dec2bcd[data]
+        self.flags |= data & 128
+      self.a = self.dec2bcd[data]
     else:
       if self.flags & self.CARRY:
         tmp = 1
       else:
         tmp = 0
-      data += self.a + tmp;
+      data += self.a + tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
       if data > 255:
         self.flags|=self.OVERFLOW+self.CARRY
@@ -274,20 +273,20 @@ class MPU:
       if data == 0:
         self.flags |= self.ZERO
       else:
-        self.flags |= data&128;
+        self.flags |= data & 128
       self.a = data
 
   def opROR(self, x):
     addr=x()
-    tbyte=self.ByteAt(addr)
-    if (self.flags&self.CARRY):
-      if (tbyte&1):
+    tbyte = self.ByteAt(addr)
+    if self.flags & self.CARRY:
+      if tbyte & 1:
         pass # {}
       else:
         self.flags &=~ self.CARRY
       tbyte=(tbyte>>1)|128
     else:
-      if (tbyte&1):
+      if tbyte & 1:
         self.flags |= self.CARRY
       tbyte=tbyte>>1
     self.FlagsNZ(tbyte)
@@ -303,90 +302,90 @@ class MPU:
     self.RAM[y()] = self.x
 
   def opCPY(self, x):
-    tbyte=self.ByteAt(x());
+    tbyte=self.ByteAt(x())
     self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if (self.y==tbyte):
+    if self.y == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif (self.y>tbyte):
+    elif self.y > tbyte:
        self.flags |= self.CARRY
     else:
-      self.flags |= self.NEGATIVE;
+      self.flags |= self.NEGATIVE
 
   def opCPX(self, y):
-    tbyte=self.ByteAt(y())
+    tbyte = self.ByteAt(y())
     self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if (self.x==tbyte):
+    if self.x == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif (self.x>tbyte):
+    elif self.x > tbyte:
       self.flags |= self.CARRY
     else:
       self.flags |= self.NEGATIVE
 
   def opCMP(self, x):
     tbyte = self.ByteAt(x())
-    self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if (self.a==tbyte):
+    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
+    if self.a == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif (self.a>tbyte):
+    elif self.a > tbyte:
       self.flags |= self.CARRY
     else:
       self.flags |= self.NEGATIVE
 
   def opSBC(self, x):
     data = self.ByteAt(x())
-    if (self.flags & self.DECIMAL):
-      if (self.flags & self.CARRY):
+    if self.flags & self.DECIMAL:
+      if self.flags & self.CARRY:
         tmp = 0
       else:
         tmp = 1
     
       data = self.bcd2dec[a] - self.bcd2dec[data] - tmp
       self.flags &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
-      if (data==0):
+      if data == 0:
         self.flags |= self.ZERO + self.CARRY
-      elif (data>0):
+      elif data > 0:
         self.flags |= self.CARRY
       else:
         self.flags |= self.NEGATIVE
         data +=100
       self.a = self.dec2bcd[data]
     else:
-      if (self.flags & self.CARRY):
+      if self.flags & self.CARRY:
         tmp = 0
       else:
         tmp = 1
 
       data = self.a - data - tmp
-      self.flags &=~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
-      if (data==0):
+      self.flags &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
+      if data == 0:
         self.flags |= self.ZERO + self.CARRY
-      elif (data>0):
+      elif data > 0:
         self.flags |= self.CARRY
       else:
         self.flags |= self.OVERFLOW
-      self.flags |= data&128
-      self.a = data&255
+      self.flags |= data & 128
+      self.a = data & 255
 
   def opDECR(self, x):
-    addr=x();
+    addr = x()
     tbyte = self.ByteAt(addr)
-    self.flags &=~(self.ZERO+self.NEGATIVE)
+    self.flags &= ~(self.ZERO + self.NEGATIVE)
     tbyte -= 1
     if tbyte:
-      self.flags |= self.tbyte&128
+      self.flags |= self.tbyte & 128
     else:
-      self.flags |= self.ZERO;
+      self.flags |= self.ZERO
     self.RAM[addr] = tbyte
 
   def opINCR(self, x):
-    addr=x();
+    addr = x()
     tbyte = self.ByteAt(addr)
-    self.flags &=~(self.ZERO + self.NEGATIVE)
+    self.flags &= ~(self.ZERO + self.NEGATIVE)
     tbyte += 1
-    if (tbyte):
+    if tbyte:
       self.flags |= tbyte&128
     else:
-      self.flags |= fZER;
+      self.flags |= fZER
     self.RAM[addr]=tbyte
 
   def opLDA(self, x):
@@ -436,12 +435,12 @@ class MPU:
     self.pc += 1
   
   def i0a(self):
-    if (self.a&128):
+    if self.a & 128:
       self.flags |= self.CARRY
     else:
-      self.flags &= ~self.CARRY;
-    self.a = self.a << 1;
-    self.FlagsNZ(self.a);
+      self.flags &= ~self.CARRY
+    self.a = self.a << 1
+    self.FlagsNZ(self.a)
     self.a &= 255
 
   def i0d(self):
@@ -511,16 +510,16 @@ class MPU:
     self.pc += 1
 
   def i2a(self):
-    if (self.flags & self.CARRY):
-      if ((self.a & 128)==0):
-        self.flags &=~self.CARRY;
-      self.a=(self.a<<1)|1
+    if self.flags & self.CARRY:
+      if (self.a & 128) == 0:
+        self.flags &=~self.CARRY
+      self.a = (self.a<<1) | 1
     else:
-      if (self.a&128):
-        self.flags|=self.CARRY;
-      self.a=self.a<<1
-    self.FlagsNZ(self.a);
-    self.a&=255
+      if self.a & 128:
+        self.flags |= self.CARRY
+      self.a = self.a << 1
+    self.FlagsNZ(self.a)
+    self.a &= 255
 
   def i2c(self):
     self.opBIT(self.AbsoluteAddr)
@@ -589,16 +588,16 @@ class MPU:
     self.pc+=1
 
   def i4a(self):
-    self.flags &=~(self.CARRY+self.NEGATIVE+self.ZERO);
-    if (self.a&1):
+    self.flags &= ~(self.CARRY+self.NEGATIVE+self.ZERO)
+    if self.a & 1:
       self.flags |= self.CARRY
 
-    self.a=self.a>>1
-    if (self.a):
+    self.a = self.a >> 1
+    if self.a:
       pass # {}
     else:
       self.flags |= self.ZERO
-    self.a&=255
+    self.a &= 255
 
   def i4c(self):
     self.pc=self.WordAt(self.pc)
@@ -664,36 +663,36 @@ class MPU:
   def i69(self):
     data = self.ImmediateByte()
 
-    if (self.flags & self.CARRY):
+    if self.flags & self.CARRY:
       tmp = 1
     else:
       tmp = 0
 
-    if (self.flags & self.DECIMAL):
+    if self.flags & self.DECIMAL:
       data = self.bcd2dec[data] + self.bcd2dec[a] + tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-      if (data>99):
-        self.flags|=self.CARRY+self.OVERFLOW
-        data -=100
-      if (data==0):
+      if data > 99:
+        self.flags |= self.CARRY+self.OVERFLOW
+        data -= 100
+      if data == 0:
         self.flags |= self.ZERO
       else:
-        self.flags |= self.data&128
+        self.flags |= self.data & 128
       self.a = self.dec2bcd[data]
     else:
-      if (self.flags & self.CARRY):
+      if self.flags & self.CARRY:
         tmp = 1
       else:
         tmp = 0
       data += self.a + tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-      if (data>255):
+      if data > 255:
         self.flags |= self.OVERFLOW + self.CARRY
-        data &=255
-      if (data==0):
+        data &= 255
+      if data == 0:
         self.flags |= self.ZERO
       else:
-        self.flags |= data&128
+        self.flags |= data & 128
       self.a=data
     self.pc += 1
 
@@ -917,13 +916,13 @@ class MPU:
 
   def ic0(self):
     tbyte = self.ImmediateByte()
-    self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE);
-    if (y==tbyte):
+    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
+    if y == tbyte:
       self.flags |= self.CARRY+self.ZERO
-    elif (y>tbyte):
+    elif y > tbyte:
       self.flags |= self.CARRY
     else:
-      self.flags |= self.NEGATIVE;
+      self.flags |= self.NEGATIVE
     self.pc += 1
 
   def ic1(self):
@@ -949,10 +948,10 @@ class MPU:
 
   def ic9(self):
     tbyte = self.ImmediateByte()
-    self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if (self.a==tbyte):
+    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
+    if self.a == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif (a>tbyte):
+    elif a > tbyte:
       self.flags |= self.CARRY
     else:
       self.flags |= self.NEGATIVE
@@ -1007,13 +1006,13 @@ class MPU:
 
   def ie0(self):
     tbyte = self.ImmediateByte()
-    self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if (self.x==tbyte):
+    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
+    if self.x == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif (self.x>tbyte):
+    elif self.x > tbyte:
       self.flags |= self.CARRY
     else:
-      self.flags |= self.NEGATIVE;
+      self.flags |= self.NEGATIVE
     self.pc += 1
 
   def ie1(self):
@@ -1040,38 +1039,38 @@ class MPU:
   def ie9(self):
     data=self.ImmediateByte()
 
-    if (self.flags & self.DECIMAL):
-      if (self.flags & self.CARRY):
+    if self.flags & self.DECIMAL:
+      if self.flags & self.CARRY:
         tmp = 0
       else:
         tmp = 1
       data = self.bcd2dec[a] - self.bcd2dec[data] - tmp
       self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE+self.OVERFLOW)
-      if (data==0):
+      if data == 0:
         self.flags |= self.ZERO + self.CARRY
-      elif (data>0):
+      elif data > 0:
         self.flags |= self.CARRY
       else:
-        self.flags |= self.NEGATIVE;
+        self.flags |= self.NEGATIVE
         data +=100
       self.a = self.dec2bcd[data]
     else:
-      if (self.flags & self.CARRY):
+      if self.flags & self.CARRY:
         tmp = 0
       else:
         tmp = 1    
       data = self.a - data - tmp
-      self.flags &=~(self.CARRY+self.ZERO+self.OVERFLOW+self.NEGATIVE)
-      if (data==0):
+      self.flags &= ~(self.CARRY+self.ZERO+self.OVERFLOW+self.NEGATIVE)
+      if data == 0:
         self.flags |= self.ZERO + self.CARRY
-      elif (data>0):
+      elif data > 0:
         self.flags |= self.CARRY
       else:
         self.flags |= self.OVERFLOW
-      data &= 255;
-      self.flags |= data&128;
-      self.a=data
-    self.pc+=1
+      data &= 255
+      self.flags |= data & 128
+      self.a = data
+    self.pc += 1
 
   def iea(self):
     pass
