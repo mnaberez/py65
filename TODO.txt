@@ -3,5 +3,4 @@ Instructions needing unit tests:
   cmp
   cpx
   cpy
-  dec
   sbc

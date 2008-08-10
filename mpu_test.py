@@ -1223,6 +1223,138 @@ class MPUTests(unittest.TestCase):
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0, mpu.flags & mpu.OVERFLOW)
+
+  # DEC Absolute
+  
+  def test_dec_abs_decrements_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xCE, 0xCD, 0xAB) #=> DEC 0xABCD
+    mpu.memory[0xABCD] = 0x10
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x0F, mpu.memory[0xABCD])
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  def test_dec_abs_below_00_rolls_over_and_sets_negative_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xCE, 0xCD, 0xAB) #=> DEC 0xABCD
+    mpu.memory[0xABCD] = 0x00
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0xFF, mpu.memory[0xABCD])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)        
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)        
+
+  def test_dec_abs_sets_zero_flag_when_decrementing_to_zero(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xCE, 0xCD, 0xAB) #=> DEC 0xABCD
+    mpu.memory[0xABCD] = 0x01
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)      
+
+  # DEC Zero Page
+
+  def test_dec_zp_decrements_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xC6, 0x10) #=> DEC 0x0010
+    mpu.memory[0x0010] = 0x10
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x0F, mpu.memory[0x0010])
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  def test_dec_zp_below_00_rolls_over_and_sets_negative_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xC6, 0x10) #=> DEC 0x0010
+    mpu.memory[0x0010] = 0x00
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.memory[0x0010])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)        
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)        
+
+  def test_dec_zp_sets_zero_flag_when_decrementing_to_zero(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xC6, 0x10) #=> DEC 0x0010
+    mpu.memory[0x0010] = 0x01
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)      
+
+  # DEC Absolute, X-Indexed
+  
+  def test_dec_abs_x_decrements_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xDE, 0xCD, 0xAB) #=> DEC 0xABCD,X
+    mpu.x = 0x03
+    mpu.memory[0xABCD + mpu.x] = 0x10
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x0F, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  def test_dec_abs_x_below_00_rolls_over_and_sets_negative_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xDE, 0xCD, 0xAB) #=> DEC 0xABCD,X
+    mpu.memory[0xABCD + mpu.x] = 0x00
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0xFF, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)        
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)        
+
+  def test_dec_abs_x_sets_zero_flag_when_decrementing_to_zero(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xDE, 0xCD, 0xAB) #=> DEC 0xABCD,X
+    mpu.memory[0xABCD + mpu.x] = 0x01
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)      
+
+  # DEC Zero Page, X-Indexed
+
+  def test_dec_zp_x_decrements_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xD6, 0x10) #=> DEC 0x0010,X
+    mpu.x = 0x03
+    mpu.memory[0x0010 + mpu.x] = 0x10
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x0F, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+  def test_dec_zp_x_below_00_rolls_over_and_sets_negative_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xD6, 0x10) #=> DEC 0x0010,X
+    mpu.x = 0x03
+    mpu.memory[0x0010 + mpu.x] = 0x00
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0xFF, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)        
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)        
+
+  def test_dec_zp_x_sets_zero_flag_when_decrementing_to_zero(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xD6, 0x10) #=> DEC 0x0010,X
+    mpu.x = 0x03
+    mpu.memory[0x0010 + mpu.x] = 0x01
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)      
         
   # DEX
   
@@ -1233,6 +1365,8 @@ class MPUTests(unittest.TestCase):
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0x0F, mpu.x)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
       
   def test_dex_below_00_rolls_over_and_sets_negative_flag(self):
     mpu = MPU()
@@ -1242,7 +1376,8 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0xFF, mpu.x)
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
-    
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+        
   def test_dex_sets_zero_flag_when_decrementing_to_zero(self):
     mpu = MPU()
     mpu.x = 0x01
@@ -1251,6 +1386,7 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0x00, mpu.x)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
     
   # DEY
   
@@ -1261,6 +1397,8 @@ class MPUTests(unittest.TestCase):
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0x0F, mpu.y)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
       
   def test_dey_below_00_rolls_over_and_sets_negative_flag(self):
     mpu = MPU()

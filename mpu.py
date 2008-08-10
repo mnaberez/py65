@@ -370,9 +370,9 @@ class MPU:
     addr = x()
     tbyte = self.ByteAt(addr)
     self.flags &= ~(self.ZERO + self.NEGATIVE)
-    tbyte -= 1
+    tbyte = (tbyte - 1) & 0xFF
     if tbyte:
-      self.flags |= self.tbyte & 128
+      self.flags |= tbyte & self.NEGATIVE
     else:
       self.flags |= self.ZERO
     self.RAM[addr] = tbyte
@@ -1001,7 +1001,7 @@ class MPU:
     self.pc+=2
 
   def ide(self):
-    self.opDECR(AbsoluteXAddr)
+    self.opDECR(self.AbsoluteXAddr)
     self.pc+=2
 
   def ie0(self):
