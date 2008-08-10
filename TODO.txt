@@ -4,5 +4,4 @@ Instructions needing unit tests:
   cpx
   cpy
   dec
-  inc
   sbc

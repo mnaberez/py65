@@ -381,12 +381,12 @@ class MPU:
     addr = x()
     tbyte = self.ByteAt(addr)
     self.flags &= ~(self.ZERO + self.NEGATIVE)
-    tbyte += 1
+    tbyte = (tbyte + 1) & 0xFF
     if tbyte:
-      self.flags |= tbyte&128
+      self.flags |= tbyte & self.NEGATIVE
     else:
-      self.flags |= fZER
-    self.RAM[addr]=tbyte
+      self.flags |= self.ZERO
+    self.RAM[addr] = tbyte
 
   def opLDA(self, x):
     self.a = self.ByteAt(x())
@@ -1028,7 +1028,7 @@ class MPU:
     self.pc+=1
 
   def ie6(self):
-    self.opINCR(ZeroPageAddr)
+    self.opINCR(self.ZeroPageAddr)
     self.pc+=1
   
   def ie8(self):

@@ -1489,7 +1489,139 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0xFF, mpu.memory[0x0010 + mpu.x])
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
     self.assertEquals(0, mpu.flags & mpu.ZERO)
-        
+
+  # INC Absolute
+
+  def test_inc_abs_increments_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xEE, 0xCD, 0xAB)    
+    mpu.memory[0xABCD] = 0x09
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x0A, mpu.memory[0xABCD])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+  
+  def test_inc_abs_increments_memory_rolls_over_and_sets_zero_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xEE, 0xCD, 0xAB)
+    mpu.memory[0xABCD] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+  
+  def test_inc_abs_sets_negative_flag_when_incrementing_above_7F(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xEE, 0xCD, 0xAB)
+    mpu.memory[0xABCD] = 0x7F
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x80, mpu.memory[0xABCD])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+
+  # INC Zero Page
+  
+  def test_inc_zp_increments_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xE6, 0x10)    
+    mpu.memory[0x0010] = 0x09
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x0A, mpu.memory[0x0010])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)      
+
+  def test_inc_zp_increments_memory_rolls_over_and_sets_zero_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xE6, 0x10)
+    mpu.memory[0x0010] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_inc_zp_sets_negative_flag_when_incrementing_above_7F(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xE6, 0x10)
+    mpu.memory[0x0010] = 0x7F
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.memory[0x0010])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+
+  # INC Absolute, X-Indexed
+  
+  def test_inc_abs_x_increments_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xFE, 0xCD, 0xAB)    
+    mpu.x = 0x03
+    mpu.memory[0xABCD + mpu.x] = 0x09
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x0A, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+  
+  def test_inc_abs_x_increments_memory_rolls_over_and_sets_zero_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xFE, 0xCD, 0xAB)
+    mpu.x = 0x03
+    mpu.memory[0xABCD + mpu.x] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+  
+  def test_inc_abs_x_sets_negative_flag_when_incrementing_above_7F(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0002] = (0xFE, 0xCD, 0xAB)
+    mpu.x = 0x03
+    mpu.memory[0xABCD + mpu.x] = 0x7F
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x80, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)      
+
+  # INC Zero Page, X-Indexed
+  
+  def test_inc_zp_x_increments_memory(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xF6, 0x10)    
+    mpu.x = 0x03
+    mpu.memory[0x0010 + mpu.x] = 0x09
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x0A, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)      
+
+  def test_inc_zp_x_increments_memory_rolls_over_and_sets_zero_flag(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xF6, 0x10)
+    mpu.memory[0x0010 + mpu.x] = 0xFF
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_inc_zp_x_sets_negative_flag_when_incrementing_above_7F(self):
+    mpu = MPU()
+    mpu.memory[0x0000:0x0001] = (0xF6, 0x10)
+    mpu.memory[0x0010 + mpu.x] = 0x7F
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+
   # INX
 
   def test_inx_increments_x(self):
@@ -1499,7 +1631,9 @@ class MPUTests(unittest.TestCase):
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0x0A, mpu.x)
-    
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+        
   def test_inx_above_FF_rolls_over_and_sets_zero_flag(self):
     mpu = MPU()
     mpu.x = 0xFF
@@ -1527,7 +1661,9 @@ class MPUTests(unittest.TestCase):
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0x0A, mpu.y)
-    
+    self.assertEquals(0, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)    
+        
   def test_iny_above_FF_rolls_over_and_sets_zero_flag(self):
     mpu = MPU()
     mpu.y = 0xFF
