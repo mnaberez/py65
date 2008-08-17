@@ -3322,6 +3322,61 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0xC004, mpu.pc)
     self.assertEquals(0xFF,   mpu.sp)
 
+  # SBC
+  
+  def test_sbc_abs_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    mpu.memory[0xABCD] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+  def test_sbc_abs_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    mpu.memory[0xABCD] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_abs_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    mpu.memory[0xABCD] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_abs_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    mpu.memory[0xABCD] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+      
+
   # SEC
   
   def test_sec_sets_carry_flag(self):
