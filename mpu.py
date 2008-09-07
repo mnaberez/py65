@@ -18,8 +18,6 @@ class MPU:
   def __init__(self):
     # config
     self.debug = False
-    self.externalLoop = True
-    self.stopOnIterrupt = True
     
     # vm status
     self.breakFlag = False
@@ -58,16 +56,15 @@ class MPU:
     self.processorCycles=0
 
   def clearMemory(self, start=0x0000, end=0xFFFF):
-    self.memory = self.RAM = [] 
+    self.memory = [] 
     for addr in range(start, end + 1):
       self.memory.insert(addr, 0x00)
-
 
   def ByteAt(self, addr):
     return self.memory[addr]
 
   def WordAt(self, addr):
-    return self.ByteAt(addr) + self.ByteAt(0xffff&(addr+1))*256
+    return self.ByteAt(addr) + (self.ByteAt(addr + 1) << 8)
 
   def ImmediateByte(self):
     return self.ByteAt(self.pc)
@@ -123,7 +120,7 @@ class MPU:
     self.pc += 1
 
     if addr & 128:
-      addr = self.pc - (addr ^ 0xFF) + 1
+      addr = self.pc - (addr ^ 0xFF) - 1
     else:
       addr = self.pc + addr
 
@@ -135,7 +132,7 @@ class MPU:
   # stack
 
   def stPush(self,z):
-    self.RAM[self.sp+256] = z&255
+    self.memory[self.sp+256] = z&255
     self.sp -= 1
     self.sp &= 255
 
@@ -180,7 +177,7 @@ class MPU:
     else:
       self.flags |= self.ZERO
 
-    self.RAM[addr] = tbyte
+    self.memory[addr] = tbyte
 
   def opLSR(self, x):
     addr = x()
@@ -193,7 +190,7 @@ class MPU:
       pass # {}
     else:
       self.flags |= self.ZERO
-    self.RAM[addr]=tbyte
+    self.memory[addr]=tbyte
 
   def opBCL(self, x):
     if self.flags & x: 
@@ -238,7 +235,7 @@ class MPU:
         self.flags |= self.CARRY
       tbyte = tbyte << 1
     self.FlagsNZ(tbyte)
-    self.RAM[addr] = tbyte & 0xFF
+    self.memory[addr] = tbyte & 0xFF
 
   def opEOR(self, x):
     self.a ^= self.ByteAt(x())
@@ -292,16 +289,16 @@ class MPU:
         self.flags |= self.CARRY
       tbyte=tbyte>>1
     self.FlagsNZ(tbyte)
-    self.RAM[addr]=tbyte
+    self.memory[addr]=tbyte
 
   def opSTA(self, x):
-    self.RAM[x()] = self.a
+    self.memory[x()] = self.a
 
   def opSTY(self, x):
-    self.RAM[x()] = self.y
+    self.memory[x()] = self.y
 
   def opSTX(self, y):
-    self.RAM[y()] = self.x
+    self.memory[y()] = self.x
 
   def opCPY(self, x):
     tbyte=self.ByteAt(x())
@@ -377,7 +374,7 @@ class MPU:
       self.flags |= tbyte & self.NEGATIVE
     else:
       self.flags |= self.ZERO
-    self.RAM[addr] = tbyte
+    self.memory[addr] = tbyte
 
   def opINCR(self, x):
     addr = x()
@@ -388,7 +385,7 @@ class MPU:
       self.flags |= tbyte & self.NEGATIVE
     else:
       self.flags |= self.ZERO
-    self.RAM[addr] = tbyte
+    self.memory[addr] = tbyte
 
   def opLDA(self, x):
     self.a = self.ByteAt(x())
