@@ -22,10 +22,7 @@ class Monitor(cmd.Cmd):
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
-        matches = re.match('^~\s*', line)
-        if matches:
-            start, end = matches.span()
-            line = "tilde %s" % line[end:]
+        line = self._preprocess_line(line)
         
         result = None
         try:
@@ -39,6 +36,24 @@ class Monitor(cmd.Cmd):
 
         self._update_prompt()
         return result
+
+    def _preprocess_line(self, line):
+        # tilde command
+        matches = re.match('^~\s*', line)
+        if matches:
+            start, end = matches.span()
+            line = "tilde %s" % line[end:]
+
+        # line comments
+        quoted = False
+        for pos in range(0, len(line)):
+            if line[pos] in ('"', "'"):
+                quoted = not quoted
+            if (not quoted) and (line[pos] == ';'):
+                line = line[:pos]
+                break
+
+        return line
 
     def _install_mpu_observers(self):
         def printit(operation, address, value):
