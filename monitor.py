@@ -4,15 +4,21 @@ import cmd
 import os
 import re
 import shlex
+import asyncore
+from cmd import Cmd
 from mpu import MPU
+from util import itoa
+from memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
 
-    def __init__(self, options, completekey='tab', stdin=None, stdout=None):
+    def __init__(self, options={}, completekey='tab', stdin=None, stdout=None):
         self.options = options
         self._mpu = MPU()
+        self._install_mpu_observers()
         self._update_prompt()
         self._radix = 16
+        self._labels = {}
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
@@ -21,9 +27,27 @@ class Monitor(cmd.Cmd):
             start, end = matches.span()
             line = "tilde %s" % line[end:]
         
-        result = cmd.Cmd.onecmd(self, line)
+        result = None
+        try:
+            result = cmd.Cmd.onecmd(self, line)
+        except KeyboardInterrupt:
+            self._output("Interrupt")
+        except Exception,e:
+            (file, fun, line), t, v, tbinfo = asyncore.compact_traceback()
+            error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
+            self._output(error)
+
         self._update_prompt()
         return result
+
+    def _install_mpu_observers(self):
+        def printit(operation, address, value):
+            self.stdout.write(chr(value))
+
+        m = ObservableMemory()
+        m.subscribe(m.WRITE, [0xE001], printit)
+        
+        self._mpu.memory = m
 
     def _update_prompt(self):
         self.prompt = "\n%s\n." % repr(self._mpu)
@@ -45,9 +69,10 @@ class Monitor(cmd.Cmd):
     def help_reset(self):
         self._output("reset\t\tReset the microprocessor")
 
-    def do_reset(self):
+    def do_reset(self, args):
         self._mpu = MPU()
-
+        self._install_mpu_observers()
+        
     def do_EOF(self, args):
         self._output('')
         return 1
@@ -72,8 +97,17 @@ class Monitor(cmd.Cmd):
         self._output("before the next RTS or RTI is executed.")
     
     def do_return(self, args):
+        returns = [0x60, 0x40] # RTS, RTI
+        self._run(stopcodes=returns)
+
+    def do_goto(self, args):
+        self._mpu.pc = self._parsenum(args)
+        brks = [0x00] # BRK
+        self._run(stopcodes=brks)
+    
+    def _run(self, stopcodes=[]):
         last_instruct = None
-        while last_instruct != 0x60:  # RTS
+        while last_instruct not in stopcodes:
             self._mpu.step()
             last_instruct = self._mpu.memory[self._mpu.pc]
     
@@ -104,7 +138,7 @@ class Monitor(cmd.Cmd):
         for name, radix in radixes.iteritems():
             if self._radix == radix:
                 self._output("Default radix is %s" % name)
-    
+
     def help_tilde(self):
         self._output("~ <number>")
         self._output("Display the specified number in decimal, hex, octal, and binary.")
@@ -119,7 +153,7 @@ class Monitor(cmd.Cmd):
         self._output("+%u" % num)
         self._output("$%02x" % num)
         self._output("%04o" % num)
-        self._output(self._itoa(num, 2).zfill(8))
+        self._output(itoa(num, 2).zfill(8))
     
     def help_registers(self):
         self._output("registers[<reg_name> = <number> [, <reg_name> = <number>]*]")
@@ -191,14 +225,7 @@ class Monitor(cmd.Cmd):
             self._output(msg)
             return
 
-        address = start
-        for byte in bytes:
-            address &= 0xFFFF
-            self._mpu.memory[address] = ord(byte)
-            address += 1
-
-        fmt = (address - start, start, address)
-        self._output("Loaded %d bytes from %d to %d" % fmt)
+        self._fill(start, start, map(ord, bytes))
     
     def help_fill(self):
         self.output("fill <address_range> <data_list>")
@@ -208,25 +235,34 @@ class Monitor(cmd.Cmd):
     
     def do_fill(self, args):
         split = shlex.split(args)
-        if len(split) != 2:
+        if len(split) < 2:
             self._output("Syntax error: %s" % args)
             return
-        addresses, fillbyte = split
 
-        start, end = self._parserange(addresses)
-        fillbyte   = self._parsenum(fillbyte)
+        start, end = self._parserange(split[0])
+        filler = map(self._parsenum, split[1:])
         
-        self._fill(start, end, fillbyte)
+        self._fill(start, end, filler)
 
-    def _fill(self, start, end, byte):
-        byte &= 0xFF
+    def _fill(self, start, end, filler):
         address = start
+        length, index = len(filler), 0
+
+        if start == end:
+            end = start + length - 1
+            if (end > 0xFFFF):
+                end = 0xFFFF
+
         while address <= end:
             address &= 0xFFFF
-            self._mpu.memory[address] = byte
+            self._mpu.memory[address] = (filler[index] & 0xFF)
+            index += 1
+            if index == length:
+                index = 0
             address += 1
+
         fmt = (end - start + 1, start, end)
-        self._output("Filled +%d bytes from %d to %d" % fmt)
+        self._output("Wrote +%d bytes from $%04x to $%04x" % fmt)
     
     def help_mem(self):
         self._output("mem <address_range>")
@@ -235,46 +271,86 @@ class Monitor(cmd.Cmd):
     def do_mem(self, args):
         start, end = self._parserange(args)
 
-        out = self._itoa(start, 16) + ":  "
-        for byte in self._mpu.memory[start:end]:
+        out = itoa(start, 16).zfill(4) + ":  "
+        for byte in self._mpu.memory[start:end+1]:
             out += "%02x  " % byte
         self._output(out)
-         
-    def _parsenum(self, num):
-        if num.startswith('%'):
-            return int(num[1:], 2)
 
-        elif num.startswith('$'):
+    def do_add_label(self, args):
+        split = shlex.split(args)
+        if len(split) != 2:
+            self._output("Syntax error: %s" % args)
+            return
+        
+        address = self._parsenum(split[0])    
+        label   = split[1]
+
+        self._labels[label] = address
+
+    def do_show_labels(self, args):
+        byaddress = zip(self._labels.values(), self._labels.keys())
+        byaddress.sort()
+        for address, label in byaddress:
+            self._output("%04x: %s" % (address, label))
+
+    def do_delete_label(self, args):
+        try:
+            del self._labels[args]
+        except KeyError:
+            pass
+
+    def _parsenum(self, num):
+        if num.startswith('$'):
             return int(num[1:], 16)
 
         elif num.startswith('+'):
             return int(num[1:], 10)
 
+        elif num.startswith('%'):
+            return int(num[1:], 2)
+
+        elif num in self._labels:
+            return self._labels[num]
+        
         else:
-            return int(num, self._radix)
+            matches = re.match('^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
+            if matches:
+                label, sign, offset = matches.groups()
+
+                if label not in self._labels:
+                    raise KeyError("Label not found: %s" % label)
+
+                base = self._labels[label]
+                offset = self._parsenum(offset)
+
+                if sign == '+':
+                    address = base + offset
+                else:
+                    address = base - offset
+
+                if address < 0:
+                    address = 0
+                if address > 0xFFFF:
+                    address = 0xFFFF
+                return address
+
+            else:
+                try:
+                    return int(num, self._radix)
+                except ValueError:
+                    raise KeyError("Label not found: %s" % num)
 
     def _parserange(self, addresses):
-        matches = re.match('^([^,]+)\s*[:,]+\s*([^,]+)$', addresses)
-        if not matches:
-            raise ValueError
-        start, end = map(self._parsenum, matches.groups(0))
+        matches = re.match('^([^:,]+)\s*[:,]+\s*([^:,]+)$', addresses)
+        if matches:
+            start, end = map(self._parsenum, matches.groups(0))
+        else:
+            start = end = self._parsenum(addresses)
 
         if start > end:
             start, end = end, start            
         return (start, end)
 
-    def _itoa(self, num, base=10):
-       negative = num < 0
-       if negative:
-          num = -num
-       digits = []
-       while num > 0:
-          num, last_digit = divmod(num, base)
-          digits.append('0123456789abcdefghijklmnopqrstuvwxyz'[last_digit])
-       if negative:
-          digits.append('-')
-       digits.reverse()
-       return ''.join(digits) 
 
 def main(args=None, options=None):
     c = Monitor(options)
