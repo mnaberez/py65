@@ -1,4 +1,4 @@
-from bcd_conversion import convert_to_bin, convert_to_bcd
+from util import convert_to_bin, convert_to_bcd
 
 class MPU:
   # vectors
@@ -86,7 +86,7 @@ class MPU:
       a1 = self.WordAt(self.ByteAt(self.pc))
       a2 = (a1+self.y) & 0xffff
       if (a1 & 0xff00) != (a2 & 0xff00):
-        self.extracycles += 1
+        self.excycles += 1
       return a2
     else:
       return (self.WordAt(self.ByteAt(self.pc))+self.y)&0xffff
@@ -99,7 +99,7 @@ class MPU:
       a1 = self.WordAt(self.pc)
       a2 = (a1 + self.x) & 0xffff
       if (a1 & 0xff00) != (a2 & 0xff00):
-        self.extracycles += 1
+        self.excycles += 1
       return a2
     else:
       return (self.WordAt(self.pc)+self.x)&0xffff
@@ -109,7 +109,7 @@ class MPU:
       a1 = self.WordAt(self.pc)
       a2 = (a1 + self.y) & 0xffff
       if (a1 & 0xff00) != (a2 & 0xff00):
-        self.extracycles += 1
+        self.excycles += 1
       return a2
     else:
       return (self.WordAt(self.pc)+self.y)&0xffff
@@ -916,9 +916,9 @@ class MPU:
   def ic0(self):
     tbyte = self.ImmediateByte()
     self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if y == tbyte:
+    if self.y == tbyte:
       self.flags |= self.CARRY+self.ZERO
-    elif y > tbyte:
+    elif self.y > tbyte:
       self.flags |= self.CARRY
     else:
       self.flags |= self.NEGATIVE
