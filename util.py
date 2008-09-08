@@ -1,9 +1,22 @@
+
+def itoa(num, base=10):
+   negative = num < 0
+   if negative:
+      num = -num
+   digits = []
+   while num > 0:
+      num, last_digit = divmod(num, base)
+      digits.append('0123456789abcdefghijklmnopqrstuvwxyz'[last_digit])
+   if negative:
+      digits.append('-')
+   digits.reverse()
+   return ''.join(digits) 
+   
 def convert_to_bin(bcd):
   return bcd2bin[bcd]
 
 def convert_to_bcd(bin):
   return bin2bcd[bin]
-
 
 bcd2bin = [
     0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,  # 0x00
