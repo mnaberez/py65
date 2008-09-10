@@ -6,7 +6,7 @@ import re
 import shlex
 import asyncore
 from py65.mpu6502 import MPU
-from py65.util import itoa
+from py65.util import itoa, AddressParser
 from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
@@ -16,8 +16,7 @@ class Monitor(cmd.Cmd):
         self._mpu = MPU()
         self._install_mpu_observers()
         self._update_prompt()
-        self._radix = 16
-        self._labels = {}
+        self._address_parser = AddressParser()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
@@ -115,7 +114,7 @@ class Monitor(cmd.Cmd):
         self._run(stopcodes=returns)
 
     def do_goto(self, args):
-        self._mpu.pc = self._parsenum(args)
+        self._mpu.pc = self._address_parser.number(args)
         brks = [0x00] # BRK
         self._run(stopcodes=brks)
     
@@ -144,13 +143,13 @@ class Monitor(cmd.Cmd):
             changed = False
             for name, radix in radixes.iteritems():
                 if name[0].lower() == new:
-                    self._radix = radix
+                    self._address_parser.radix = radix
                     changed = True
             if not changed:
                 self._output("Illegal radix: %s" % args)
 
         for name, radix in radixes.iteritems():
-            if self._radix == radix:
+            if self._address_parser.radix == radix:
                 self._output("Default radix is %s" % name)
 
     def help_tilde(self):
@@ -159,7 +158,7 @@ class Monitor(cmd.Cmd):
     
     def do_tilde(self, args):
         try:
-            num = self._parsenum(args)
+            num = self._address_parser.number(args)
         except ValueError:
             self._output("Syntax error: %s" % args)
             return
@@ -187,7 +186,7 @@ class Monitor(cmd.Cmd):
                 self._output("Invalid register: %s" % register)
             else:
                 try:
-                    intval = self._parsenum(value) & 0xFFFF
+                    intval = self._address_parser.number(value) & 0xFFFF
                     if len(register) == 1:
                         intval &= 0xFF
                     setattr(self._mpu, register, intval)
@@ -226,7 +225,7 @@ class Monitor(cmd.Cmd):
 
         filename = split[0]
         if len(split) == 2:
-            start = self._parsenum(split[1])
+            start = self._address_parser.number(split[1])
         else:
             start = self._mpu.pc
 
@@ -253,8 +252,8 @@ class Monitor(cmd.Cmd):
             self._output("Syntax error: %s" % args)
             return
 
-        start, end = self._parserange(split[0])
-        filler = map(self._parsenum, split[1:])
+        start, end = self._address_parser.range(split[0])
+        filler = map(self._address_parser.number, split[1:])
         
         self._fill(start, end, filler)
 
@@ -283,7 +282,7 @@ class Monitor(cmd.Cmd):
         self._output("Display the contents of memory.")
     
     def do_mem(self, args):
-        start, end = self._parserange(args)
+        start, end = self._address_parser.range(args)
 
         out = itoa(start, 16).zfill(4) + ":  "
         for byte in self._mpu.memory[start:end+1]:
@@ -296,74 +295,26 @@ class Monitor(cmd.Cmd):
             self._output("Syntax error: %s" % args)
             return
         
-        address = self._parsenum(split[0])    
+        address = self._address_parser.number(split[0])    
         label   = split[1]
 
-        self._labels[label] = address
+        self._address_parser.labels[label] = address
 
     def do_show_labels(self, args):
-        byaddress = zip(self._labels.values(), self._labels.keys())
+        values = self._address_parser.labels.values()
+        keys = self._address_parser.labels.keys()
+      
+        byaddress = zip(values, keys)
         byaddress.sort()
         for address, label in byaddress:
             self._output("%04x: %s" % (address, label))
 
     def do_delete_label(self, args):
         try:
-            del self._labels[args]
+            del self._address_parser.labels[args]
         except KeyError:
             pass
 
-    def _parsenum(self, num):
-        if num.startswith('$'):
-            return int(num[1:], 16)
-
-        elif num.startswith('+'):
-            return int(num[1:], 10)
-
-        elif num.startswith('%'):
-            return int(num[1:], 2)
-
-        elif num in self._labels:
-            return self._labels[num]
-        
-        else:
-            matches = re.match('^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
-            if matches:
-                label, sign, offset = matches.groups()
-
-                if label not in self._labels:
-                    raise KeyError("Label not found: %s" % label)
-
-                base = self._labels[label]
-                offset = self._parsenum(offset)
-
-                if sign == '+':
-                    address = base + offset
-                else:
-                    address = base - offset
-
-                if address < 0:
-                    address = 0
-                if address > 0xFFFF:
-                    address = 0xFFFF
-                return address
-
-            else:
-                try:
-                    return int(num, self._radix)
-                except ValueError:
-                    raise KeyError("Label not found: %s" % num)
-
-    def _parserange(self, addresses):
-        matches = re.match('^([^:,]+)\s*[:,]+\s*([^:,]+)$', addresses)
-        if matches:
-            start, end = map(self._parsenum, matches.groups(0))
-        else:
-            start = end = self._parsenum(addresses)
-
-        if start > end:
-            start, end = end, start            
-        return (start, end)
 
 
 def main(args=None, options=None):
