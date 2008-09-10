@@ -1,7 +1,7 @@
 import unittest
 import sys
 import re
-from monitor import Monitor
+from py65.monitor import Monitor
 
 class MonitorTests(unittest.TestCase):
   def test__parsenum_hex_literal(self):

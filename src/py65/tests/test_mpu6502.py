@@ -1,6 +1,6 @@
 import unittest
 import sys
-from mpu import MPU
+from py65.mpu6502 import MPU
 
 class MPUTests(unittest.TestCase):
   

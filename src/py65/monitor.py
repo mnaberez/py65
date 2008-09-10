@@ -5,10 +5,9 @@ import os
 import re
 import shlex
 import asyncore
-from cmd import Cmd
-from mpu import MPU
-from util import itoa
-from memory import ObservableMemory
+from py65.mpu6502 import MPU
+from py65.util import itoa
+from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
 
