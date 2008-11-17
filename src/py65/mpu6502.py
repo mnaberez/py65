@@ -950,7 +950,7 @@ class MPU:
     self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
     if self.a == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif a > tbyte:
+    elif self.a > tbyte:
       self.flags |= self.CARRY
     else:
       self.flags |= self.NEGATIVE
