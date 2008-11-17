@@ -12,21 +12,25 @@ class ObservableMemory:
         self._observers = []
 
     def __setitem__(self, address, value):
-        self._notify(self.WRITE, address, value)
+        for oper, addr_range, callback in self._observers:
+            if address in addr_range:
+                if (oper == self.RW) or (oper == self.WRITE):
+                    result = callback(self.WRITE, address, value)        
+                    if result is not None:
+                        value = result
         self._subject[address] = value
 
     def __getitem__(self, address):
-        self._notify(self.READ, address)
+        for oper, addr_range, callback in self._observers:
+            if address in addr_range:
+                if (oper == self.RW) or (oper == self.READ):
+                    result = callback(self.READ, address, None)
+                    if result is not None:
+                        return result
         return self._subject[address]
     
     def __getattr__(self, address):
         return getattr(self._subject, address)
-
-    def _notify(self, operation, address, value=None):
-        for oper, addr_range, callback in self._observers:
-            if address in addr_range:
-                if (oper == self.RW) or (oper == operation):
-                    callback(operation, address, value)
 
     def subscribe(self, operation, addr_range, callback):
         if operation not in (self.READ, self.WRITE, self.RW):

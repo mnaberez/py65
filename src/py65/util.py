@@ -1,4 +1,8 @@
 import re
+import select
+import termios
+import fcntl
+import os
 
 class AddressParser:
     """Parse user input into addresses or ranges of addresses.
@@ -123,3 +127,31 @@ bin2bcd = [
   0x80,0x81,0x82,0x83,0x84,0x85,0x86,0x87,0x88,0x89,
   0x90,0x91,0x92,0x93,0x94,0x95,0x96,0x97,0x98,0x99
 ]
+
+def getch(stdin):
+    """ Performs a nonblocking read of one byte from stdin and returns 
+    its ordinal value.  If no byte is available, 0 is returned.
+    """
+    
+    fd = stdin.fileno()
+
+    oldterm = termios.tcgetattr(fd)
+    newattr = oldterm[:]
+    newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
+    termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+    oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+
+    try:
+        byte = 0
+        r, w, e = select.select([fd], [], [], 0.1)
+        if r:
+            c = stdin.read(1)
+            byte = ord(c)
+            if byte == 0x0a:
+                byte = 0x0d
+    finally:
+        termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
+        fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+    return byte

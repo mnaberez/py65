@@ -5,8 +5,9 @@ import os
 import re
 import shlex
 import asyncore
+import sys
 from py65.mpu6502 import MPU
-from py65.util import itoa, AddressParser
+from py65.util import itoa, AddressParser, getch
 from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
@@ -54,11 +55,16 @@ class Monitor(cmd.Cmd):
         return line
 
     def _install_mpu_observers(self):
-        def printit(operation, address, value):
+        def putc(operation, address, value):
             self.stdout.write(chr(value))
+            self.stdout.flush()
+
+        def getc(operation, address, value):
+            return getch(self.stdin)
 
         m = ObservableMemory()
-        m.subscribe(m.WRITE, [0xE001], printit)
+        m.subscribe(m.WRITE, [0xF001], putc)
+        m.subscribe(m.READ,  [0xF004], getc)
         
         self._mpu.memory = m
 
