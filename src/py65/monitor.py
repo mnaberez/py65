@@ -7,6 +7,7 @@ import shlex
 import asyncore
 import sys
 from py65.mpu6502 import MPU
+from py65.disassembler import Disassembler
 from py65.util import itoa, AddressParser, getch
 from py65.memory import ObservableMemory
 
@@ -18,6 +19,7 @@ class Monitor(cmd.Cmd):
         self._install_mpu_observers()
         self._update_prompt()
         self._address_parser = AddressParser()
+        self._disassembler = Disassembler(self._mpu, self._address_parser)
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
@@ -105,11 +107,34 @@ class Monitor(cmd.Cmd):
     def help_quit(self):
         return self.help_EOF()
 
+    def do_disassemble(self, args):
+        start, end = self._address_parser.range(args)
+        if start == end:
+            end += 1
+        
+        address = start
+        while address < end:
+            bytes, disasm = self._disassembler.instruction_at(address)
+            
+            mem = ''
+            for byte in self._mpu.memory[address:address+bytes]:
+                mem += '%02x ' % byte
+            
+            line = "$%04x  %-10s%s" % (address, mem, disasm)
+            self._output(line)                
+
+            address += bytes
+
+    def help_disassemble(self):
+        self._output("disassemble <address_range>")
+        self._output("Disassemble instructions in the address range.")
+
     def help_step(self):
         self._output("Single-step through instructions.")
 
     def do_step(self, args):
         self._mpu.step()
+        self.do_disassemble('%04x' % self._mpu.pc)
     
     def help_return(self):
         self._output("Continues execution and returns to the monitor just")
@@ -118,6 +143,10 @@ class Monitor(cmd.Cmd):
     def do_return(self, args):
         returns = [0x60, 0x40] # RTS, RTI
         self._run(stopcodes=returns)
+
+    def help_goto(self):
+        self._output("goto <address>")
+        self._output("Change the PC to address and continue execution.")
 
     def do_goto(self, args):
         self._mpu.pc = self._address_parser.number(args)
@@ -295,6 +324,10 @@ class Monitor(cmd.Cmd):
             out += "%02x  " % byte
         self._output(out)
 
+    def help_add_label(self):
+        self._output("add_label <address> <label>")
+        self._output("Map a given address to a label.")
+
     def do_add_label(self, args):
         split = shlex.split(args)
         if len(split) != 2:
@@ -306,6 +339,10 @@ class Monitor(cmd.Cmd):
 
         self._address_parser.labels[label] = address
 
+    def help_show_labels(self):
+        self._output("show_labels")
+        self._output("Display current label mappings.")
+
     def do_show_labels(self, args):
         values = self._address_parser.labels.values()
         keys = self._address_parser.labels.keys()
@@ -314,6 +351,10 @@ class Monitor(cmd.Cmd):
         byaddress.sort()
         for address, label in byaddress:
             self._output("%04x: %s" % (address, label))
+
+    def help_delete_label(self):
+        self._output("delete_label <label>")
+        self._output("Remove the specified label from the label tables.")
 
     def do_delete_label(self, args):
         try:

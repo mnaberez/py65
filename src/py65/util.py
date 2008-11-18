@@ -16,6 +16,14 @@ class AddressParser:
         self.radix = radix
         self.labels = labels
 
+    def label_for(self, address, default=None):
+        """Given an address, return the corresponding label or a default.
+        """
+        for label, label_address in self.labels.iteritems():
+            if label_address == address:
+                return label
+        return default
+
     def number(self, num):
         """Parse a string containing a label or number into an address.
         """
