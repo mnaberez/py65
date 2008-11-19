@@ -1,0 +1,25 @@
+Next Release
+  
+  - Added a new "disassemble" command to the monitor.  It can disassemble
+    any range of memory (e.g. "disassemble c000:c0010").  If labels have been
+    defined, the disassembly will show them in the operands.
+
+  - Moved the character I/O area from $E000 to $F000 for compatibility with
+    the EhBASIC binary saved from Michal Kowalski's Windows-based simulator.  
+    In a future version of Py65, the I/O area will be configurable.
+
+  - When running a program in the monitor, a read to $F004 will now do a
+    non-blocking read from STDIN.  If no character is available, a null
+    byte ($00) will be returned.
+
+  - Fixed a bug where a CMP instruction could crash the simulator due to 
+    an undefined variable.
+
+  - EhBASIC 2.09 now runs in the simulator!
+
+  - Documented all remaining monitor commands.  In the monitor, use the
+    command "help command" for help on any command.
+
+0.1
+
+  - First release.
