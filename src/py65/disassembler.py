@@ -80,6 +80,7 @@ class Disassembler:
 
         if addressing == 'acc':
             disasm += ' A'
+            length = 1
 
         elif addressing ==  'abs':
             address = self._mpu.WordAt(pc + 1)
