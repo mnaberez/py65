@@ -400,11 +400,6 @@ class DisassemblerTests(unittest.TestCase):
         self.assertEqual(3, length)
         self.assertEqual('LSR $4400', disasm)      
 
-    def test_disassembles_4e(self):
-        length, disasm = self.disassemble([0x4e, 0x00, 0x44])
-        self.assertEqual(3, length)
-        self.assertEqual('LSR $4400', disasm)      
-
     def test_disassembles_4f(self):
         length, disasm = self.disassemble([0x4f])
         self.assertEqual(1, length)
@@ -810,6 +805,491 @@ class DisassemblerTests(unittest.TestCase):
         self.assertEqual(1, length)
         self.assertEqual('???', disasm)    
 
+    def test_disassembles_a0(self):
+        length, disasm = self.disassemble([0xa0, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDY #$44', disasm)    
+
+    def test_disassembles_a1(self):
+        length, disasm = self.disassemble([0xa1, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDA ($44,X)', disasm)    
+
+    def test_disassembles_a2(self):
+        length, disasm = self.disassemble([0xa2, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDX #$44', disasm)    
+
+    def test_disassembles_a3(self):
+        length, disasm = self.disassemble([0xa3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_a4(self):
+        length, disasm = self.disassemble([0xa4, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDY $44', disasm)    
+
+    def test_disassembles_a5(self):
+        length, disasm = self.disassemble([0xa5, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDA $44', disasm)    
+
+    def test_disassembles_a6(self):
+        length, disasm = self.disassemble([0xa6, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDX $44', disasm)    
+
+    def test_disassembles_a7(self):
+        length, disasm = self.disassemble([0xa7])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_a8(self):
+        length, disasm = self.disassemble([0xa8])
+        self.assertEqual(1, length)
+        self.assertEqual('TAY', disasm)    
+
+    def test_disassembles_a9(self):
+        length, disasm = self.disassemble([0xa9, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDA #$44', disasm)    
+
+    def test_disassembles_aa(self):
+        length, disasm = self.disassemble([0xaa])
+        self.assertEqual(1, length)
+        self.assertEqual('TAX', disasm)    
+
+    def test_disassembles_ab(self):
+        length, disasm = self.disassemble([0xab])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_ac(self):
+        length, disasm = self.disassemble([0xac, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDY $4400', disasm)    
+
+    def test_disassembles_ad(self):
+        length, disasm = self.disassemble([0xad, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDA $4400', disasm)    
+
+    def test_disassembles_ae(self):
+        length, disasm = self.disassemble([0xae, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDX $4400', disasm)    
+
+    def test_disassembles_af(self):
+        length, disasm = self.disassemble([0xaf])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+                
+    def test_disassembles_b0(self):
+        length, disasm = self.disassemble([0xb0, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('BCS $0046', disasm)    
+
+    def test_disassembles_b1(self):
+        length, disasm = self.disassemble([0xb1, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDA ($44),Y', disasm)    
+
+    def test_disassembles_b2(self):
+        length, disasm = self.disassemble([0xb2])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_b3(self):
+        length, disasm = self.disassemble([0xb3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_b3(self):
+        length, disasm = self.disassemble([0xb3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_b4(self):
+        length, disasm = self.disassemble([0xb4, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDY $44,X', disasm)  
+
+    def test_disassembles_b5(self):
+        length, disasm = self.disassemble([0xb5, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDA $44,X', disasm)  
+
+    def test_disassembles_b6(self):
+        length, disasm = self.disassemble([0xb6, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('LDX $44,Y', disasm)                                                                                                                                                                     
+
+    def test_disassembles_b7(self):
+        length, disasm = self.disassemble([0xb7])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)                                                                                                                                                                     
+
+    def test_disassembles_b8(self):
+        length, disasm = self.disassemble([0xb8])
+        self.assertEqual(1, length)
+        self.assertEqual('CLV', disasm)
+
+    def test_disassembles_b9(self):
+        length, disasm = self.disassemble([0xb9, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDA $4400,Y', disasm)
+
+    def test_disassembles_ba(self):
+        length, disasm = self.disassemble([0xba])
+        self.assertEqual(1, length)
+        self.assertEqual('TSX', disasm)
+
+    def test_disassembles_bb(self):
+        length, disasm = self.disassemble([0xbb])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_bc(self):
+        length, disasm = self.disassemble([0xbc, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDY $4400,X', disasm)
+
+    def test_disassembles_bd(self):
+        length, disasm = self.disassemble([0xbd, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDA $4400,X', disasm)
+
+    def test_disassembles_be(self):
+        length, disasm = self.disassemble([0xbe, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('LDX $4400,Y', disasm)
+
+    def test_disassembles_bf(self):
+        length, disasm = self.disassemble([0xbf])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+                
+    def test_disassembles_c0(self):
+        length, disasm = self.disassemble([0xc0, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CPY #$44', disasm)
+
+    def test_disassembles_c1(self):
+        length, disasm = self.disassemble([0xc1, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CMP ($44,X)', disasm)
+
+    def test_disassembles_c2(self):
+        length, disasm = self.disassemble([0xc2])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_c3(self):
+        length, disasm = self.disassemble([0xc3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_c4(self):
+        length, disasm = self.disassemble([0xc4, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CPY $44', disasm)
+
+    def test_disassembles_c5(self):
+        length, disasm = self.disassemble([0xc5, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CMP $44', disasm)
+
+    def test_disassembles_c6(self):
+        length, disasm = self.disassemble([0xc6, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('DEC $44', disasm)
+
+    def test_disassembles_c7(self):
+        length, disasm = self.disassemble([0xc7])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_c8(self):
+        length, disasm = self.disassemble([0xc8])
+        self.assertEqual(1, length)
+        self.assertEqual('INY', disasm)
+
+    def test_disassembles_c9(self):
+        length, disasm = self.disassemble([0xc9, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CMP #$44', disasm)
+
+    def test_disassembles_ca(self):
+        length, disasm = self.disassemble([0xca])
+        self.assertEqual(1, length)
+        self.assertEqual('DEX', disasm)
+
+    def test_disassembles_cb(self):
+        length, disasm = self.disassemble([0xcb])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_cc(self):
+        length, disasm = self.disassemble([0xcc, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('CPY $4400', disasm)
+
+    def test_disassembles_cd(self):
+        length, disasm = self.disassemble([0xcd, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('CMP $4400', disasm)
+
+    def test_disassembles_ce(self):
+        length, disasm = self.disassemble([0xce, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('DEC $4400', disasm)
+
+    def test_disassembles_cf(self):
+        length, disasm = self.disassemble([0xcf])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_d0(self):
+        length, disasm = self.disassemble([0xd0, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('BNE $0046', disasm)
+
+    def test_disassembles_d1(self):
+        length, disasm = self.disassemble([0xd1, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CMP ($44),Y', disasm)
+
+    def test_disassembles_d2(self):
+        length, disasm = self.disassemble([0xd2])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_d3(self):
+        length, disasm = self.disassemble([0xd3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)
+
+    def test_disassembles_d4(self):
+        length, disasm = self.disassemble([0xd4])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)        
+
+    def test_disassembles_d5(self):
+        length, disasm = self.disassemble([0xd5, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CMP $44,X', disasm)        
+
+    def test_disassembles_d6(self):
+        length, disasm = self.disassemble([0xd6, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('DEC $44,X', disasm)      
+
+    def test_disassembles_d7(self):
+        length, disasm = self.disassemble([0xd7])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)      
+
+    def test_disassembles_d8(self):
+        length, disasm = self.disassemble([0xd8])
+        self.assertEqual(1, length)
+        self.assertEqual('CLD', disasm)    
+
+    def test_disassembles_d9(self):
+        length, disasm = self.disassemble([0xd9, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('CMP $4400,Y', disasm)    
+
+    def test_disassembles_da(self):
+        length, disasm = self.disassemble([0xda])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_db(self):
+        length, disasm = self.disassemble([0xdb])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)    
+
+    def test_disassembles_dc(self):
+        length, disasm = self.disassemble([0xdc])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)   
+
+    def test_disassembles_dd(self):
+        length, disasm = self.disassemble([0xdd, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('CMP $4400,X', disasm)   
+
+    def test_disassembles_de(self):
+        length, disasm = self.disassemble([0xde, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('DEC $4400,X', disasm)   
+
+    def test_disassembles_df(self):
+        length, disasm = self.disassemble([0xdf])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_e0(self):
+        length, disasm = self.disassemble([0xe0, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CPX #$44', disasm)  
+
+    def test_disassembles_e1(self):
+        length, disasm = self.disassemble([0xe1, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('SBC ($44,X)', disasm)  
+
+    def test_disassembles_e2(self):
+        length, disasm = self.disassemble([0xe2])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_e3(self):
+        length, disasm = self.disassemble([0xe3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_e4(self):
+        length, disasm = self.disassemble([0xe4, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('CPX $44', disasm)  
+
+    def test_disassembles_e5(self):
+        length, disasm = self.disassemble([0xe5, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('SBC $44', disasm)  
+
+    def test_disassembles_e6(self):
+        length, disasm = self.disassemble([0xe6, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('INC $44', disasm)  
+
+    def test_disassembles_e7(self):
+        length, disasm = self.disassemble([0xe7])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+        
+    def test_disassembles_e8(self):
+        length, disasm = self.disassemble([0xe8])
+        self.assertEqual(1, length)
+        self.assertEqual('INX', disasm)  
+        
+    def test_disassembles_e9(self):
+        length, disasm = self.disassemble([0xe9, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('SBC #$44', disasm)  
+        
+    def test_disassembles_ea(self):
+        length, disasm = self.disassemble([0xea])
+        self.assertEqual(1, length)
+        self.assertEqual('NOP', disasm)  
+        
+    def test_disassembles_eb(self):
+        length, disasm = self.disassemble([0xeb])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+        
+    def test_disassembles_ec(self):
+        length, disasm = self.disassemble([0xec, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('CPX $4400', disasm)  
+        
+    def test_disassembles_ed(self):
+        length, disasm = self.disassemble([0xed, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('SBC $4400', disasm)  
+
+    def test_disassembles_ee(self):
+        length, disasm = self.disassemble([0xee, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('INC $4400', disasm)  
+
+    def test_disassembles_ef(self):
+        length, disasm = self.disassemble([0xef])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+                                
+    def test_disassembles_f0(self):
+        length, disasm = self.disassemble([0xf0, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('BEQ $0046', disasm)  
+                                
+    def test_disassembles_f1(self):
+        length, disasm = self.disassemble([0xf1, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('SBC ($44),Y', disasm)  
+
+    def test_disassembles_f2(self):
+        length, disasm = self.disassemble([0xf2])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_f3(self):
+        length, disasm = self.disassemble([0xf3])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_f4(self):
+        length, disasm = self.disassemble([0xf4])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_f5(self):
+        length, disasm = self.disassemble([0xf5, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('SBC $44,X', disasm)  
+
+    def test_disassembles_f6(self):
+        length, disasm = self.disassemble([0xf6, 0x44])
+        self.assertEqual(2, length)
+        self.assertEqual('INC $44,X', disasm)  
+
+    def test_disassembles_f7(self):
+        length, disasm = self.disassemble([0xf7])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_f8(self):
+        length, disasm = self.disassemble([0xf8])
+        self.assertEqual(1, length)
+        self.assertEqual('SED', disasm)  
+
+    def test_disassembles_f9(self):
+        length, disasm = self.disassemble([0xf9, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('SBC $4400,Y', disasm)  
+
+    def test_disassembles_fa(self):
+        length, disasm = self.disassemble([0xfa])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_fb(self):
+        length, disasm = self.disassemble([0xfb])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_fc(self):
+        length, disasm = self.disassemble([0xfc])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+
+    def test_disassembles_fd(self):
+        length, disasm = self.disassemble([0xfd, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('SBC $4400,X', disasm)  
+
+    def test_disassembles_fe(self):
+        length, disasm = self.disassemble([0xfe, 0x00, 0x44])
+        self.assertEqual(3, length)
+        self.assertEqual('INC $4400,X', disasm)  
+
+    def test_disassembles_ff(self):
+        length, disasm = self.disassemble([0xff])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)  
+                                                                                                                                                                                        
     # Test Helpers
     
     def disassemble(self, bytes):
