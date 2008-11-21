@@ -1,8 +1,12 @@
-Next Release
-  
+0.2
+
   - Added a new "disassemble" command to the monitor.  It can disassemble
-    any range of memory (e.g. "disassemble c000:c0010").  If labels have been
+    any range of memory ("disassemble c000:c010").  If labels have been
     defined, the disassembly will show them in the operands.
+
+  - Added a new "assemble" command to the monitor.  It can assemble a 
+    single instruction at an address ("assemble c000 jsr $ffd2").  
+    Labels in the operands are also supported ("assemble c000 jsr charout").
 
   - Moved the character I/O area from $E000 to $F000 for compatibility with
     the EhBASIC binary saved from Michal Kowalski's Windows-based simulator.  

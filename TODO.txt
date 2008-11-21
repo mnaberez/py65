@@ -4,3 +4,9 @@ Instructions needing unit tests:
   cpx
   cpy
   sbc
+
+Better error messages when assembling fails.
+
+Ability to assemble more than one instruction at a time.
+
+Windows support for non-blocking character input.
