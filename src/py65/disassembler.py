@@ -1,5 +1,5 @@
 class Disassembler:
-    _instructions = [
+    Instructions = [
         ['BRK','imp'], ['ORA','inx'], ['???','imp'], ['???','imp'],
         ['???','imp'], ['ORA','zpg'], ['ASL','zpg'], ['???','imp'],
         ['PHP','imp'], ['ORA','imm'], ['ASL','acc'], ['???','imp'],
@@ -76,7 +76,7 @@ class Disassembler:
         """
 
         instruction = self._mpu.ByteAt(pc)
-        disasm, addressing = self._instructions[instruction]
+        disasm, addressing = self.Instructions[instruction]
 
         if addressing == 'acc':
             disasm += ' A'
@@ -118,7 +118,7 @@ class Disassembler:
             disasm += ' (%s)' % address_or_label
             length = 3
 
-        elif addressing ==  'iny':
+        elif addressing == 'iny':
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(zp_address, 
                 '$%02x' % zp_address)

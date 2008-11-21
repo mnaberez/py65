@@ -8,6 +8,7 @@ import asyncore
 import sys
 from py65.mpu6502 import MPU
 from py65.disassembler import Disassembler
+from py65.assembler import Assembler
 from py65.util import itoa, AddressParser, getch
 from py65.memory import ObservableMemory
 
@@ -20,6 +21,7 @@ class Monitor(cmd.Cmd):
         self._update_prompt()
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
+        self._assembler = Assembler(self._address_parser)
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
@@ -106,6 +108,18 @@ class Monitor(cmd.Cmd):
     
     def help_quit(self):
         return self.help_EOF()
+
+    def do_assemble(self, args):
+        start, statement = args.split(None, 1)
+        start = self._address_parser.number(start)
+
+        bytes = self._assembler.assemble(statement)
+        if bytes is None:
+            self._output("Statement could not be assembled.")
+        else:
+            end = start + len(bytes)
+            self._mpu.memory[start:end] = bytes
+            self.do_disassemble('%04x:%04x' % (start, end))
 
     def do_disassemble(self, args):
         start, end = self._address_parser.range(args)

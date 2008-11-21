@@ -496,9 +496,9 @@ class DisassemblerTests(unittest.TestCase):
         self.assertEqual('ADC ($44,X)', disasm)        
 
     def test_disassembles_62(self):
-        length, disasm = self.disassemble([0x61, 0x44])
-        self.assertEqual(2, length)
-        self.assertEqual('ADC ($44,X)', disasm)      
+        length, disasm = self.disassemble([0x62])
+        self.assertEqual(1, length)
+        self.assertEqual('???', disasm)                      
 
     def test_disassembles_63(self):
         length, disasm = self.disassemble([0x63])
@@ -897,11 +897,6 @@ class DisassemblerTests(unittest.TestCase):
 
     def test_disassembles_b2(self):
         length, disasm = self.disassemble([0xb2])
-        self.assertEqual(1, length)
-        self.assertEqual('???', disasm)    
-
-    def test_disassembles_b3(self):
-        length, disasm = self.disassemble([0xb3])
         self.assertEqual(1, length)
         self.assertEqual('???', disasm)    
 
