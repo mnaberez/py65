@@ -110,7 +110,11 @@ class Monitor(cmd.Cmd):
         return self.help_EOF()
 
     def do_assemble(self, args):
-        start, statement = args.split(None, 1)
+        split = args.split(None, 1)
+        if len(split) != 2:
+            return self.help_assemble()
+        
+        start, statement = split
         start = self._address_parser.number(start)
 
         bytes = self._assembler.assemble(statement)
@@ -120,6 +124,10 @@ class Monitor(cmd.Cmd):
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
             self.do_disassemble('%04x:%04x' % (start, end))
+
+    def help_assemble(self):
+        self._output("assemble <address> <statement>")
+        self._output("Assemble a statement at the address.")
 
     def do_disassemble(self, args):
         start, end = self._address_parser.range(args)
