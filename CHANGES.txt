@@ -1,3 +1,8 @@
+0.3
+
+  - Added shortcuts for monitor commands such as "m" for "memory".  These
+    are mostly the same as the VICE monitor shortcuts.
+
 0.2
 
   - Added a new "disassemble" command to the monitor.  It can disassemble

@@ -19,6 +19,7 @@ class Monitor(cmd.Cmd):
         self._mpu = MPU()
         self._install_mpu_observers()
         self._update_prompt()
+        self._add_shortcuts()
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
         self._assembler = Assembler(self._address_parser)
@@ -40,12 +41,32 @@ class Monitor(cmd.Cmd):
         self._update_prompt()
         return result
 
+    def _add_shortcuts(self):
+        self._shortcuts = {'~':   'tilde',
+                           '?':   'help',
+                           'al':  'add_label',
+                           'd':   'disassemble',
+                           'dl':  'delete_label',
+                           'f':   'fill',
+                           'g':   'goto',
+                           'l':   'load',
+                           'll':  'load_labels',
+                           'm':   'mem',
+                           'r':   'registers',
+                           'ret': 'return',
+                           'rad': 'radix',
+                           'shl': 'show_labels',
+                           'x':   'quit',
+                           'z':   'step'}
+
     def _preprocess_line(self, line):
-        # tilde command
-        matches = re.match('^~\s*', line)
-        if matches:
-            start, end = matches.span()
-            line = "tilde %s" % line[end:]
+        # command shortcuts
+        for shortcut, command in self._shortcuts.iteritems():
+            pattern = '^%s\s+' % re.escape(shortcut)
+            matches = re.match(pattern, line)
+            if matches:
+                start, end = matches.span()
+                line = "%s %s" % (command, line[end:])
 
         # line comments
         quoted = False
@@ -298,10 +319,10 @@ class Monitor(cmd.Cmd):
         self._fill(start, start, map(ord, bytes))
     
     def help_fill(self):
-        self.output("fill <address_range> <data_list>")
-        self.output("Fill memory in the specified address range with the data in")
-        self.output("<data_list>.  If the size of the address range is greater")
-        self.output("than the size of the data_list, the data_list is repeated.")
+        self._output("fill <address_range> <data_list>")
+        self._output("Fill memory in the specified address range with the data in")
+        self._output("<data_list>.  If the size of the address range is greater")
+        self._output("than the size of the data_list, the data_list is repeated.")
     
     def do_fill(self, args):
         split = shlex.split(args)
