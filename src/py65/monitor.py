@@ -16,6 +16,7 @@ class Monitor(cmd.Cmd):
 
     def __init__(self, options={}, completekey='tab', stdin=None, stdout=None):
         self.options = options
+        self._width = 78
         self._mpu = MPU()
         self._install_mpu_observers()
         self._update_prompt()
@@ -362,10 +363,17 @@ class Monitor(cmd.Cmd):
     def do_mem(self, args):
         start, end = self._address_parser.range(args)
 
-        out = itoa(start, 16).zfill(4) + ":  "
-        for byte in self._mpu.memory[start:end+1]:
-            out += "%02x  " % byte
-        self._output(out)
+        line = "%04x:" % start
+        for address in range(start, end+1):
+            byte = self._mpu.memory[address]
+            more = "  %02x" % byte                       
+            
+            exceeded = len(line) + len(more) > self._width
+            if exceeded:
+                self._output(line)
+                line = "%04x:" % address
+            line += more
+        self._output(line)
 
     def help_add_label(self):
         self._output("add_label <address> <label>")
@@ -405,7 +413,23 @@ class Monitor(cmd.Cmd):
         except KeyError:
             pass
 
+    def do_width(self, args):
+        if args != '':
+            try:
+                new_width = int(args)
+                if new_width >= 10:
+                    self._width = new_width
+                else:
+                    self._output("Minimum terminal width is 10")
+            except ValueError:
+                self._output("Illegal width: %s" % args)
 
+        self._output("Terminal width is %d" % self._width)
+
+    def help_width(self):
+        self._output("width <columns>")
+        self._output("Set the width used by some commands to wrap output.")
+        self._output("With no argument, the current width is printed.")
 
 def main(args=None, options=None):
     c = Monitor(options)
