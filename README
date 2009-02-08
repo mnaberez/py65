@@ -8,7 +8,7 @@ Mike Naberezny.  The excellent book "Programming the 6502" by
 Rodnay Zaks was also referenced extensively during the development 
 of this software.
 
-For a quick introduction to Py65, see this post:
-http://mikenaberezny.com/2008/07/01/py65-6502-microprocessor-simulator/
+For an introduction to Py65, please visit the project home page:
+http://6502.org/projects/py65/
 
 For more information on the 6502 microprocessor, visit http://6502.org.
