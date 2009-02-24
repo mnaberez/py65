@@ -1,5 +1,4 @@
 Instructions needing unit tests:
-  bit
   cmp
   cpx
   cpy
