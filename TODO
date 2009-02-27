@@ -2,7 +2,6 @@ Instructions needing unit tests:
   cmp
   cpx
   cpy
-  sbc
 
 Better error messages when assembling fails.
 

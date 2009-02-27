@@ -3464,7 +3464,7 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0xC004, mpu.pc)
     self.assertEquals(0xFF,   mpu.sp)
 
-  # SBC
+  # SBC Absolute
   
   def test_sbc_abs_all_zeros_and_no_borrow_is_zero(self):
     mpu = MPU()
@@ -3518,6 +3518,464 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0, mpu.flags & mpu.ZERO)  
     self.assertEquals(mpu.CARRY, mpu.CARRY)
       
+  # SBC Zero Page
+  
+  def test_sbc_zp_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    mpu.memory[0x0010] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+  def test_sbc_zp_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    mpu.memory[0x0010] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_zp_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    mpu.memory[0x0010] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_zp_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    mpu.memory[0x0010] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  # SBC Immediate
+  
+  def test_sbc_imm_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0001] = (0xE9, 0x00) #=> SBC #$00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+  def test_sbc_imm_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE9, 0x01) #=> SBC #$01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_imm_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE9, 0x00) #=> SBC #$00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_imm_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0001] = (0xE9, 0x02) #=> SBC #$02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  # SBC Absolute, X-Indexed
+  
+  def test_sbc_abs_x_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    mpu.x = 0x0D
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+  def test_sbc_abs_x_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    mpu.x = 0x0D
+    mpu.memory[0xFEED] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_abs_x_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    mpu.x = 0x0D
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_abs_x_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    mpu.x = 0x0D
+    mpu.memory[0xFEED] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  # SBC Absolute, Y-Indexed
+  
+  def test_sbc_abs_y_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    mpu.y = 0x0D
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+  def test_sbc_abs_y_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    mpu.y = 0x0D
+    mpu.memory[0xFEED] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_abs_y_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    mpu.y = 0x0D
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_abs_y_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    mpu.y = 0x0D
+    mpu.memory[0xFEED] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  # SBC Indirect, Indexed (X)
+  
+  def test_sbc_ind_x_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+  
+  def test_sbc_ind_x_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03  
+    mpu.memory[0xFEED] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_ind_x_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_ind_x_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03  
+    mpu.memory[0xFEED] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  def test_sbc_ind_x_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+  
+  def test_sbc_ind_x_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03  
+    mpu.memory[0xFEED] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_ind_x_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03
+    mpu.memory[0xFEED] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_ind_x_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.x = 0x03  
+    mpu.memory[0xFEED] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  # SBC Indexed, Indirect (Y)
+
+  def test_sbc_ind_y_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00 
+    mpu.y = 0x03
+    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
+    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.memory[0xFEED + mpu.y] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+  
+  def test_sbc_ind_y_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
+    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.memory[0xFEED + mpu.y] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_ind_y_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
+    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.memory[0xFEED + mpu.y] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_ind_y_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
+    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    mpu.memory[0xFEED + mpu.y] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+
+  # SBC Zero Page, X-Indexed
+  
+  def test_sbc_zp_x_all_zeros_and_no_borrow_is_zero(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x00
+    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    mpu.x = 0x0D
+    mpu.memory[0x001D] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+  def test_sbc_zp_x_downto_zero_no_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags |= mpu.CARRY # borrow = 0
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    mpu.x = 0x0D
+    mpu.memory[0x001D] = 0x01
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
+  def test_sbc_zp_x_downto_zero_with_borrow_sets_z_clears_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x01
+    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    mpu.x = 0x0D
+    mpu.memory[0x001D] = 0x00
+    mpu.step()
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+  
+  def test_sbc_zp_x_downto_four_with_borrow_clears_z_n(self):
+    mpu = MPU()
+    mpu.flags &= ~(mpu.DECIMAL)
+    mpu.flags &= ~(mpu.CARRY) # borrow = 1
+    mpu.a = 0x07
+    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    mpu.x = 0x0D
+    mpu.memory[0x001D] = 0x02
+    mpu.step()
+    self.assertEquals(0x04, mpu.a)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    self.assertEquals(0, mpu.flags & mpu.ZERO)  
+    self.assertEquals(mpu.CARRY, mpu.CARRY)
 
   # SEC
   
