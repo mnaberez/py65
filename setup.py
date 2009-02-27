@@ -65,9 +65,9 @@ dist = setup(
     packages = find_packages(os.path.join(here, 'src')),
     # put data files in egg 'doc' dir
     data_files=[ ('doc', [
-        'CHANGES.txt',
-        'README.txt',
-        'TODO.txt',
+        'CHANGES',
+        'README',
+        'TODO',
         ]
     )],
     install_requires = [],
