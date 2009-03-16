@@ -126,7 +126,7 @@ class Monitor(cmd.Cmd):
         self._output("To quit, type ^D or use the quit command.")
 
     def do_quit(self, args):
-        return self.do_EOF
+        return self.do_EOF(args)
     
     def help_quit(self):
         return self.help_EOF()
@@ -235,7 +235,7 @@ class Monitor(cmd.Cmd):
         self._output("~ <number>")
         self._output("Display the specified number in decimal, hex, octal, and binary.")
     
-    def do_tilde(self, args):
+    def do_tilde(self, args):   
         try:
             num = self._address_parser.number(args)
         except ValueError:
@@ -269,8 +269,8 @@ class Monitor(cmd.Cmd):
                     if len(register) == 1:
                         intval &= 0xFF
                     setattr(self._mpu, register, intval)
-                except ValueError:
-                    self._output("Syntax error: %s" % value)
+                except KeyError, why:
+                    self._output(why[0])
     
     def help_cd(self, args):
         self._output("cd <directory>")
