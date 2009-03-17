@@ -139,7 +139,66 @@ class MonitorTests(unittest.TestCase):
         mon.help_registers()
         out = stdout.getvalue()
         self.assertTrue(out.startswith("registers[<reg_name>"))         
-       
+
+    def test_do_add_label_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('should be label space value')
+        out = stdout.getvalue()
+        self.assertEqual("Syntax error: should be label space value\n", out)         
+
+    def test_do_add_label_adds_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('$c000 foo')
+        address_parser = mon._address_parser
+        self.assertEqual(0xC000, address_parser.number('foo'))
+
+    def test_help_add_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_add_label()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("add_label"))        
+
+    def test_do_delete_label_no_args_displays_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_delete_label('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('delete_label'))
+
+    def test_do_delete_label_with_bad_label_fails_silently(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_delete_label('non-existant-label')
+        out = stdout.getvalue()
+        self.assertEqual('', out)
+
+    def test_do_delete_label_with_delete_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._address_parser.labels['foo'] = 0xc000
+        mon.do_delete_label('foo') 
+        self.assertFalse(mon._address_parser.labels.has_key('foo'))
+        out = stdout.getvalue()
+        self.assertEqual('', out)
+
+    def test_show_labels_displays_labels(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._address_parser.labels = {'chrin': 0xffc4, 'chrout': 0xffd2}            
+        mon.do_show_labels('')
+        out = stdout.getvalue()
+        self.assertEqual("ffc4: chrin\nffd2: chrout\n", out)        
+
+    def test_help_show_labels(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._address_parser.labels = {'chrin': 0xffc4, 'chrout': 0xffd2}            
+        mon.do_show_labels('')
+        out = stdout.getvalue()
+        self.assertEqual("ffc4: chrin\nffd2: chrout\n", out)        
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
