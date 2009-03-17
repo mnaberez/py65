@@ -408,6 +408,9 @@ class Monitor(cmd.Cmd):
         self._output("Remove the specified label from the label tables.")
 
     def do_delete_label(self, args):
+        if args == '':
+            return self.help_delete_label()
+        
         try:
             del self._address_parser.labels[args]
         except KeyError:
