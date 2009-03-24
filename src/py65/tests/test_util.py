@@ -90,7 +90,18 @@ class AddressParserTests(unittest.TestCase):
       self.fail()
     except KeyError, why:
       self.assertEqual('Label not found: bad_label', why[0])    
-    
+
+  def test_label_for_returns_label(self):
+    parser = util.AddressParser(labels={'chrout':0xFFD2})
+    self.assertEqual('chrout', parser.label_for(0xFFD2))
+  
+  def test_label_for_returns_none_by_default(self):
+    parser = util.AddressParser(labels={})
+    self.assertEqual(None, parser.label_for(0xFFD2))
+
+  def test_label_for_returns_alternate_default(self):
+    parser = util.AddressParser(labels={})
+    self.assertEqual('foo', parser.label_for(0xFFD2, 'foo'))
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
