@@ -1,11 +1,90 @@
 import unittest
 import sys
 import re
+import os
 from py65.monitor import Monitor
 from StringIO import StringIO
 
 class MonitorTests(unittest.TestCase):
 
+    # assemble
+    
+    def test_do_assemble_shows_help_for_invalid_args(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('c000')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("assemble <address>"))
+
+    def test_do_assemble_assembles_valid_statement(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('c000 lda #$ab')
+
+        mpu = mon._mpu
+        self.assertEqual(0xA9, mpu.memory[0xC000])
+        self.assertEqual(0xAB, mpu.memory[0xC001])
+    
+    def test_do_assemble_outputs_disassembly(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('c000 lda #$ab')
+        
+        out = stdout.getvalue()
+        self.assertEqual("$c000  a9 ab     LDA #$ab\n", out)
+
+    def test_do_assemble_parses_start_address_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('c000 base')
+        mon.do_assemble('c000 rts')
+        
+        mpu = mon._mpu
+        self.assertEqual(0x60, mpu.memory[0xC000])
+
+    def test_do_assemble_shows_bad_label_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('nonexistant rts')
+        
+        out = stdout.getvalue()
+        self.assertEqual("Bad label: nonexistant\n", out)
+
+    def test_do_assemble_shows_bad_statement_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('c000 foo')
+        
+        out = stdout.getvalue()
+        self.assertEqual("Assemble failed: foo\n", out)
+
+    def test_help_assemble(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_assemble()
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("assemble <address>"))
+
+    # pwd
+
+    def test_pwd_shows_os_getcwd(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_pwd()
+
+        out = stdout.getvalue()
+        self.assertEqual("%s\n" % os.getcwd(), out)
+        
+
+    def test_help_pwd(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_pwd()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Show the current working"))
+        
     # quit
 
     def test_do_EOF(self):
