@@ -137,11 +137,15 @@ class Monitor(cmd.Cmd):
             return self.help_assemble()
         
         start, statement = split
-        start = self._address_parser.number(start)
+        try:
+            start = self._address_parser.number(start)
+        except KeyError:
+            self._output("Bad label: %s" % start)
+            return
 
         bytes = self._assembler.assemble(statement)
         if bytes is None:
-            self._output("Statement could not be assembled.")
+            self._output("Assemble failed: %s" % statement)
         else:
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
