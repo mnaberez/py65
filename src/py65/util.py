@@ -1,7 +1,5 @@
 import re
 import select
-import termios
-import fcntl
 import os
 
 class AddressParser:
@@ -140,6 +138,8 @@ def getch(stdin):
     """ Performs a nonblocking read of one byte from stdin and returns 
     its ordinal value.  If no byte is available, 0 is returned.
     """
+    import termios
+    import fcntl
     
     fd = stdin.fileno()
 
