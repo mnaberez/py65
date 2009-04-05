@@ -2,7 +2,7 @@ import unittest
 import sys
 from py65.mpu6502 import MPU
 from py65.disassembler import Disassembler
-from py65.util import AddressParser
+from py65.utils.addressing import AddressParser
 
 class DisassemblerTests(unittest.TestCase):
     def test_disassembles_00(self):

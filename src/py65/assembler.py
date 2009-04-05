@@ -1,6 +1,6 @@
 import re
 from py65.disassembler import Disassembler
-from py65.util import AddressParser
+from py65.utils.addressing import AddressParser
 
 class Assembler:
     Statement = re.compile(r'^([A-z]{3}\s+'

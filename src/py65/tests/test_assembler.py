@@ -1,7 +1,7 @@
 import unittest
 import sys
 from py65.assembler import Assembler
-from py65.util import AddressParser
+from py65.utils.addressing import AddressParser
 
 class AssemblerTests(unittest.TestCase):
     def test_assembles_00(self):

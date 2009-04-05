@@ -9,7 +9,9 @@ import sys
 from py65.mpu6502 import MPU
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
-from py65.util import itoa, AddressParser, getch
+from py65.utils.addressing import AddressParser
+from py65.utils.console import getch
+from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
