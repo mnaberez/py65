@@ -67,19 +67,15 @@ class ObservableMemoryTests(unittest.TestCase):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
         
-        try:   
-            self._count = 0
-
-            def listener(address, value):
-                self._count += 1
+        calls = []
+        def listener(address, value):
+            calls.append('listener')
         
-            mem.register_listener([0xC000], listener)
-            mem.register_listener([0xC000], listener)
+        mem.register_listener([0xC000], listener)
+        mem.register_listener([0xC000], listener)
 
-            mem[0xC000] = 0xAB
-            self.assertEqual(1, self._count)
-        finally:
-            delattr(self, '_count')
+        mem[0xC000] = 0xAB
+        self.assertEqual(['listener'], calls)
    
     # __getitem__
     
@@ -109,22 +105,22 @@ class ObservableMemoryTests(unittest.TestCase):
     def test___getitem__calls_all_providers_and_uses_result_of_last(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
-
-        def provider_1(calls, address):
+        
+        calls = []
+        def provider_1(address):
             calls.append('provider_1')
             return 0x01
 
-        def provider_2(calls, address):
+        def provider_2(address):
             calls.append('provider_2')
             return 0x02
         
-        calls = []
-        mem.register_provider([0xC000], lambda a: provider_1(calls, a))
-        mem.register_provider([0xC000], lambda a: provider_2(calls, a))
+        mem.register_provider([0xC000], provider_1)
+        mem.register_provider([0xC000], provider_2)
 
         subject[0xC000] = 0xAB
-        self.assertEqual(['provider_1', 'provider_2'], calls)
         self.assertEqual(0x02, mem[0xC000])
+        self.assertEqual(['provider_1', 'provider_2'], calls)
 
     # __getattr__
 
