@@ -15,7 +15,8 @@ class ObservableMemory:
             result = callback(address, value)
             if result is not None:
                 value = result
-
+        self._subject[address] = value
+        
     def __getitem__(self, address):
         callbacks = self._providers[address]
         final_result = None
@@ -25,21 +26,23 @@ class ObservableMemory:
             if result is not None:
                 final_result = result
 
-        if final_result:
-            return final_result
-        else:
+        if final_result is None:
             return self._subject[address]
+        else:
+            return final_result
     
-    def __getattr__(self, address):
-        return getattr(self._subject, address)
-
-    def register_provider(self, address_range, callback):
-        for address in address_range:
-            self._providers[address].append(callback)
+    def __getattr__(self, attribute):
+        return getattr(self._subject, attribute)
 
     def register_listener(self, address_range, callback):
         for address in address_range:
-            self._listeners[address].append(callback)
+            if not callback in self._listeners[address]:
+                self._listeners[address].append(callback)
+
+    def register_provider(self, address_range, callback): 
+        for address in address_range:
+            if not callback in self._providers[address]:
+                self._providers[address].append(callback)
 
     def write(self, start_address, bytes):
         self._subject[start_address:start_address+len(bytes)] = bytes
