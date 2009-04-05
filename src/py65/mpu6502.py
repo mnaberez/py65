@@ -15,7 +15,7 @@ class MPU:
   ZERO      = 2
   CARRY     = 1
 
-  def __init__(self, memory=None, pc=0):
+  def __init__(self, memory=None, pc=0x0000):
     # config
     self.debug = False
     
@@ -26,13 +26,12 @@ class MPU:
     self.processorCycles = 0
     self.internalCycleDelay = 0
 
-    if not memory:
+    if memory is None:
         memory = 0xFFFF * [0x00]
     self.memory = memory
     self.start_pc = pc
 
     # init
-    #self.clearMemory()
     self.reset()
 
   def __repr__(self):
@@ -61,11 +60,6 @@ class MPU:
     self.flags = 32
     self.breakFlag = False
     self.processorCycles = 0
-
-  #def clearMemory(self, start=0x0000, end=0xFFFF):
-    #self.memory = [] 
-    #for addr in range(start, end + 1):
-      #self.memory.insert(addr, 0x00)
 
   def ByteAt(self, addr):
     return self.memory[addr]
