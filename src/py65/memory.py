@@ -6,19 +6,21 @@ class ObservableMemory:
             subject = 0x10000 * [0x00]
         self._subject = subject
 
-        self._listeners = defaultdict(list)
-        self._providers = defaultdict(list)        
+        self._read_subscribers  = defaultdict(list)
+        self._write_subscribers = defaultdict(list)        
 
     def __setitem__(self, address, value):
-        callbacks = self._listeners[address]
+        callbacks = self._write_subscribers[address]
+
         for callback in callbacks:
             result = callback(address, value)
             if result is not None:
                 value = result
+
         self._subject[address] = value
         
     def __getitem__(self, address):
-        callbacks = self._providers[address]
+        callbacks = self._read_subscribers[address]
         final_result = None
 
         for callback in callbacks:
@@ -34,15 +36,15 @@ class ObservableMemory:
     def __getattr__(self, attribute):
         return getattr(self._subject, attribute)
 
-    def register_listener(self, address_range, callback):
+    def subscribe_to_write(self, address_range, callback):
         for address in address_range:
-            if not callback in self._listeners[address]:
-                self._listeners[address].append(callback)
+            if not callback in self._write_subscribers[address]:
+                self._write_subscribers[address].append(callback)
 
-    def register_provider(self, address_range, callback): 
+    def subscribe_to_read(self, address_range, callback): 
         for address in address_range:
-            if not callback in self._providers[address]:
-                self._providers[address].append(callback)
+            if not callback in self._read_subscribers[address]:
+                self._read_subscribers[address].append(callback)
 
     def write(self, start_address, bytes):
         self._subject[start_address:start_address+len(bytes)] = bytes

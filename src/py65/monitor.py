@@ -91,8 +91,8 @@ class Monitor(cmd.Cmd):
             return getch(self.stdin)
 
         m = ObservableMemory()
-        m.register_listener([0xF001], putc)
-        m.register_provider([0xF004], getc)
+        m.subscribe_to_write([0xF001], putc)
+        m.subscribe_to_read([0xF004], getc)
         
         self._mpu.memory = m
 

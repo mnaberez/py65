@@ -15,129 +15,131 @@ class ObservableMemoryTests(unittest.TestCase):
         mem[0xC000] = 0xAB
         self.assertEqual(0xAB, subject[0xC000])
  
-    def test___setitem__ignores_listeners_returning_none(self):
+    def test___setitem__ignores_subscribers_returning_none(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
 
-        def listener_1(address, value):
+        def write_subscriber_1(address, value):
             return None
 
-        def listener_2(address, value):
+        def write_subscriber_2(address, value):
             return None
         
-        mem.register_listener([0xC000], listener_1)
-        mem.register_listener([0xC000], listener_2)
+        mem.subscribe_to_write([0xC000], write_subscriber_1)
+        mem.subscribe_to_write([0xC000], write_subscriber_2)
         
         mem[0xC000] = 0xAB
         self.assertEqual(0xAB, subject[0xC000])
 
-    def test___setitem__uses_result_of_last_listener(self):
+    def test___setitem__uses_result_of_last_subscriber(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
-
-        def listener_1(address, value):
+    
+        def write_subscriber_1(address, value):
             return 0x01
-
-        def listener_2(address, value):
+    
+        def write_subscriber_2(address, value):
             return 0x02
         
-        mem.register_listener([0xC000], listener_1)
-        mem.register_listener([0xC000], listener_2)
+        mem.subscribe_to_write([0xC000], write_subscriber_1)
+        mem.subscribe_to_write([0xC000], write_subscriber_2)
         
         mem[0xC000] = 0xAB
         self.assertEqual(0x02, subject[0xC000])
-
-    # register_listener
-
-    def test_register_listener_covers_all_addresses_in_range(self):
+     
+    # subscribe_to_read
+    
+    def test_subscribe_to_read_covers_all_addresses_in_range(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
-
-        def listener(address, value):
+    
+        def read_subscriber(address, value):
             return 0xAB
         
-        mem.register_listener(xrange(0xC000, 0xC001+1), listener)
-
+        mem.subscribe_to_read(xrange(0xC000, 0xC001+1), read_subscriber)
+    
         mem[0xC000] = 0xAB
         mem[0xC001] = 0xAB
         self.assertEqual(0xAB, subject[0xC001])
         self.assertEqual(0xAB, subject[0xC001])
-
-    def test_register_listener_does_not_register_same_listener_twice(self):
+     
+    def test__subscribe_to_read_does_not_register_same_listener_twice(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
         
         calls = []
-        def listener(address, value):
-            calls.append('listener')
+        def read_subscriber(address):
+            calls.append('read_subscriber')
         
-        mem.register_listener([0xC000], listener)
-        mem.register_listener([0xC000], listener)
-
-        mem[0xC000] = 0xAB
-        self.assertEqual(['listener'], calls)
-   
+        mem.subscribe_to_read([0xC000], read_subscriber)
+        mem.subscribe_to_read([0xC000], read_subscriber)
+    
+        value = mem[0xC000]
+        self.assertEqual(['read_subscriber'], calls)
+       
     # __getitem__
     
-    def test___getitem__with_no_providers_changes_memory(self):
+    def test___getitem__with_no_write_subscribers_changes_memory(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
- 
+     
         subject[0xC000] = 0xAB
         self.assertEqual(0xAB, mem[0xC000])
-
-    def test___getitem__ignores_providers_returning_none(self):
+       
+    def test___getitem__ignores_read_subscribers_returning_none(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
-
-        def provider_1(address):
+    
+        def read_subscriber_1(address):
             return None
-
-        def provider_2(address):
+    
+        def read_subscriber_2(address):
             return None
         
-        mem.register_provider([0xC000], provider_1)
-        mem.register_provider([0xC000], provider_2)
+        mem.subscribe_to_read([0xC000], read_subscriber_1)
+        mem.subscribe_to_read([0xC000], read_subscriber_2)
         
         mem[0xC000] = 0xAB
         self.assertEqual(0xAB, subject[0xC000])
-
-    def test___getitem__calls_all_providers_and_uses_result_of_last(self):
+        
+    def test___getitem__calls_all_read_subscribers_uses_last_result(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
         
         calls = []
-        def provider_1(address):
-            calls.append('provider_1')
+        def read_subscriber_1(address):
+            calls.append('read_subscriber_1')
             return 0x01
-
-        def provider_2(address):
-            calls.append('provider_2')
+    
+        def read_subscriber_2(address):
+            calls.append('read_subscriber_2')
             return 0x02
         
-        mem.register_provider([0xC000], provider_1)
-        mem.register_provider([0xC000], provider_2)
-
+        mem.subscribe_to_read([0xC000], read_subscriber_1)
+        mem.subscribe_to_read([0xC000], read_subscriber_2)
+    
         subject[0xC000] = 0xAB
         self.assertEqual(0x02, mem[0xC000])
-        self.assertEqual(['provider_1', 'provider_2'], calls)
 
+        expected_calls = ['read_subscriber_1', 'read_subscriber_2']
+        self.assertEqual(expected_calls, calls)
+     
     # __getattr__
-
+    
     def test__getattr__proxies_subject(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
         self.assertEqual(subject.count, mem.count)
-
+    
     # write
     
     def test_write_directly_writes_values_to_subject(self):
         subject = self._make_subject()
         mem = ObservableMemory(subject=subject)
-
-        def listener(address, value):
+    
+        def write_subscriber(address, value):
             return 0xFF
-        mem.register_listener([0xC000,0xC001], listener)
+        mem.subscribe_to_write([0xC000,0xC001], write_subscriber)
         
         mem.write(0xC000, [0x01, 002])
         self.assertEqual(0x01, subject[0xC000])
