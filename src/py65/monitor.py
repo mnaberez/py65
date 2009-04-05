@@ -85,12 +85,12 @@ class Monitor(cmd.Cmd):
             self.stdout.write(chr(value))
             self.stdout.flush()
 
-        def getc(operation, address, value):
+        def getc(operation, address):
             return getch(self.stdin)
 
         m = ObservableMemory()
-        m.subscribe(m.WRITE, [0xF001], putc)
-        m.subscribe(m.READ,  [0xF004], getc)
+        m.register_listener([0xF001], putc)
+        m.register_provider([0xF004], getc)
         
         self._mpu.memory = m
 
