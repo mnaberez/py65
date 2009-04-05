@@ -1,3 +1,4 @@
-.DS_Store
+*~
 *.pyc
-py65.egg-info
+*.pyo
+src/py65.egg-info/
