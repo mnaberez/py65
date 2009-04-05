@@ -1,4 +1,4 @@
-from py65 import util
+from py65.utils.conversions import convert_to_bin, convert_to_bcd
 
 class MPU:
   # vectors
@@ -254,7 +254,7 @@ class MPU:
         tmp = 1
       else:
         tmp = 0
-      data = util.convert_to_bin(data) + util.convert_to_bin(self.a) + tmp
+      data = convert_to_bin(data) + convert_to_bin(self.a) + tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
       if data > 99:
         self.flags |= self.CARRY + self.OVERFLOW
@@ -264,7 +264,7 @@ class MPU:
         self.flags |= self.ZERO
       else:
         self.flags |= data & 128
-      self.a = util.convert_to_bcd(data)
+      self.a = convert_to_bcd(data)
     else:
       if self.flags & self.CARRY:
         tmp = 1
@@ -344,7 +344,7 @@ class MPU:
       else:
         borrow = 1
     
-      data = util.convert_to_bin(self.a) - util.convert_to_bin(data) - borrow
+      data = convert_to_bin(self.a) - convert_to_bin(data) - borrow
       self.flags &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
       if data == 0:
         self.flags |= self.ZERO + self.CARRY
@@ -353,7 +353,7 @@ class MPU:
       else:
         self.flags |= self.NEGATIVE
         data +=100
-      self.a = util.convert_to_bcd(data)
+      self.a = convert_to_bcd(data)
     else:
       if self.flags & self.CARRY:
         borrow = 0
@@ -674,7 +674,7 @@ class MPU:
       tmp = 0
 
     if self.flags & self.DECIMAL:
-      data = util.convert_to_bin(data) + util.convert_to_bin(self.a) + tmp
+      data = convert_to_bin(data) + convert_to_bin(self.a) + tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
       if data > 99:
         self.flags |= self.CARRY+self.OVERFLOW
@@ -683,7 +683,7 @@ class MPU:
         self.flags |= self.ZERO
       else:
         self.flags |= self.data & 128
-      self.a = util.convert_to_bcd(data)
+      self.a = convert_to_bcd(data)
     else:
       if self.flags & self.CARRY:
         tmp = 1
@@ -1049,7 +1049,7 @@ class MPU:
         tmp = 0
       else:
         tmp = 1
-      data = util.convert_to_bin(self.a) - util.convert_to_bin(data) - tmp
+      data = convert_to_bin(self.a) - convert_to_bin(data) - tmp
       self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE+self.OVERFLOW)
       if data == 0:
         self.flags |= self.ZERO + self.CARRY
@@ -1058,7 +1058,7 @@ class MPU:
       else:
         self.flags |= self.NEGATIVE
         data +=100
-      self.a = util.convert_to_bcd(data)
+      self.a = convert_to_bcd(data)
     else:
       if self.flags & self.CARRY:
         tmp = 0
