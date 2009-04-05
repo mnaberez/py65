@@ -9,6 +9,7 @@ class MPU:
   # processor flags
   NEGATIVE  = 128
   OVERFLOW  = 64
+  UNUSED    = 32
   BREAK     = 16
   DECIMAL   = 8
   INTERRUPT = 4
@@ -27,7 +28,7 @@ class MPU:
     self.internalCycleDelay = 0
 
     if memory is None:
-        memory = 0xFFFF * [0x00]
+        memory = 0x10000 * [0x00]
     self.memory = memory
     self.start_pc = pc
 
@@ -57,15 +58,19 @@ class MPU:
     self.a = 0
     self.x = 0
     self.y = 0
-    self.flags = 32
+    self.flags = self.UNUSED
     self.breakFlag = False
     self.processorCycles = 0
+
+  # Helpers for addressing modes
 
   def ByteAt(self, addr):
     return self.memory[addr]
 
   def WordAt(self, addr):
     return self.ByteAt(addr) + (self.ByteAt(addr + 1) << 8)
+  
+  # Addressing modes
 
   def ImmediateByte(self):
     return self.ByteAt(self.pc)
