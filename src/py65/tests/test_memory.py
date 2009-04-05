@@ -56,7 +56,7 @@ class ObservableMemoryTests(unittest.TestCase):
         def listener(address, value):
             return 0xAB
         
-        mem.register_listener(range(0xC000, 0xC001+1), listener)
+        mem.register_listener(xrange(0xC000, 0xC001+1), listener)
 
         mem[0xC000] = 0xAB
         mem[0xC001] = 0xAB
