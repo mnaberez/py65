@@ -2,4 +2,7 @@
 *~
 *.pyc
 *.pyo
+*.swp
+build/
+dist/
 src/py65.egg-info/
