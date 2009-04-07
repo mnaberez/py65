@@ -2,7 +2,8 @@ import unittest
 import sys
 from py65.mpu6502 import MPU
 
-class MPUTests(unittest.TestCase):
+def make_common_tests(MPU):
+ class MPUTests(unittest.TestCase):
   
   # ADC Absolute
   
@@ -4575,9 +4576,23 @@ class MPUTests(unittest.TestCase):
     self.assertEquals(0x00, mpu.y)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
     self.assertEquals(0x0001, mpu.pc)
+ return MPUTests
       
 
-  
+MPUTests = make_common_tests(MPU)
+ 
+class MPU6502SpecificTests(unittest.TestCase):
+    def test_repr(self):
+        mpu = MPU()
+        self.assertEquals('<6502: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>',
+                           repr(mpu))
+
+    def test_stz_not_supported(self):
+        mpu = MPU(debug=True)
+        mpu.memory[0x0000] = 0x64 #=> stz (on 65c02)
+        self.assertRaises(NotImplementedError, mpu.step)
+
+
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
 

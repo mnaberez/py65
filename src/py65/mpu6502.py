@@ -16,9 +16,10 @@ class MPU:
   ZERO      = 2
   CARRY     = 1
 
-  def __init__(self, memory=None, pc=0x0000):
+  def __init__(self, memory=None, pc=0x0000, debug=False):
     # config
-    self.debug = False
+    self.debug = debug
+    self.name = '6502'
     
     # vm status
     self.breakFlag = False
@@ -36,8 +37,8 @@ class MPU:
     self.reset()
 
   def __repr__(self):
-    out = '<6502: A=%02x, X=%02x, Y=%02x, Flags=%02x, SP=%02x, PC=%04x>'
-    return out % (self.a, self.x, self.y,
+    out = '<%s: A=%02x, X=%02x, Y=%02x, Flags=%02x, SP=%02x, PC=%04x>'
+    return out % (self.name, self.a, self.x, self.y,
                   self.flags, self.sp, self.pc)
 
   def step(self):
