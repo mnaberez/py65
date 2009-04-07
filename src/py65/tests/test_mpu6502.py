@@ -2,6 +2,9 @@ import unittest
 import sys
 from py65.mpu6502 import MPU
 
+def write(memory, start_address, bytes):
+    memory[start_address:start_address+len(bytes)] = bytes
+
 def make_common_tests(MPU):
  class MPUTests(unittest.TestCase):
   
@@ -10,7 +13,9 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_carry_clear_in_accumulator_zeroes(self):
     mpu = MPU()
     mpu.a = 0
-    mpu.memory[0x0000:0x0002] = (0x6D, 0x00, 0xC0) #=> $0000 ADC $C000
+    write(mpu.memory, 0x0000, (0x6D, 0x00, 0xC0)) #=> $0000 ADC $C000
+    self.assertEquals(0x10000, len(mpu.memory))
+
     mpu.memory[0xC000] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -23,7 +28,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x6D, 0x00, 0xC0) #=> $0000 ADC $C000
+    write(mpu.memory, 0x0000, (0x6D, 0x00, 0xC0)) #=> $0000 ADC $C000
     mpu.memory[0xC000] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -35,7 +40,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_carry_clear_in_no_carry_clear_out(self):
     mpu = MPU()
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0x6D, 0x00, 0xC0) #=> $0000 ADC $C000
+    write(mpu.memory, 0x0000, (0x6D, 0x00, 0xC0)) #=> $0000 ADC $C000
     mpu.memory[0xC000] = 0xFE
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -47,7 +52,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_carry_clear_in_carry_set_out(self):
     mpu = MPU()
     mpu.a = 0x02
-    mpu.memory[0x0000:0x0002] = (0x6D, 0x00, 0xC0) #=> $0000 ADC $C000
+    write(mpu.memory, 0x0000, (0x6D, 0x00, 0xC0)) #=> $0000 ADC $C000
     mpu.memory[0xC000] = 0xFF
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)
@@ -59,7 +64,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_overflow(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x6D, 0x00, 0xC0) #=> $0000 ADC $C000
+    write(mpu.memory, 0x0000, (0x6D, 0x00, 0xC0)) #=> $0000 ADC $C000
     mpu.memory[0xC000] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -73,7 +78,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_zp_carry_clear_in_accumulator_zeroes(self):
     mpu = MPU()
     mpu.a = 0
-    mpu.memory[0x0000:0x0001] = (0x65, 0xB0) #=> $0000 ADC $00B0
+    write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
     mpu.memory[0x00B0] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -86,7 +91,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x65, 0xB0) #=> $0000 ADC $00B0
+    write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
     mpu.memory[0x00B0] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -98,7 +103,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_carry_clear_in_no_carry_clear_out(self):
     mpu = MPU()
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0x65, 0xB0) #=> $0000 ADC $00B0
+    write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
     mpu.memory[0x00B0] = 0xFE
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -110,7 +115,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_carry_clear_in_carry_set_out(self):
     mpu = MPU()
     mpu.a = 0x02
-    mpu.memory[0x0000:0x0001] = (0x65, 0xB0) #=> $0000 ADC $00B0
+    write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
     mpu.memory[0x00B0] = 0xFF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
@@ -122,7 +127,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_absolute_overflow(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x65, 0xB0) #=> $0000 ADC $00B0
+    write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
     mpu.memory[0x00B0] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -136,7 +141,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_immediate_carry_clear_in_accumulator_zeroes(self):
     mpu = MPU()
     mpu.a = 0
-    mpu.memory[0x0000:0x0001] = (0x69, 0x00) #=> $0000 ADC #$00
+    write(mpu.memory, 0x0000, (0x69, 0x00)) #=> $0000 ADC #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.a)
@@ -148,7 +153,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x69, 0x00) #=> $0000 ADC #$00
+    write(mpu.memory, 0x0000, (0x69, 0x00)) #=> $0000 ADC #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x01, mpu.a)
@@ -159,7 +164,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_immediate_carry_clear_in_no_carry_clear_out(self):
     mpu = MPU()
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0x69, 0xFE) #=> $0000 ADC #$FE
+    write(mpu.memory, 0x0000, (0x69, 0xFE)) #=> $0000 ADC #$FE
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xFF, mpu.a)
@@ -170,7 +175,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_immediate_carry_clear_in_carry_set_out(self):
     mpu = MPU()
     mpu.a = 0x02
-    mpu.memory[0x0000:0x0001] = (0x69, 0xFF) #=> $0000 ADC #$FF
+    write(mpu.memory, 0x0000, (0x69, 0xFF)) #=> $0000 ADC #$FF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x01, mpu.a)
@@ -181,7 +186,7 @@ def make_common_tests(MPU):
   def test_adc_bcd_off_immediate_overflow(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x69, 0xFF) #=> $0000 ADC #$FF
+    write(mpu.memory, 0x0000, (0x69, 0xFF)) #=> $0000 ADC #$FF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xFE, mpu.a)
@@ -195,7 +200,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x7D, 0x00, 0xC0) #=> $0000 ADC $C000,X
+    write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,X
     mpu.memory[0xC000 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -209,7 +214,7 @@ def make_common_tests(MPU):
     mpu.a = 0
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x7D, 0x00, 0xC0) #=> $0000 ADC $C000,X
+    write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,X
     mpu.memory[0xC000 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -222,7 +227,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x01
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x7D, 0x00, 0xC0) #=> $0000 ADC $C000,X
+    write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,X
     mpu.memory[0xC000 + mpu.x] = 0xFE
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -235,7 +240,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x02
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x7D, 0x00, 0xC0) #=> $0000 ADC $C000,X
+    write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,X
     mpu.memory[0xC000 + mpu.x] = 0xFF
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)
@@ -248,7 +253,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x7D, 0x00, 0xC0) #=> $0000 ADC $C000,X
+    write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,X
     mpu.memory[0xC000 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -263,7 +268,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x79, 0x00, 0xC0) #=> $0000 ADC $C000,Y
+    write(mpu.memory, 0x0000, (0x79, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
     mpu.memory[0xC000 + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -277,7 +282,7 @@ def make_common_tests(MPU):
     mpu.a = 0
     mpu.y = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x7D, 0x00, 0xC0) #=> $0000 ADC $C000,Y
+    write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
     mpu.memory[0xC000 + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -290,7 +295,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x01
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x79, 0x00, 0xC0) #=> $0000 ADC $C000,Y
+    write(mpu.memory, 0x0000, (0x79, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
     mpu.memory[0xC000 + mpu.y] = 0xFE
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -303,7 +308,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x02
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x79, 0x00, 0xC0) #=> $0000 ADC $C000,Y
+    write(mpu.memory, 0x0000, (0x79, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
     mpu.memory[0xC000 + mpu.y] = 0xFF
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)
@@ -316,7 +321,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x79, 0x00, 0xC0) #=> $0000 ADC $C000,Y
+    write(mpu.memory, 0x0000, (0x79, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
     mpu.memory[0xC000 + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -331,7 +336,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x75, 0x10) #=> $0000 ADC $0010,X
+    write(mpu.memory, 0x0000, (0x75, 0x10)) #=> $0000 ADC $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -345,7 +350,7 @@ def make_common_tests(MPU):
     mpu.a = 0
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x75, 0x10) #=> $0000 ADC $0010,X
+    write(mpu.memory, 0x0000, (0x75, 0x10)) #=> $0000 ADC $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -358,7 +363,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x01
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x75, 0x10) #=> $0000 ADC $0010,X
+    write(mpu.memory, 0x0000, (0x75, 0x10)) #=> $0000 ADC $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFE
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -371,7 +376,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x02
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x75, 0x10) #=> $0000 ADC $0010,X
+    write(mpu.memory, 0x0000, (0x75, 0x10)) #=> $0000 ADC $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
@@ -384,7 +389,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x75, 0x10) #=> $0000 ADC $0010,X
+    write(mpu.memory, 0x0000, (0x75, 0x10)) #=> $0000 ADC $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -399,8 +404,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x61, 0x10) #=> $0000 ADC ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -414,8 +419,8 @@ def make_common_tests(MPU):
     mpu.a = 0
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x61, 0x10) #=> $0000 ADC ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -428,8 +433,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x01
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x61, 0x10) #=> $0000 ADC ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0xFE
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -442,8 +447,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x02
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x61, 0x10) #=> $0000 ADC ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
@@ -456,8 +461,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x61, 0x10) #=> $0000 ADC ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -472,8 +477,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x71, 0x10) #=> $0000 ADC ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x71, 0x10)) #=> $0000 ADC ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -487,8 +492,8 @@ def make_common_tests(MPU):
     mpu.a = 0
     mpu.y = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x71, 0x10) #=> $0000 ADC ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x71, 0x10)) #=> $0000 ADC ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -501,8 +506,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x01
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x71, 0x10) #=> $0000 ADC ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x71, 0x10)) #=> $0000 ADC ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0xFE
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -515,8 +520,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x02
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x71, 0x10) #=> $0000 ADC ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x71, 0x10)) #=> $0000 ADC ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
@@ -529,8 +534,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x61, 0x10) #=> $0000 ADC ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -544,7 +549,7 @@ def make_common_tests(MPU):
   def test_and_absolute_all_zeros_setting_zero_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x2D, 0xCD, 0xAB) #=> AND $ABCD
+    write(mpu.memory, 0x0000, (0x2D, 0xCD, 0xAB)) #=> AND $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -555,7 +560,7 @@ def make_common_tests(MPU):
   def test_and_absolute_zeros_and_ones_setting_negative_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x2D, 0xCD, 0xAB) #=> AND $ABCD
+    write(mpu.memory, 0x0000, (0x2D, 0xCD, 0xAB)) #=> AND $ABCD
     mpu.memory[0xABCD] = 0xAA
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -568,7 +573,7 @@ def make_common_tests(MPU):
   def test_and_zp_all_zeros_setting_zero_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x25, 0x10) #=> AND $0010
+    write(mpu.memory, 0x0000, (0x25, 0x10)) #=> AND $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -579,7 +584,7 @@ def make_common_tests(MPU):
   def test_and_zp_zeros_and_ones_setting_negative_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x25, 0x10) #=> AND $0010
+    write(mpu.memory, 0x0000, (0x25, 0x10)) #=> AND $0010
     mpu.memory[0x0010] = 0xAA
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -592,7 +597,7 @@ def make_common_tests(MPU):
   def test_and_immediate_all_zeros_setting_zero_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x29, 0x00) #=> AND #$00
+    write(mpu.memory, 0x0000, (0x29, 0x00)) #=> AND #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.a)
@@ -602,7 +607,7 @@ def make_common_tests(MPU):
   def test_and_immediate_zeros_and_ones_setting_negative_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x29, 0xAA) #=> AND #$AA
+    write(mpu.memory, 0x0000, (0x29, 0xAA)) #=> AND #$AA
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xAA, mpu.a)
@@ -615,7 +620,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x3d, 0xCD, 0xAB) #=> AND $ABCD,X
+    write(mpu.memory, 0x0000, (0x3d, 0xCD, 0xAB)) #=> AND $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -627,7 +632,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x3d, 0xCD, 0xAB) #=> AND $ABCD,X
+    write(mpu.memory, 0x0000, (0x3d, 0xCD, 0xAB)) #=> AND $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0xAA
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -641,7 +646,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x39, 0xCD, 0xAB) #=> AND $ABCD,X
+    write(mpu.memory, 0x0000, (0x39, 0xCD, 0xAB)) #=> AND $ABCD,X
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -653,7 +658,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x39, 0xCD, 0xAB) #=> AND $ABCD,X
+    write(mpu.memory, 0x0000, (0x39, 0xCD, 0xAB)) #=> AND $ABCD,X
     mpu.memory[0xABCD + mpu.y] = 0xAA
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -667,8 +672,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x21, 0x10) #=> AND ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x21, 0x10)) #=> AND ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -680,8 +685,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x21, 0x10) #=> AND ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD    
+    write(mpu.memory, 0x0000, (0x21, 0x10)) #=> AND ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD    
     mpu.memory[0xABCD] = 0xAA
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -695,8 +700,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x31, 0x10) #=> AND ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x31, 0x10)) #=> AND ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -708,8 +713,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x31, 0x10) #=> AND ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x31, 0x10)) #=> AND ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0xAA
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -723,7 +728,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x35, 0x10) #=> AND $0010,X
+    write(mpu.memory, 0x0000, (0x35, 0x10)) #=> AND $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -735,7 +740,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x35, 0x10) #=> AND $0010,X
+    write(mpu.memory, 0x0000, (0x35, 0x10)) #=> AND $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xAA
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -787,7 +792,7 @@ def make_common_tests(MPU):
 
   def test_asl_absolute_sets_z_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0x0E, 0xCD, 0xAB) #=> ASL $ABCD
+    write(mpu.memory, 0x0000, (0x0E, 0xCD, 0xAB)) #=> ASL $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -797,7 +802,7 @@ def make_common_tests(MPU):
 
   def test_asl_absolute_sets_n_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0x0E, 0xCD, 0xAB) #=> ASL $ABCD
+    write(mpu.memory, 0x0000, (0x0E, 0xCD, 0xAB)) #=> ASL $ABCD
     mpu.memory[0xABCD] = 0x40
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -808,7 +813,7 @@ def make_common_tests(MPU):
   def test_asl_absolute_shifts_out_zero(self):
     mpu = MPU()
     mpu.a = 0xAA
-    mpu.memory[0x0000:0x0002] = (0x0E, 0xCD, 0xAB) #=> ASL $ABCD
+    write(mpu.memory, 0x0000, (0x0E, 0xCD, 0xAB)) #=> ASL $ABCD
     mpu.memory[0xABCD] = 0x7F
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -819,7 +824,7 @@ def make_common_tests(MPU):
   def test_asl_absolute_shifts_out_one(self):
     mpu = MPU()
     mpu.a = 0xAA
-    mpu.memory[0x0000:0x0002] = (0x0E, 0xCD, 0xAB) #=> ASL $ABCD
+    write(mpu.memory, 0x0000, (0x0E, 0xCD, 0xAB)) #=> ASL $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -831,7 +836,7 @@ def make_common_tests(MPU):
   
   def test_asl_zp_sets_z_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0x06, 0x10) #=> ASL $0010
+    write(mpu.memory, 0x0000, (0x06, 0x10)) #=> ASL $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -841,7 +846,7 @@ def make_common_tests(MPU):
 
   def test_asl_zp_sets_n_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0x06, 0x10) #=> ASL $0010
+    write(mpu.memory, 0x0000, (0x06, 0x10)) #=> ASL $0010
     mpu.memory[0x0010] = 0x40
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -852,7 +857,7 @@ def make_common_tests(MPU):
   def test_asl_zp_shifts_out_zero(self):
     mpu = MPU()
     mpu.a = 0xAA
-    mpu.memory[0x0000:0x0001] = (0x06, 0x10) #=> ASL $0010
+    write(mpu.memory, 0x0000, (0x06, 0x10)) #=> ASL $0010
     mpu.memory[0x0010] = 0x7F
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -863,7 +868,7 @@ def make_common_tests(MPU):
   def test_asl_zp_shifts_out_one(self):
     mpu = MPU()
     mpu.a = 0xAA
-    mpu.memory[0x0000:0x0001] = (0x06, 0x10) #=> ASL $0010
+    write(mpu.memory, 0x0000, (0x06, 0x10)) #=> ASL $0010
     mpu.memory[0x0010] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -876,7 +881,7 @@ def make_common_tests(MPU):
   def test_asl_absolute_x_indexed_sets_z_flag(self):
     mpu = MPU()
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x1E, 0xCD, 0xAB) #=> ASL $ABCD,X
+    write(mpu.memory, 0x0000, (0x1E, 0xCD, 0xAB)) #=> ASL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -887,7 +892,7 @@ def make_common_tests(MPU):
   def test_asl_absolute_x_indexed_sets_n_flag(self):
     mpu = MPU()
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x1E, 0xCD, 0xAB) #=> ASL $ABCD,X
+    write(mpu.memory, 0x0000, (0x1E, 0xCD, 0xAB)) #=> ASL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x40
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -899,7 +904,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xAA
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x1E, 0xCD, 0xAB) #=> ASL $ABCD,X
+    write(mpu.memory, 0x0000, (0x1E, 0xCD, 0xAB)) #=> ASL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x7F
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -911,7 +916,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xAA
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x1E, 0xCD, 0xAB) #=> ASL $ABCD,X
+    write(mpu.memory, 0x0000, (0x1E, 0xCD, 0xAB)) #=> ASL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -924,7 +929,7 @@ def make_common_tests(MPU):
   def test_asl_zp_x_indexed_sets_z_flag(self):
     mpu = MPU()
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x16, 0x10) #=> ASL $0010,X
+    write(mpu.memory, 0x0000, (0x16, 0x10)) #=> ASL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -935,7 +940,7 @@ def make_common_tests(MPU):
   def test_asl_zp_x_indexed_sets_n_flag(self):
     mpu = MPU()
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x16, 0x10) #=> ASL $0010,X
+    write(mpu.memory, 0x0000, (0x16, 0x10)) #=> ASL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x40
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -947,7 +952,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.a = 0xAA
-    mpu.memory[0x0000:0x0001] = (0x16, 0x10) #=> ASL $0010,X
+    write(mpu.memory, 0x0000, (0x16, 0x10)) #=> ASL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x7F
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -959,7 +964,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.a = 0xAA
-    mpu.memory[0x0000:0x0001] = (0x16, 0x10) #=> ASL $0010,X
+    write(mpu.memory, 0x0000, (0x16, 0x10)) #=> ASL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -972,7 +977,7 @@ def make_common_tests(MPU):
   def test_bcc_carry_clear_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0x90, 0x06) #=> BCC +6
+    write(mpu.memory, 0x0000, (0x90, 0x06)) #=> BCC +6
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
 
@@ -981,14 +986,14 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.CARRY)
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0x90, rel) #=> BCC -6
+    write(mpu.memory, 0x0050, (0x90, rel)) #=> BCC -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
   
   def test_bcc_carry_set_does_not_branch(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x90, 0x06) #=> BCC +6
+    write(mpu.memory, 0x0000, (0x90, 0x06)) #=> BCC +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
 
@@ -997,7 +1002,7 @@ def make_common_tests(MPU):
   def test_bcs_carry_set_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0xB0, 0x06) #=> BCS +6
+    write(mpu.memory, 0x0000, (0xB0, 0x06)) #=> BCS +6
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
 
@@ -1006,14 +1011,14 @@ def make_common_tests(MPU):
     mpu.flags |= mpu.CARRY
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0xB0, rel) #=> BCS -6
+    write(mpu.memory, 0x0050, (0xB0, rel)) #=> BCS -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
   
   def test_bcs_carry_clear_does_not_branch(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0xB0, 0x06) #=> BCS +6
+    write(mpu.memory, 0x0000, (0xB0, 0x06)) #=> BCS +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
   
@@ -1022,7 +1027,7 @@ def make_common_tests(MPU):
   def test_beq_zero_set_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags |= mpu.ZERO
-    mpu.memory[0x0000:0x0001] = (0xF0, 0x06) #=> BEQ +6
+    write(mpu.memory, 0x0000, (0xF0, 0x06)) #=> BEQ +6
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
     
@@ -1031,14 +1036,14 @@ def make_common_tests(MPU):
     mpu.flags |= mpu.ZERO
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0xF0, rel) #=> BEQ -6
+    write(mpu.memory, 0x0050, (0xF0, rel)) #=> BEQ -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
   
   def test_beq_zero_clear_does_not_branch(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.ZERO)
-    mpu.memory[0x0000:0x0001] = (0xF0, 0x06) #=> BEQ +6
+    write(mpu.memory, 0x0000, (0xF0, 0x06)) #=> BEQ +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
 
@@ -1047,7 +1052,7 @@ def make_common_tests(MPU):
   def test_bit_abs_copies_bit_7_of_memory_to_n_flag_when_0(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0xFF
     mpu.a = 0xFF
     mpu.step()
@@ -1056,7 +1061,7 @@ def make_common_tests(MPU):
   def test_bit_abs_copies_bit_7_of_memory_to_n_flag_when_1(self):
     mpu = MPU()
     mpu.flags &= mpu.NEGATIVE
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0xFF
     mpu.step()
@@ -1065,7 +1070,7 @@ def make_common_tests(MPU):
   def test_bit_abs_copies_bit_6_of_memory_to_v_flag_when_0(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.OVERFLOW)
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0xFF
     mpu.a = 0xFF
     mpu.step()
@@ -1074,7 +1079,7 @@ def make_common_tests(MPU):
   def test_bit_abs_copies_bit_6_of_memory_to_v_flag_when_1(self):
     mpu = MPU()
     mpu.flags &= mpu.OVERFLOW
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0xFF
     mpu.step()
@@ -1083,7 +1088,7 @@ def make_common_tests(MPU):
   def test_bit_abs_stores_result_of_and_in_z_while_preserving_a_when_1(self):
     mpu = MPU()   
     mpu.flags &= mpu.ZERO
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0x01
     mpu.step()
@@ -1094,7 +1099,7 @@ def make_common_tests(MPU):
   def test_bit_abs_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
     mpu = MPU()   
     mpu.flags &= mpu.ZERO
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x01
     mpu.a = 0x01
     mpu.step()
@@ -1105,7 +1110,7 @@ def make_common_tests(MPU):
   def test_bit_abs_stores_result_of_and_when_zero_in_z_while_preserving_a(self):
     mpu = MPU()   
     mpu.flags &= ~(mpu.ZERO)
-    mpu.memory[0x0000:0x0002] = (0x2C, 0xED, 0xFE) #=> BIT $FEED
+    write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0x01
     mpu.step()
@@ -1118,7 +1123,7 @@ def make_common_tests(MPU):
   def test_bit_zp_copies_bit_7_of_memory_to_n_flag_when_0(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0xFF
     mpu.a = 0xFF
     mpu.step()
@@ -1127,7 +1132,7 @@ def make_common_tests(MPU):
   def test_bit_zp_copies_bit_7_of_memory_to_n_flag_when_1(self):
     mpu = MPU()
     mpu.flags &= mpu.NEGATIVE
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0xFF
     mpu.step()
@@ -1136,7 +1141,7 @@ def make_common_tests(MPU):
   def test_bit_zp_copies_bit_6_of_memory_to_v_flag_when_0(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.OVERFLOW)
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0xFF
     mpu.a = 0xFF
     mpu.step()
@@ -1145,7 +1150,7 @@ def make_common_tests(MPU):
   def test_bit_zp_copies_bit_6_of_memory_to_v_flag_when_1(self):
     mpu = MPU()
     mpu.flags &= mpu.OVERFLOW
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0xFF
     mpu.step()
@@ -1154,7 +1159,7 @@ def make_common_tests(MPU):
   def test_bit_zp_stores_result_of_and_in_z_while_preserving_a_when_1(self):
     mpu = MPU()   
     mpu.flags &= mpu.ZERO
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0x01
     mpu.step()
@@ -1165,7 +1170,7 @@ def make_common_tests(MPU):
   def test_bit_zp_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
     mpu = MPU()   
     mpu.flags &= mpu.ZERO
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x01
     mpu.a = 0x01
     mpu.step()
@@ -1176,7 +1181,7 @@ def make_common_tests(MPU):
   def test_bit_zp_stores_result_of_and_when_zero_in_z_while_preserving_a(self):
     mpu = MPU()   
     mpu.flags &= ~(mpu.ZERO)
-    mpu.memory[0x0000:0x0002] = (0x24, 0x10) #=> BIT $0010
+    write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0x01
     mpu.step()
@@ -1189,7 +1194,7 @@ def make_common_tests(MPU):
   def test_bmi_negative_set_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags |= mpu.NEGATIVE
-    mpu.memory[0x0000:0x0001] = (0x30, 0x06) #=> BMI +06
+    write(mpu.memory, 0x0000, (0x30, 0x06)) #=> BMI +06
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
 
@@ -1198,14 +1203,14 @@ def make_common_tests(MPU):
     mpu.flags |= mpu.NEGATIVE
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0x30, rel) #=> BMI -6
+    write(mpu.memory, 0x0050, (0x30, rel)) #=> BMI -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
         
   def test_bmi_negative_clear_does_not_branch(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
-    mpu.memory[0x0000:0x0001] = (0x30, 0x06) #=> BEQ +6
+    write(mpu.memory, 0x0000, (0x30, 0x06)) #=> BEQ +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     
@@ -1214,7 +1219,7 @@ def make_common_tests(MPU):
   def test_bne_zero_clear_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.ZERO)
-    mpu.memory[0x0000:0x0001] = (0xD0, 0x06) #=> BNE +6
+    write(mpu.memory, 0x0000, (0xD0, 0x06)) #=> BNE +6
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
     
@@ -1223,14 +1228,14 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.ZERO)
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0xD0, rel) #=> BNE -6
+    write(mpu.memory, 0x0050, (0xD0, rel)) #=> BNE -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
 
   def test_bne_zero_set_does_not_branch(self):
     mpu = MPU()
     mpu.flags |= mpu.ZERO
-    mpu.memory[0x0000:0x0001] = (0xD0, 0x06) #=> BNE +6
+    write(mpu.memory, 0x0000, (0xD0, 0x06)) #=> BNE +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
   
@@ -1239,7 +1244,7 @@ def make_common_tests(MPU):
   def test_bpl_negative_clear_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
-    mpu.memory[0x0000:0x0001] = (0x10, 0x06) #=> BPL +06
+    write(mpu.memory, 0x0000, (0x10, 0x06)) #=> BPL +06
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
 
@@ -1248,14 +1253,14 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0x10, rel) #=> BPL -6
+    write(mpu.memory, 0x0050, (0x10, rel)) #=> BPL -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
         
   def test_bpl_negative_set_does_not_branch(self):
     mpu = MPU()
     mpu.flags |= mpu.NEGATIVE
-    mpu.memory[0x0000:0x0001] = (0x10, 0x06) #=> BPL +6
+    write(mpu.memory, 0x0000, (0x10, 0x06)) #=> BPL +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
   
@@ -1264,7 +1269,7 @@ def make_common_tests(MPU):
   def test_brk_pushes_pc_plus_2_and_status_then_sets_pc_to_irq_vector(self):
     mpu = MPU()
     mpu.flags = 0x00
-    mpu.memory[0xFFFE:0xFFFF] = (0xCD, 0xAB)
+    write(mpu.memory, 0xFFFE, (0xCD, 0xAB))
     mpu.memory[0xC000]        = 0x00 #=> BRK
     mpu.pc = 0xC000
     mpu.step()
@@ -1282,7 +1287,7 @@ def make_common_tests(MPU):
   def test_bvc_overflow_clear_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.OVERFLOW)
-    mpu.memory[0x0000:0x0001] = (0x50, 0x06) #=> BVC +6
+    write(mpu.memory, 0x0000, (0x50, 0x06)) #=> BVC +6
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
 
@@ -1291,14 +1296,14 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.OVERFLOW)
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0x50, rel) #=> BVC -6
+    write(mpu.memory, 0x0050, (0x50, rel)) #=> BVC -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
   
   def test_bvc_overflow_set_does_not_branch(self):
     mpu = MPU()
     mpu.flags |= mpu.OVERFLOW
-    mpu.memory[0x0000:0x0001] = (0x50, 0x06) #=> BVC +6
+    write(mpu.memory, 0x0000, (0x50, 0x06)) #=> BVC +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
 
@@ -1307,7 +1312,7 @@ def make_common_tests(MPU):
   def test_bvs_overflow_set_branches_relative_forward(self):
     mpu = MPU()
     mpu.flags |= mpu.OVERFLOW
-    mpu.memory[0x0000:0x0001] = (0x70, 0x06) #=> BVS +6
+    write(mpu.memory, 0x0000, (0x70, 0x06)) #=> BVS +6
     mpu.step()
     self.assertEquals(0x0002 + 0x06, mpu.pc)
 
@@ -1316,14 +1321,14 @@ def make_common_tests(MPU):
     mpu.flags |= mpu.OVERFLOW
     mpu.pc = 0x0050
     rel = (0x06^0xFF + 1) # two's complement of 6
-    mpu.memory[0x0050:0x0051] = (0x70, rel) #=> BVS -6
+    write(mpu.memory, 0x0050, (0x70, rel)) #=> BVS -6
     mpu.step()
     self.assertEquals(0x0052 + rel, mpu.pc)
   
   def test_bvs_overflow_clear_does_not_branch(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.OVERFLOW)
-    mpu.memory[0x0000:0x0001] = (0x70, 0x06) #=> BVS +6
+    write(mpu.memory, 0x0000, (0x70, 0x06)) #=> BVS +6
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
 
@@ -1371,7 +1376,7 @@ def make_common_tests(MPU):
   
   def test_dec_abs_decrements_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xCE, 0xCD, 0xAB) #=> DEC 0xABCD
+    write(mpu.memory, 0x0000, (0xCE, 0xCD, 0xAB)) #=> DEC 0xABCD
     mpu.memory[0xABCD] = 0x10
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1381,7 +1386,7 @@ def make_common_tests(MPU):
 
   def test_dec_abs_below_00_rolls_over_and_sets_negative_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xCE, 0xCD, 0xAB) #=> DEC 0xABCD
+    write(mpu.memory, 0x0000, (0xCE, 0xCD, 0xAB)) #=> DEC 0xABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1391,7 +1396,7 @@ def make_common_tests(MPU):
 
   def test_dec_abs_sets_zero_flag_when_decrementing_to_zero(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xCE, 0xCD, 0xAB) #=> DEC 0xABCD
+    write(mpu.memory, 0x0000, (0xCE, 0xCD, 0xAB)) #=> DEC 0xABCD
     mpu.memory[0xABCD] = 0x01
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1403,7 +1408,7 @@ def make_common_tests(MPU):
 
   def test_dec_zp_decrements_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xC6, 0x10) #=> DEC 0x0010
+    write(mpu.memory, 0x0000, (0xC6, 0x10)) #=> DEC 0x0010
     mpu.memory[0x0010] = 0x10
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1413,7 +1418,7 @@ def make_common_tests(MPU):
 
   def test_dec_zp_below_00_rolls_over_and_sets_negative_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xC6, 0x10) #=> DEC 0x0010
+    write(mpu.memory, 0x0000, (0xC6, 0x10)) #=> DEC 0x0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1423,7 +1428,7 @@ def make_common_tests(MPU):
 
   def test_dec_zp_sets_zero_flag_when_decrementing_to_zero(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xC6, 0x10) #=> DEC 0x0010
+    write(mpu.memory, 0x0000, (0xC6, 0x10)) #=> DEC 0x0010
     mpu.memory[0x0010] = 0x01
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1435,7 +1440,7 @@ def make_common_tests(MPU):
   
   def test_dec_abs_x_decrements_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xDE, 0xCD, 0xAB) #=> DEC 0xABCD,X
+    write(mpu.memory, 0x0000, (0xDE, 0xCD, 0xAB)) #=> DEC 0xABCD,X
     mpu.x = 0x03
     mpu.memory[0xABCD + mpu.x] = 0x10
     mpu.step()
@@ -1446,7 +1451,7 @@ def make_common_tests(MPU):
 
   def test_dec_abs_x_below_00_rolls_over_and_sets_negative_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xDE, 0xCD, 0xAB) #=> DEC 0xABCD,X
+    write(mpu.memory, 0x0000, (0xDE, 0xCD, 0xAB)) #=> DEC 0xABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1456,7 +1461,7 @@ def make_common_tests(MPU):
 
   def test_dec_abs_x_sets_zero_flag_when_decrementing_to_zero(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xDE, 0xCD, 0xAB) #=> DEC 0xABCD,X
+    write(mpu.memory, 0x0000, (0xDE, 0xCD, 0xAB)) #=> DEC 0xABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x01
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1468,7 +1473,7 @@ def make_common_tests(MPU):
 
   def test_dec_zp_x_decrements_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xD6, 0x10) #=> DEC 0x0010,X
+    write(mpu.memory, 0x0000, (0xD6, 0x10)) #=> DEC 0x0010,X
     mpu.x = 0x03
     mpu.memory[0x0010 + mpu.x] = 0x10
     mpu.step()
@@ -1479,7 +1484,7 @@ def make_common_tests(MPU):
 
   def test_dec_zp_x_below_00_rolls_over_and_sets_negative_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xD6, 0x10) #=> DEC 0x0010,X
+    write(mpu.memory, 0x0000, (0xD6, 0x10)) #=> DEC 0x0010,X
     mpu.x = 0x03
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
@@ -1490,7 +1495,7 @@ def make_common_tests(MPU):
 
   def test_dec_zp_x_sets_zero_flag_when_decrementing_to_zero(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xD6, 0x10) #=> DEC 0x0010,X
+    write(mpu.memory, 0x0000, (0xD6, 0x10)) #=> DEC 0x0010,X
     mpu.x = 0x03
     mpu.memory[0x0010 + mpu.x] = 0x01
     mpu.step()
@@ -1566,7 +1571,7 @@ def make_common_tests(MPU):
   def test_eor_absolute_flips_bits_over_setting_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x4D, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x4D, 0xCD, 0xAB))
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1577,7 +1582,7 @@ def make_common_tests(MPU):
   def test_eor_absolute_flips_bits_over_setting_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0x4D, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x4D, 0xCD, 0xAB))
     mpu.memory[0xABCD] = 0xFF
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)
@@ -1591,7 +1596,7 @@ def make_common_tests(MPU):
   def test_eor_zp_flips_bits_over_setting_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x45, 0x10)
+    write(mpu.memory, 0x0000, (0x45, 0x10))
     mpu.memory[0x0010] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1602,7 +1607,7 @@ def make_common_tests(MPU):
   def test_eor_zp_flips_bits_over_setting_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0x45, 0x10)
+    write(mpu.memory, 0x0000, (0x45, 0x10))
     mpu.memory[0x0010] = 0xFF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
@@ -1616,7 +1621,7 @@ def make_common_tests(MPU):
   def test_eor_immediate_flips_bits_over_setting_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x49, 0xFF)
+    write(mpu.memory, 0x0000, (0x49, 0xFF))
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.a)
@@ -1625,7 +1630,7 @@ def make_common_tests(MPU):
   def test_eor_immediate_flips_bits_over_setting_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0x49, 0xFF)
+    write(mpu.memory, 0x0000, (0x49, 0xFF))
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xFF, mpu.a)
@@ -1638,7 +1643,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x5D, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x5D, 0xCD, 0xAB))
     mpu.memory[0xABCD + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1650,7 +1655,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x5D, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x5D, 0xCD, 0xAB))
     mpu.memory[0xABCD + mpu.x] = 0xFF
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)
@@ -1665,7 +1670,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x59, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x59, 0xCD, 0xAB))
     mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1677,7 +1682,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x59, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x59, 0xCD, 0xAB))
     mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)
@@ -1692,8 +1697,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x41, 0x10) #=> EOR ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x41, 0x10)) #=> EOR ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1705,8 +1710,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x41, 0x10) #=> EOR ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x41, 0x10)) #=> EOR ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1721,8 +1726,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x51, 0x10) #=> EOR ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x51, 0x10)) #=> EOR ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1734,8 +1739,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x51, 0x10) #=> EOR ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x51, 0x10)) #=> EOR ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1750,7 +1755,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x55, 0x10)
+    write(mpu.memory, 0x0000, (0x55, 0x10))
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1762,7 +1767,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x55, 0x10)
+    write(mpu.memory, 0x0000, (0x55, 0x10))
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)
@@ -1775,7 +1780,7 @@ def make_common_tests(MPU):
 
   def test_inc_abs_increments_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xEE, 0xCD, 0xAB)    
+    write(mpu.memory, 0x0000, (0xEE, 0xCD, 0xAB))    
     mpu.memory[0xABCD] = 0x09
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1785,7 +1790,7 @@ def make_common_tests(MPU):
   
   def test_inc_abs_increments_memory_rolls_over_and_sets_zero_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xEE, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0xEE, 0xCD, 0xAB))
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1795,7 +1800,7 @@ def make_common_tests(MPU):
   
   def test_inc_abs_sets_negative_flag_when_incrementing_above_7F(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xEE, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0xEE, 0xCD, 0xAB))
     mpu.memory[0xABCD] = 0x7F
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -1807,7 +1812,7 @@ def make_common_tests(MPU):
   
   def test_inc_zp_increments_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xE6, 0x10)    
+    write(mpu.memory, 0x0000, (0xE6, 0x10))    
     mpu.memory[0x0010] = 0x09
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1817,7 +1822,7 @@ def make_common_tests(MPU):
 
   def test_inc_zp_increments_memory_rolls_over_and_sets_zero_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xE6, 0x10)
+    write(mpu.memory, 0x0000, (0xE6, 0x10))
     mpu.memory[0x0010] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1827,7 +1832,7 @@ def make_common_tests(MPU):
 
   def test_inc_zp_sets_negative_flag_when_incrementing_above_7F(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xE6, 0x10)
+    write(mpu.memory, 0x0000, (0xE6, 0x10))
     mpu.memory[0x0010] = 0x7F
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1839,7 +1844,7 @@ def make_common_tests(MPU):
   
   def test_inc_abs_x_increments_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xFE, 0xCD, 0xAB)    
+    write(mpu.memory, 0x0000, (0xFE, 0xCD, 0xAB))    
     mpu.x = 0x03
     mpu.memory[0xABCD + mpu.x] = 0x09
     mpu.step()
@@ -1850,7 +1855,7 @@ def make_common_tests(MPU):
   
   def test_inc_abs_x_increments_memory_rolls_over_and_sets_zero_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xFE, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0xFE, 0xCD, 0xAB))
     mpu.x = 0x03
     mpu.memory[0xABCD + mpu.x] = 0xFF
     mpu.step()
@@ -1861,7 +1866,7 @@ def make_common_tests(MPU):
   
   def test_inc_abs_x_sets_negative_flag_when_incrementing_above_7F(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0xFE, 0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0xFE, 0xCD, 0xAB))
     mpu.x = 0x03
     mpu.memory[0xABCD + mpu.x] = 0x7F
     mpu.step()
@@ -1874,7 +1879,7 @@ def make_common_tests(MPU):
   
   def test_inc_zp_x_increments_memory(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xF6, 0x10)    
+    write(mpu.memory, 0x0000, (0xF6, 0x10))    
     mpu.x = 0x03
     mpu.memory[0x0010 + mpu.x] = 0x09
     mpu.step()
@@ -1885,7 +1890,7 @@ def make_common_tests(MPU):
 
   def test_inc_zp_x_increments_memory_rolls_over_and_sets_zero_flag(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xF6, 0x10)
+    write(mpu.memory, 0x0000, (0xF6, 0x10))
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1895,7 +1900,7 @@ def make_common_tests(MPU):
 
   def test_inc_zp_x_sets_negative_flag_when_incrementing_above_7F(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0001] = (0xF6, 0x10)
+    write(mpu.memory, 0x0000, (0xF6, 0x10))
     mpu.memory[0x0010 + mpu.x] = 0x7F
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -1967,14 +1972,14 @@ def make_common_tests(MPU):
   
   def test_jmp_jumps_to_absolute_address(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0x4C, 0xCD, 0xAB) #=> JMP $ABCD
+    write(mpu.memory, 0x0000, (0x4C, 0xCD, 0xAB)) #=> JMP $ABCD
     mpu.step()
     self.assertEquals(0xABCD, mpu.pc)
   
   def test_jmp_jumps_to_indirect_address(self):
     mpu = MPU()
-    mpu.memory[0x0000:0x0002] = (0x6C, 0x00, 0x02) #=> JMP ($ABCD)
-    mpu.memory[0x0200:0x0201] = (0xCD, 0xAB)
+    write(mpu.memory, 0x0000, (0x6C, 0x00, 0x02)) #=> JMP ($ABCD)
+    write(mpu.memory, 0x0200, (0xCD, 0xAB))
     mpu.step()
     self.assertEquals(0xABCD, mpu.pc)
 
@@ -1982,7 +1987,7 @@ def make_common_tests(MPU):
   
   def test_jsr_pushes_pc_plus_2_and_sets_pc(self):
     mpu = MPU()
-    mpu.memory[0xC000:0xC002] = (0x20, 0xD2, 0xFF) #=> JSR $FFD2
+    write(mpu.memory, 0xC000, (0x20, 0xD2, 0xFF)) #=> JSR $FFD2
     mpu.pc = 0xC000
     mpu.step()
     self.assertEquals(0xFFD2, mpu.pc)
@@ -1995,7 +2000,7 @@ def make_common_tests(MPU):
   def test_lda_absolute_loads_a_sets_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xAD, 0xCD, 0xAB) #=> LDA $ABCD
+    write(mpu.memory, 0x0000, (0xAD, 0xCD, 0xAB)) #=> LDA $ABCD
     mpu.memory[0xABCD] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2006,7 +2011,7 @@ def make_common_tests(MPU):
   def test_lda_absolute_loads_a_sets_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xAD, 0xCD, 0xAB) #=> LDA $ABCD
+    write(mpu.memory, 0x0000, (0xAD, 0xCD, 0xAB)) #=> LDA $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2019,7 +2024,7 @@ def make_common_tests(MPU):
   def test_lda_absolute_loads_a_sets_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xAD, 0xCD, 0xAB) #=> LDA $ABCD
+    write(mpu.memory, 0x0000, (0xAD, 0xCD, 0xAB)) #=> LDA $ABCD
     mpu.memory[0xABCD] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2030,7 +2035,7 @@ def make_common_tests(MPU):
   def test_lda_absolute_loads_a_sets_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xAD, 0xCD, 0xAB) #=> LDA $ABCD
+    write(mpu.memory, 0x0000, (0xAD, 0xCD, 0xAB)) #=> LDA $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2043,7 +2048,7 @@ def make_common_tests(MPU):
   def test_lda_zp_loads_a_sets_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xA5, 0x10) #=> LDA $0010
+    write(mpu.memory, 0x0000, (0xA5, 0x10)) #=> LDA $0010
     mpu.memory[0x0010] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2054,7 +2059,7 @@ def make_common_tests(MPU):
   def test_lda_zp_loads_a_sets_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xA5, 0x10) #=> LDA $0010
+    write(mpu.memory, 0x0000, (0xA5, 0x10)) #=> LDA $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2067,7 +2072,7 @@ def make_common_tests(MPU):
   def test_lda_immediate_loads_a_sets_n_flag(self):
     mpu = MPU()
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xA9, 0x80) #=> LDA #$80
+    write(mpu.memory, 0x0000, (0xA9, 0x80)) #=> LDA #$80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x80, mpu.a)
@@ -2077,7 +2082,7 @@ def make_common_tests(MPU):
   def test_ldx_immediate_loads_x_sets_z_flag(self):
     mpu = MPU()
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xA2, 0x00) #=> LDA #$00
+    write(mpu.memory, 0x0000, (0xA2, 0x00)) #=> LDA #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.a)
@@ -2090,7 +2095,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xBD, 0xCD, 0xAB) #=> LDA $ABCD,X
+    write(mpu.memory, 0x0000, (0xBD, 0xCD, 0xAB)) #=> LDA $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2102,7 +2107,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xBD, 0xCD, 0xAB) #=> LDA $ABCD,X
+    write(mpu.memory, 0x0000, (0xBD, 0xCD, 0xAB)) #=> LDA $ABCD,X
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2116,7 +2121,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB9, 0xCD, 0xAB) #=> LDA $ABCD,Y
+    write(mpu.memory, 0x0000, (0xB9, 0xCD, 0xAB)) #=> LDA $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2128,7 +2133,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB9, 0xCD, 0xAB) #=> LDA $ABCD,Y
+    write(mpu.memory, 0x0000, (0xB9, 0xCD, 0xAB)) #=> LDA $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2142,8 +2147,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xA1, 0x10) #=> LDA ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0xA1, 0x10)) #=> LDA ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2155,8 +2160,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xA1, 0x10) #=> LDA ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0xA1, 0x10)) #=> LDA ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2170,8 +2175,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB1, 0x10) #=> LDA ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0xB1, 0x10)) #=> LDA ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2183,8 +2188,8 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB1, 0x10) #=> LDA ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0xB1, 0x10)) #=> LDA ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2198,7 +2203,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0xB5, 0x10) #=> LDA $0010,X
+    write(mpu.memory, 0x0000, (0xB5, 0x10)) #=> LDA $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2210,7 +2215,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB5, 0x10) #=> LDA $0010,X
+    write(mpu.memory, 0x0000, (0xB5, 0x10)) #=> LDA $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2223,7 +2228,7 @@ def make_common_tests(MPU):
   def test_ldx_absolute_loads_x_sets_n_flag(self):
     mpu = MPU()
     mpu.x = 0x00
-    mpu.memory[0x0000:0x0002] = (0xAE, 0xCD, 0xAB) #=> LDX $ABCD
+    write(mpu.memory, 0x0000, (0xAE, 0xCD, 0xAB)) #=> LDX $ABCD
     mpu.memory[0xABCD] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2234,7 +2239,7 @@ def make_common_tests(MPU):
   def test_ldx_absolute_loads_x_sets_z_flag(self):
     mpu = MPU()
     mpu.x = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xAE, 0xCD, 0xAB) #=> LDX $ABCD
+    write(mpu.memory, 0x0000, (0xAE, 0xCD, 0xAB)) #=> LDX $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2247,7 +2252,7 @@ def make_common_tests(MPU):
   def test_ldx_zp_loads_x_sets_n_flag(self):
     mpu = MPU()
     mpu.x = 0x00
-    mpu.memory[0x0000:0x0002] = (0xA6, 0x10) #=> LDX $0010
+    write(mpu.memory, 0x0000, (0xA6, 0x10)) #=> LDX $0010
     mpu.memory[0x0010] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2258,7 +2263,7 @@ def make_common_tests(MPU):
   def test_ldx_zp_loads_x_sets_z_flag(self):
     mpu = MPU()
     mpu.x = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xA6, 0x10) #=> LDX $0010
+    write(mpu.memory, 0x0000, (0xA6, 0x10)) #=> LDX $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2271,7 +2276,7 @@ def make_common_tests(MPU):
   def test_ldx_immediate_loads_x_sets_n_flag(self):
     mpu = MPU()
     mpu.x = 0x00
-    mpu.memory[0x0000:0x0002] = (0xA2, 0x80) #=> LDX #$80
+    write(mpu.memory, 0x0000, (0xA2, 0x80)) #=> LDX #$80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x80, mpu.x)
@@ -2281,7 +2286,7 @@ def make_common_tests(MPU):
   def test_ldx_immediate_loads_x_sets_z_flag(self):
     mpu = MPU()
     mpu.x = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xA2, 0x00) #=> LDX #$00
+    write(mpu.memory, 0x0000, (0xA2, 0x00)) #=> LDX #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.x)
@@ -2294,7 +2299,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xBE, 0xCD, 0xAB) #=> LDX $ABCD,Y
+    write(mpu.memory, 0x0000, (0xBE, 0xCD, 0xAB)) #=> LDX $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2306,7 +2311,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xBE, 0xCD, 0xAB) #=> LDX $ABCD,Y
+    write(mpu.memory, 0x0000, (0xBE, 0xCD, 0xAB)) #=> LDX $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2320,7 +2325,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0xB6, 0x10) #=> LDX $0010,Y
+    write(mpu.memory, 0x0000, (0xB6, 0x10)) #=> LDX $0010,Y
     mpu.memory[0x0010 + mpu.y] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2332,7 +2337,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB6, 0x10) #=> LDX $0010,Y
+    write(mpu.memory, 0x0000, (0xB6, 0x10)) #=> LDX $0010,Y
     mpu.memory[0x0010 + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2345,7 +2350,7 @@ def make_common_tests(MPU):
   def test_ldy_absolute_loads_y_sets_n_flag(self):
     mpu = MPU()
     mpu.y = 0x00
-    mpu.memory[0x0000:0x0002] = (0xAC, 0xCD, 0xAB) #=> LDY $ABCD
+    write(mpu.memory, 0x0000, (0xAC, 0xCD, 0xAB)) #=> LDY $ABCD
     mpu.memory[0xABCD] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2356,7 +2361,7 @@ def make_common_tests(MPU):
   def test_ldy_absolute_loads_y_sets_z_flag(self):
     mpu = MPU()
     mpu.y = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xAC, 0xCD, 0xAB) #=> LDY $ABCD
+    write(mpu.memory, 0x0000, (0xAC, 0xCD, 0xAB)) #=> LDY $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2369,7 +2374,7 @@ def make_common_tests(MPU):
   def test_ldy_zp_loads_y_sets_n_flag(self):
     mpu = MPU()
     mpu.y = 0x00
-    mpu.memory[0x0000:0x0002] = (0xA4, 0x10) #=> LDY $0010
+    write(mpu.memory, 0x0000, (0xA4, 0x10)) #=> LDY $0010
     mpu.memory[0x0010] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2380,7 +2385,7 @@ def make_common_tests(MPU):
   def test_ldy_zp_loads_y_sets_z_flag(self):
     mpu = MPU()
     mpu.y = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xA4, 0x10) #=> LDY $0010
+    write(mpu.memory, 0x0000, (0xA4, 0x10)) #=> LDY $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2393,7 +2398,7 @@ def make_common_tests(MPU):
   def test_ldy_immediate_loads_y_sets_n_flag(self):
     mpu = MPU()
     mpu.y = 0x00
-    mpu.memory[0x0000:0x0002] = (0xA0, 0x80) #=> LDY #$80
+    write(mpu.memory, 0x0000, (0xA0, 0x80)) #=> LDY #$80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x80, mpu.y)
@@ -2403,7 +2408,7 @@ def make_common_tests(MPU):
   def test_ldy_immediate_loads_y_sets_z_flag(self):
     mpu = MPU()
     mpu.y = 0xFF
-    mpu.memory[0x0000:0x0002] = (0xA0, 0x00) #=> LDY #$00
+    write(mpu.memory, 0x0000, (0xA0, 0x00)) #=> LDY #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.y)
@@ -2416,7 +2421,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.y = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xBC, 0xCD, 0xAB) #=> LDY $ABCD,X
+    write(mpu.memory, 0x0000, (0xBC, 0xCD, 0xAB)) #=> LDY $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2428,7 +2433,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.y = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xBC, 0xCD, 0xAB) #=> LDY $ABCD,X
+    write(mpu.memory, 0x0000, (0xBC, 0xCD, 0xAB)) #=> LDY $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2442,7 +2447,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.y = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0xB4, 0x10) #=> LDY $0010,X
+    write(mpu.memory, 0x0000, (0xB4, 0x10)) #=> LDY $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2454,7 +2459,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.y = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0xB4, 0x10) #=> LDY $0010,X
+    write(mpu.memory, 0x0000, (0xB4, 0x10)) #=> LDY $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2505,7 +2510,7 @@ def make_common_tests(MPU):
   def test_lsr_absolute_rotates_in_zero_not_carry(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x4E, 0xCD, 0xAB) #=> LSR $ABCD
+    write(mpu.memory, 0x0000, (0x4E, 0xCD, 0xAB)) #=> LSR $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2517,7 +2522,7 @@ def make_common_tests(MPU):
   def test_lsr_absolute_sets_carry_and_zero_flags_after_rotation(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x4E, 0xCD, 0xAB) #=> LSR $ABCD
+    write(mpu.memory, 0x0000, (0x4E, 0xCD, 0xAB)) #=> LSR $ABCD
     mpu.memory[0xABCD] = 0x01
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)    
@@ -2529,7 +2534,7 @@ def make_common_tests(MPU):
   def test_lsr_absolute_rotates_bits_right(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x4E, 0xCD, 0xAB) #=> LSR $ABCD
+    write(mpu.memory, 0x0000, (0x4E, 0xCD, 0xAB)) #=> LSR $ABCD
     mpu.memory[0xABCD] = 0x04
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)    
@@ -2543,7 +2548,7 @@ def make_common_tests(MPU):
   def test_lsr_zp_rotates_in_zero_not_carry(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x46, 0x10) #=> LSR $0010
+    write(mpu.memory, 0x0000, (0x46, 0x10)) #=> LSR $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2555,7 +2560,7 @@ def make_common_tests(MPU):
   def test_lsr_zp_sets_carry_and_zero_flags_after_rotation(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x46, 0x10) #=> LSR $0010
+    write(mpu.memory, 0x0000, (0x46, 0x10)) #=> LSR $0010
     mpu.memory[0x0010] = 0x01
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)    
@@ -2567,7 +2572,7 @@ def make_common_tests(MPU):
   def test_lsr_zp_rotates_bits_right(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x46, 0x10) #=> LSR $0010
+    write(mpu.memory, 0x0000, (0x46, 0x10)) #=> LSR $0010
     mpu.memory[0x0010] = 0x04
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)    
@@ -2582,7 +2587,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x5E, 0xCD, 0xAB) #=> LSR $ABCD,X
+    write(mpu.memory, 0x0000, (0x5E, 0xCD, 0xAB)) #=> LSR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2595,7 +2600,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x5E, 0xCD, 0xAB) #=> LSR $ABCD,X
+    write(mpu.memory, 0x0000, (0x5E, 0xCD, 0xAB)) #=> LSR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x01
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)    
@@ -2607,7 +2612,7 @@ def make_common_tests(MPU):
   def test_lsr_absolute_x_indexed_rotates_bits_right(self):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x5E, 0xCD, 0xAB) #=> LSR $ABCD,X
+    write(mpu.memory, 0x0000, (0x5E, 0xCD, 0xAB)) #=> LSR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x04
     mpu.step()    
     self.assertEquals(0x0003, mpu.pc)    
@@ -2622,7 +2627,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x56, 0x10) #=> LSR $0010,X
+    write(mpu.memory, 0x0000, (0x56, 0x10)) #=> LSR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2635,7 +2640,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x56, 0x10) #=> LSR $0010,X
+    write(mpu.memory, 0x0000, (0x56, 0x10)) #=> LSR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x01
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)    
@@ -2648,7 +2653,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= mpu.CARRY
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x56, 0x10) #=> LSR $0010,X
+    write(mpu.memory, 0x0000, (0x56, 0x10)) #=> LSR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x04
     mpu.step()    
     self.assertEquals(0x0002, mpu.pc)    
@@ -2671,7 +2676,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0x0D, 0xCD, 0xAB) #=> ORA $ABCD
+    write(mpu.memory, 0x0000, (0x0D, 0xCD, 0xAB)) #=> ORA $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2682,7 +2687,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
-    mpu.memory[0x0000:0x0001] = (0x0D, 0xCD, 0xAB) #=> ORA $ABCD
+    write(mpu.memory, 0x0000, (0x0D, 0xCD, 0xAB)) #=> ORA $ABCD
     mpu.memory[0xABCD] = 0x82
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2696,7 +2701,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0x05, 0x10) #=> ORA $0010
+    write(mpu.memory, 0x0000, (0x05, 0x10)) #=> ORA $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2707,7 +2712,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
-    mpu.memory[0x0000:0x0001] = (0x05, 0x10) #=> ORA $0010
+    write(mpu.memory, 0x0000, (0x05, 0x10)) #=> ORA $0010
     mpu.memory[0x0010] = 0x82
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2721,7 +2726,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0x09, 0x00) #=> ORA #$00
+    write(mpu.memory, 0x0000, (0x09, 0x00)) #=> ORA #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.a)
@@ -2731,7 +2736,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
-    mpu.memory[0x0000:0x0001] = (0x09, 0x82) #=> ORA #$82
+    write(mpu.memory, 0x0000, (0x09, 0x82)) #=> ORA #$82
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x83, mpu.a)
@@ -2745,7 +2750,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x1D, 0xCD, 0xAB) #=> ORA $ABCD,X
+    write(mpu.memory, 0x0000, (0x1D, 0xCD, 0xAB)) #=> ORA $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2757,7 +2762,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x1D, 0xCD, 0xAB) #=> ORA $ABCD,X
+    write(mpu.memory, 0x0000, (0x1D, 0xCD, 0xAB)) #=> ORA $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x82
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2772,7 +2777,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x19, 0xCD, 0xAB) #=> ORA $ABCD,Y
+    write(mpu.memory, 0x0000, (0x19, 0xCD, 0xAB)) #=> ORA $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2784,7 +2789,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x19, 0xCD, 0xAB) #=> ORA $ABCD,Y
+    write(mpu.memory, 0x0000, (0x19, 0xCD, 0xAB)) #=> ORA $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x82
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2799,8 +2804,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x01, 0x10) #=> ORA ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x01, 0x10)) #=> ORA ($0010,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2812,8 +2817,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x01, 0x10) #=> ORA ($ABCD,X)
-    mpu.memory[0x0013:0x0014] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x01, 0x10)) #=> ORA ($ABCD,X)
+    write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x82
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2828,8 +2833,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x11, 0x10) #=> ORA ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x11, 0x10)) #=> ORA ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2841,8 +2846,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x11, 0x10) #=> ORA ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xCD, 0xAB) #=> Vector to $ABCD
+    write(mpu.memory, 0x0000, (0x11, 0x10)) #=> ORA ($0010),Y
+    write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD + mpu.y] = 0x82
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2857,7 +2862,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x15, 0x10) #=> ORA $0010,X
+    write(mpu.memory, 0x0000, (0x15, 0x10)) #=> ORA $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2869,7 +2874,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x15, 0x10) #=> ORA $0010,X
+    write(mpu.memory, 0x0000, (0x15, 0x10)) #=> ORA $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x82
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -2985,7 +2990,7 @@ def make_common_tests(MPU):
   def test_rol_absolute_zero_and_carry_zero_sets_z_flag(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0002] = (0x2E, 0xCD, 0xAB) #=> ROL $ABCD
+    write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -2997,7 +3002,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x2E, 0xCD, 0xAB) #=> ROL $ABCD
+    write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3008,7 +3013,7 @@ def make_common_tests(MPU):
   def test_rol_absolute_sets_n_flag(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x2E, 0xCD, 0xAB) #=> ROL $ABCD
+    write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
     mpu.memory[0xABCD] = 0x40    
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3019,7 +3024,7 @@ def make_common_tests(MPU):
   def test_rol_absolute_shifts_out_zero(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0002] = (0x2E, 0xCD, 0xAB) #=> ROL $ABCD
+    write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
     mpu.memory[0xABCD] = 0x7F    
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3029,7 +3034,7 @@ def make_common_tests(MPU):
   def test_rol_absolute_shifts_out_one(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0002] = (0x2E, 0xCD, 0xAB) #=> ROL $ABCD
+    write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
     mpu.memory[0xABCD] = 0xFF    
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3041,7 +3046,7 @@ def make_common_tests(MPU):
   def test_rol_zp_zero_and_carry_zero_sets_z_flag(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0x26, 0x10) #=> ROL $0010
+    write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3053,7 +3058,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.a = 0x00
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x26, 0x10) #=> ROL $0010
+    write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3064,7 +3069,7 @@ def make_common_tests(MPU):
   def test_rol_zp_sets_n_flag(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x26, 0x10) #=> ROL $0010
+    write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
     mpu.memory[0x0010] = 0x40    
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3075,7 +3080,7 @@ def make_common_tests(MPU):
   def test_rol_zp_shifts_out_zero(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0x26, 0x10) #=> ROL $0010
+    write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
     mpu.memory[0x0010] = 0x7F    
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3085,7 +3090,7 @@ def make_common_tests(MPU):
   def test_rol_zp_shifts_out_one(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0x26, 0x10) #=> ROL $0010
+    write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
     mpu.memory[0x0010] = 0xFF    
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3098,7 +3103,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x3E, 0xCD, 0xAB) #=> ROL $ABCD,X
+    write(mpu.memory, 0x0000, (0x3E, 0xCD, 0xAB)) #=> ROL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3110,7 +3115,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x3E, 0xCD, 0xAB) #=> ROL $ABCD,X
+    write(mpu.memory, 0x0000, (0x3E, 0xCD, 0xAB)) #=> ROL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3122,7 +3127,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x3E, 0xCD, 0xAB) #=> ROL $ABCD,X
+    write(mpu.memory, 0x0000, (0x3E, 0xCD, 0xAB)) #=> ROL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x40    
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3134,7 +3139,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0002] = (0x3E, 0xCD, 0xAB) #=> ROL $ABCD,X
+    write(mpu.memory, 0x0000, (0x3E, 0xCD, 0xAB)) #=> ROL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x7F    
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3145,7 +3150,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0002] = (0x3E, 0xCD, 0xAB) #=> ROL $ABCD,X
+    write(mpu.memory, 0x0000, (0x3E, 0xCD, 0xAB)) #=> ROL $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0xFF    
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3158,7 +3163,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x36, 0x10) #=> ROL $0010,X
+    write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3170,7 +3175,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x36, 0x10) #=> ROL $0010,X
+    write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3182,7 +3187,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x36, 0x10) #=> ROL $0010,X
+    write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x40    
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3194,7 +3199,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0x36, 0x10) #=> ROL $0010,X
+    write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x7F    
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3205,7 +3210,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000:0x0001] = (0x36, 0x10) #=> ROL $0010,X
+    write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFF    
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3261,7 +3266,7 @@ def make_common_tests(MPU):
   def test_ror_absolute_zero_and_carry_zero_sets_z_flag(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)    
-    mpu.memory[0x0000:0x0002] = (0x6E, 0xCD, 0xAB) #=> ROR $ABCD
+    write(mpu.memory, 0x0000, (0x6E, 0xCD, 0xAB)) #=> ROR $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3272,7 +3277,7 @@ def make_common_tests(MPU):
   def test_ror_absolute_zero_and_carry_one_rotates_in_sets_n_flags(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x6E, 0xCD, 0xAB) #=> ROR $ABCD
+    write(mpu.memory, 0x0000, (0x6E, 0xCD, 0xAB)) #=> ROR $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3283,7 +3288,7 @@ def make_common_tests(MPU):
   def test_ror_absolute_shifts_out_zero(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x6E, 0xCD, 0xAB) #=> ROR $ABCD
+    write(mpu.memory, 0x0000, (0x6E, 0xCD, 0xAB)) #=> ROR $ABCD
     mpu.memory[0xABCD] = 0x02
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3293,7 +3298,7 @@ def make_common_tests(MPU):
   def test_ror_absolute_shifts_out_one(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x6E, 0xCD, 0xAB) #=> ROR $ABCD
+    write(mpu.memory, 0x0000, (0x6E, 0xCD, 0xAB)) #=> ROR $ABCD
     mpu.memory[0xABCD] = 0x03
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3305,7 +3310,7 @@ def make_common_tests(MPU):
   def test_ror_zp_zero_and_carry_zero_sets_z_flag(self):
     mpu = MPU()
     mpu.flags &= ~(mpu.CARRY)    
-    mpu.memory[0x0000:0x0001] = (0x66, 0x10) #=> ROR $0010
+    write(mpu.memory, 0x0000, (0x66, 0x10)) #=> ROR $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3316,7 +3321,7 @@ def make_common_tests(MPU):
   def test_ror_zp_zero_and_carry_one_rotates_in_sets_n_flags(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x66, 0x10) #=> ROR $0010
+    write(mpu.memory, 0x0000, (0x66, 0x10)) #=> ROR $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3327,7 +3332,7 @@ def make_common_tests(MPU):
   def test_ror_zp_zero_absolute_shifts_out_zero(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x66, 0x10) #=> ROR $0010
+    write(mpu.memory, 0x0000, (0x66, 0x10)) #=> ROR $0010
     mpu.memory[0x0010] = 0x02
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3337,7 +3342,7 @@ def make_common_tests(MPU):
   def test_ror_zp_shifts_out_one(self):
     mpu = MPU()
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x66, 0x10) #=> ROR $0010
+    write(mpu.memory, 0x0000, (0x66, 0x10)) #=> ROR $0010
     mpu.memory[0x0010] = 0x03
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3350,7 +3355,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags &= ~(mpu.CARRY)    
-    mpu.memory[0x0000:0x0002] = (0x7E, 0xCD, 0xAB) #=> ROR $ABCD,X
+    write(mpu.memory, 0x0000, (0x7E, 0xCD, 0xAB)) #=> ROR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3362,7 +3367,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x7E, 0xCD, 0xAB) #=> ROR $ABCD,X
+    write(mpu.memory, 0x0000, (0x7E, 0xCD, 0xAB)) #=> ROR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3374,7 +3379,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x7E, 0xCD, 0xAB) #=> ROR $ABCD,X
+    write(mpu.memory, 0x0000, (0x7E, 0xCD, 0xAB)) #=> ROR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x02
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3385,7 +3390,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0002] = (0x7E, 0xCD, 0xAB) #=> ROR $ABCD,X
+    write(mpu.memory, 0x0000, (0x7E, 0xCD, 0xAB)) #=> ROR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x03
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -3398,7 +3403,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags &= ~(mpu.CARRY)    
-    mpu.memory[0x0000:0x0001] = (0x76, 0x10) #=> ROR $0010,X
+    write(mpu.memory, 0x0000, (0x76, 0x10)) #=> ROR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3410,7 +3415,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x76, 0x10) #=> ROR $0010,X
+    write(mpu.memory, 0x0000, (0x76, 0x10)) #=> ROR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3422,7 +3427,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x76, 0x10) #=> ROR $0010,X
+    write(mpu.memory, 0x0000, (0x76, 0x10)) #=> ROR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x02
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3433,7 +3438,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.x = 0x03    
     mpu.flags |= mpu.CARRY
-    mpu.memory[0x0000:0x0001] = (0x76, 0x10) #=> ROR $0010,X
+    write(mpu.memory, 0x0000, (0x76, 0x10)) #=> ROR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x03
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -3445,7 +3450,7 @@ def make_common_tests(MPU):
   def test_rti_restores_status_register_and_program_counter_and_updates_sp(self):
     mpu = MPU()
     mpu.memory[0x0000] = 0x40 #=> RTI
-    mpu.memory[0x01FD:0x01FF] = (0xAB, 0x03, 0xC0) # Status (P), PCL, PCH
+    write(mpu.memory, 0x01FD, (0xAB, 0x03, 0xC0)) # Status (P), PCL, PCH
     mpu.sp = 0xFC
 
     mpu.step()
@@ -3458,7 +3463,7 @@ def make_common_tests(MPU):
   def test_rts_restores_program_counter_and_increments_then_updates_sp(self):
     mpu = MPU()
     mpu.memory[0x0000] = 0x60 #=> RTS
-    mpu.memory[0x01FE:0x01FF] = (0x03, 0xC0) # PCL, PCH
+    write(mpu.memory, 0x01FE, (0x03, 0xC0)) # PCL, PCH
     mpu.sp = 0xFD
 
     mpu.step()
@@ -3472,7 +3477,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    write(mpu.memory, 0x0000, (0xED, 0xCD, 0xAB)) #=> SBC $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3485,7 +3490,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    write(mpu.memory, 0x0000, (0xED, 0xCD, 0xAB)) #=> SBC $ABCD
     mpu.memory[0xABCD] = 0x01
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3498,7 +3503,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    write(mpu.memory, 0x0000, (0xED, 0xCD, 0xAB)) #=> SBC $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3511,7 +3516,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0002] = (0xED, 0xCD, 0xAB) #=> SBC $ABCD
+    write(mpu.memory, 0x0000, (0xED, 0xCD, 0xAB)) #=> SBC $ABCD
     mpu.memory[0xABCD] = 0x02
     mpu.step()
     self.assertEquals(0x04, mpu.a)
@@ -3526,7 +3531,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    write(mpu.memory, 0x0000, (0xE5, 0x10)) #=> SBC $10
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3539,7 +3544,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    write(mpu.memory, 0x0000, (0xE5, 0x10)) #=> SBC $10
     mpu.memory[0x0010] = 0x01
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3552,7 +3557,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    write(mpu.memory, 0x0000, (0xE5, 0x10)) #=> SBC $10
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3565,7 +3570,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0001] = (0xE5, 0x10) #=> SBC $10
+    write(mpu.memory, 0x0000, (0xE5, 0x10)) #=> SBC $10
     mpu.memory[0x0010] = 0x02
     mpu.step()
     self.assertEquals(0x04, mpu.a)
@@ -3580,7 +3585,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0xE9, 0x00) #=> SBC #$00
+    write(mpu.memory, 0x0000, (0xE9, 0x00)) #=> SBC #$00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
@@ -3592,7 +3597,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE9, 0x01) #=> SBC #$01
+    write(mpu.memory, 0x0000, (0xE9, 0x01)) #=> SBC #$01
     mpu.step()
     self.assertEquals(0x00, mpu.a)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
@@ -3604,7 +3609,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE9, 0x00) #=> SBC #$00
+    write(mpu.memory, 0x0000, (0xE9, 0x00)) #=> SBC #$00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
@@ -3616,7 +3621,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0001] = (0xE9, 0x02) #=> SBC #$02
+    write(mpu.memory, 0x0000, (0xE9, 0x02)) #=> SBC #$02
     mpu.step()
     self.assertEquals(0x04, mpu.a)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
@@ -3630,7 +3635,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    write(mpu.memory, 0x0000, (0xFD, 0xE0, 0xFE)) #=> SBC $FEE0,X
     mpu.x = 0x0D
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3644,7 +3649,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    write(mpu.memory, 0x0000, (0xFD, 0xE0, 0xFE)) #=> SBC $FEE0,X
     mpu.x = 0x0D
     mpu.memory[0xFEED] = 0x01
     mpu.step()
@@ -3658,7 +3663,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    write(mpu.memory, 0x0000, (0xFD, 0xE0, 0xFE)) #=> SBC $FEE0,X
     mpu.x = 0x0D
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3672,7 +3677,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0002] = (0xFD, 0xE0, 0xFE) #=> SBC $FEE0,X
+    write(mpu.memory, 0x0000, (0xFD, 0xE0, 0xFE)) #=> SBC $FEE0,X
     mpu.x = 0x0D
     mpu.memory[0xFEED] = 0x02
     mpu.step()
@@ -3688,7 +3693,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    write(mpu.memory, 0x0000, (0xF9, 0xE0, 0xFE)) #=> SBC $FEE0,Y
     mpu.y = 0x0D
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3702,7 +3707,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    write(mpu.memory, 0x0000, (0xF9, 0xE0, 0xFE)) #=> SBC $FEE0,Y
     mpu.y = 0x0D
     mpu.memory[0xFEED] = 0x01
     mpu.step()
@@ -3716,7 +3721,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    write(mpu.memory, 0x0000, (0xF9, 0xE0, 0xFE)) #=> SBC $FEE0,Y
     mpu.y = 0x0D
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3730,7 +3735,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0002] = (0xF9, 0xE0, 0xFE) #=> SBC $FEE0,Y
+    write(mpu.memory, 0x0000, (0xF9, 0xE0, 0xFE)) #=> SBC $FEE0,Y
     mpu.y = 0x0D
     mpu.memory[0xFEED] = 0x02
     mpu.step()
@@ -3746,8 +3751,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3761,8 +3766,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03  
     mpu.memory[0xFEED] = 0x01
     mpu.step()
@@ -3776,8 +3781,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3791,8 +3796,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03  
     mpu.memory[0xFEED] = 0x02
     mpu.step()
@@ -3806,8 +3811,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3821,8 +3826,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03  
     mpu.memory[0xFEED] = 0x01
     mpu.step()
@@ -3836,8 +3841,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03
     mpu.memory[0xFEED] = 0x00
     mpu.step()
@@ -3851,8 +3856,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0001] = (0xE1, 0x10) #=> SBC ($10,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xE1, 0x10)) #=> SBC ($10,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.x = 0x03  
     mpu.memory[0xFEED] = 0x02
     mpu.step()
@@ -3869,8 +3874,8 @@ def make_common_tests(MPU):
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00 
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xF1, 0x10)) #=> SBC ($10),Y
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3883,8 +3888,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
-    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xF1, 0x10)) #=> SBC ($10),Y
+    write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0x01
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3897,8 +3902,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
-    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xF1, 0x10)) #=> SBC ($10),Y
+    write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -3911,8 +3916,8 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0001] = (0xF1, 0x10) #=> SBC ($10),Y
-    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0xF1, 0x10)) #=> SBC ($10),Y
+    write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0x02
     mpu.step()
     self.assertEquals(0x04, mpu.a)
@@ -3927,7 +3932,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    write(mpu.memory, 0x0000, (0xF5, 0x10)) #=> SBC $10,X
     mpu.x = 0x0D
     mpu.memory[0x001D] = 0x00
     mpu.step()
@@ -3941,7 +3946,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags |= mpu.CARRY # borrow = 0
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    write(mpu.memory, 0x0000, (0xF5, 0x10)) #=> SBC $10,X
     mpu.x = 0x0D
     mpu.memory[0x001D] = 0x01
     mpu.step()
@@ -3955,7 +3960,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x01
-    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    write(mpu.memory, 0x0000, (0xF5, 0x10)) #=> SBC $10,X
     mpu.x = 0x0D
     mpu.memory[0x001D] = 0x00
     mpu.step()
@@ -3969,7 +3974,7 @@ def make_common_tests(MPU):
     mpu.flags &= ~(mpu.DECIMAL)
     mpu.flags &= ~(mpu.CARRY) # borrow = 1
     mpu.a = 0x07
-    mpu.memory[0x0000:0x0001] = (0xF5, 0x10) #=> SBC $10,X
+    write(mpu.memory, 0x0000, (0xF5, 0x10)) #=> SBC $10,X
     mpu.x = 0x0D
     mpu.memory[0x001D] = 0x02
     mpu.step()
@@ -4014,7 +4019,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x8D, 0xCD, 0xAB) #=> STA $ABCD
+    write(mpu.memory, 0x0000, (0x8D, 0xCD, 0xAB)) #=> STA $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4026,7 +4031,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0002] = (0x8D, 0xCD, 0xAB) #=> STA $ABCD
+    write(mpu.memory, 0x0000, (0x8D, 0xCD, 0xAB)) #=> STA $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4040,7 +4045,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x85, 0x10) #=> STA $0010
+    write(mpu.memory, 0x0000, (0x85, 0x10)) #=> STA $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4052,7 +4057,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
-    mpu.memory[0x0000:0x0001] = (0x85, 0x10) #=> STA $0010
+    write(mpu.memory, 0x0000, (0x85, 0x10)) #=> STA $0010
     mpu.memory[0x0010] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4067,7 +4072,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x9D, 0xCD, 0xAB) #=> STA $ABCD,X
+    write(mpu.memory, 0x0000, (0x9D, 0xCD, 0xAB)) #=> STA $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4080,7 +4085,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x9D, 0xCD, 0xAB) #=> STA $ABCD,X
+    write(mpu.memory, 0x0000, (0x9D, 0xCD, 0xAB)) #=> STA $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4095,7 +4100,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x99, 0xCD, 0xAB) #=> STA $ABCD,Y
+    write(mpu.memory, 0x0000, (0x99, 0xCD, 0xAB)) #=> STA $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4108,7 +4113,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0002] = (0x99, 0xCD, 0xAB) #=> STA $ABCD,Y
+    write(mpu.memory, 0x0000, (0x99, 0xCD, 0xAB)) #=> STA $ABCD,Y
     mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4123,8 +4128,8 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x81, 0x10) #=> STA ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0x81, 0x10)) #=> STA ($0010,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4137,8 +4142,8 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x81, 0x10) #=> STA ($0010,X)
-    mpu.memory[0x0013:0x0014] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0x81, 0x10)) #=> STA ($0010,X)
+    write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4153,8 +4158,8 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x91, 0x10) #=> STA ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0x91, 0x10)) #=> STA ($0010),Y
+    write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4167,8 +4172,8 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x91, 0x10) #=> STA ($0010),Y
-    mpu.memory[0x0010:0x0011] = (0xED, 0xFE) #=> Vector to $FEED
+    write(mpu.memory, 0x0000, (0x91, 0x10)) #=> STA ($0010),Y
+    write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4183,7 +4188,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.a = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x95, 0x10) #=> STA $0010,X
+    write(mpu.memory, 0x0000, (0x95, 0x10)) #=> STA $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4196,7 +4201,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.a = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0002] = (0x95, 0x10) #=> STA $0010,X
+    write(mpu.memory, 0x0000, (0x95, 0x10)) #=> STA $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4210,7 +4215,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.x = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x8E, 0xCD, 0xAB) #=> STX $ABCD
+    write(mpu.memory, 0x0000, (0x8E, 0xCD, 0xAB)) #=> STX $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4222,7 +4227,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.x = 0x00
-    mpu.memory[0x0000:0x0002] = (0x8E, 0xCD, 0xAB) #=> STX $ABCD
+    write(mpu.memory, 0x0000, (0x8E, 0xCD, 0xAB)) #=> STX $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4236,7 +4241,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.x = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x86, 0x10) #=> STX $0010
+    write(mpu.memory, 0x0000, (0x86, 0x10)) #=> STX $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4248,7 +4253,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.x = 0x00
-    mpu.memory[0x0000:0x0001] = (0x86, 0x10) #=> STX $0010
+    write(mpu.memory, 0x0000, (0x86, 0x10)) #=> STX $0010
     mpu.memory[0x0010] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4263,7 +4268,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.x = 0xFF
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x96, 0x10) #=> STX $0010,Y
+    write(mpu.memory, 0x0000, (0x96, 0x10)) #=> STX $0010,Y
     mpu.memory[0x0010 + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4276,7 +4281,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.x = 0x00
     mpu.y = 0x03
-    mpu.memory[0x0000:0x0001] = (0x96, 0x10) #=> STX $0010,Y
+    write(mpu.memory, 0x0000, (0x96, 0x10)) #=> STX $0010,Y
     mpu.memory[0x0010 + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4290,7 +4295,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.y = 0xFF
-    mpu.memory[0x0000:0x0002] = (0x8C, 0xCD, 0xAB) #=> STY $ABCD
+    write(mpu.memory, 0x0000, (0x8C, 0xCD, 0xAB)) #=> STY $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4302,7 +4307,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.y = 0x00
-    mpu.memory[0x0000:0x0002] = (0x8C, 0xCD, 0xAB) #=> STY $ABCD
+    write(mpu.memory, 0x0000, (0x8C, 0xCD, 0xAB)) #=> STY $ABCD
     mpu.memory[0xABCD] = 0xFF
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
@@ -4316,7 +4321,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.y = 0xFF
-    mpu.memory[0x0000:0x0001] = (0x84, 0x10) #=> STY $0010
+    write(mpu.memory, 0x0000, (0x84, 0x10)) #=> STY $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4328,7 +4333,7 @@ def make_common_tests(MPU):
     mpu = MPU()
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.y = 0x00
-    mpu.memory[0x0000:0x0001] = (0x84, 0x10) #=> STY $0010
+    write(mpu.memory, 0x0000, (0x84, 0x10)) #=> STY $0010
     mpu.memory[0x0010] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4343,7 +4348,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
     mpu.y = 0xFF
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x94, 0x10) #=> STY $0010,X
+    write(mpu.memory, 0x0000, (0x94, 0x10)) #=> STY $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
@@ -4356,7 +4361,7 @@ def make_common_tests(MPU):
     mpu.flags = flags = 0xFF & ~(mpu.ZERO)
     mpu.y = 0x00
     mpu.x = 0x03
-    mpu.memory[0x0000:0x0001] = (0x94, 0x10) #=> STY $0010,X
+    write(mpu.memory, 0x0000, (0x94, 0x10)) #=> STY $0010,X
     mpu.memory[0x0010 + mpu.x] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
