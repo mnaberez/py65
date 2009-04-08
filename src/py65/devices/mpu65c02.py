@@ -22,6 +22,10 @@ class MPU(NMOS6502):
 
     # instructions
 
+    @instruction(0x5a, 3)
+    def i5a(self):
+        self.stPush(self.y)
+
     @instruction(0x64, 3)
     def i64(self):
         self.opSTZ(self.ZeroPageAddr)
@@ -31,6 +35,11 @@ class MPU(NMOS6502):
     def i74(self):
         self.opSTZ(self.ZeroPageXAddr)
         self.pc += 1
+
+    @instruction(0x7a, 4)
+    def ifa(self):
+      self.y = self.stPop()
+      self.FlagsNZ(self.y)    
 
     @instruction(0x9c, 4)
     def i9c(self):
@@ -42,3 +51,11 @@ class MPU(NMOS6502):
         self.opSTZ(self.AbsoluteXAddr)
         self.pc+=2
 
+    @instruction(0xda, 3)
+    def i5a(self):
+        self.stPush(self.x)
+
+    @instruction(0xfa, 4)
+    def ifa(self):
+      self.x = self.stPop()
+      self.FlagsNZ(self.x)     
