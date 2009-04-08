@@ -1,5 +1,6 @@
 import unittest
 import sys
+import py65.assembler
 import py65.devices.mpu6502
 
 class Common6502Tests:
@@ -4578,6 +4579,14 @@ class Common6502Tests:
     self.assertEquals(0x00, mpu.y)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
     self.assertEquals(0x0001, mpu.pc)
+
+  def test_decorated_addressing_modes_are_valid(self):
+    valid_modes = map(lambda x: x[0], 
+                      py65.assembler.Assembler.Addressing)
+    mpu = self._make_mpu()
+    for name, mode in mpu.disassemble:
+        self.assert_(mode in valid_modes)
+    
 
   # Test Helpers
 
