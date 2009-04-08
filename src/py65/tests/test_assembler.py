@@ -1,5 +1,6 @@
 import unittest
 import sys
+from py65.devices.mpu6502 import MPU
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
 
@@ -925,8 +926,9 @@ class AssemblerTests(unittest.TestCase):
     # Test Helpers
     
     def assemble(self, statement, pc=0000):
+        mpu = MPU()
         address_parser = AddressParser()
-        assembler = Assembler(address_parser)
+        assembler = Assembler(mpu, address_parser)
         return assembler.assemble(statement, pc)
   
 def test_suite():

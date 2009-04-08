@@ -25,7 +25,7 @@ class Monitor(cmd.Cmd):
         self._add_shortcuts()
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
-        self._assembler = Assembler(self._address_parser)
+        self._assembler = Assembler(self._mpu, self._address_parser)
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
