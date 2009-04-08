@@ -114,6 +114,111 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(0x0003, mpu.pc)
         self.assertEquals(5, mpu.processorCycles)
  
+    # TSB Zero Page
+
+    def test_tsb_sp_ones(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0x00BB] = 0xE0
+        self._write(mpu.memory, 0x0000, [0x04, 0xBB]) #=> TSB $BD
+        mpu.a = 0x70
+        self.assertEquals(0xE0, mpu.memory[0x00BB])
+        mpu.step()
+        self.assertEquals(0xF0, mpu.memory[0x00BB])
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+
+    def test_tsb_sp_zeros(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0x00BB] = 0x80
+        self._write(mpu.memory, 0x0000, [0x04, 0xBB]) #=> TSB $BD
+        mpu.a = 0x60
+        self.assertEquals(0x80, mpu.memory[0x00BB])
+        mpu.step()
+        self.assertEquals(0xE0, mpu.memory[0x00BB])
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+
+
+    # TSB Absolute
+
+    def test_tsb_abs_ones(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0xFEED] = 0xE0
+        self._write(mpu.memory, 0x0000, [0x0C, 0xED, 0xFE]) #=> TSB $FEED
+        mpu.a = 0x70
+        self.assertEquals(0xE0, mpu.memory[0xFEED])
+        mpu.step()
+        self.assertEquals(0xF0, mpu.memory[0xFEED])
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0003, mpu.pc)
+        self.assertEquals(6, mpu.processorCycles)
+
+    def test_tsb_abs_zeros(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0xFEED] = 0x80
+        self._write(mpu.memory, 0x0000, [0x0C, 0xED, 0xFE]) #=> TSB $FEED
+        mpu.a = 0x60
+        self.assertEquals(0x80, mpu.memory[0xFEED])
+        mpu.step()
+        self.assertEquals(0xE0, mpu.memory[0xFEED])
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0003, mpu.pc)
+        self.assertEquals(6, mpu.processorCycles)
+
+    # TRB Zero Page
+
+    def test_trb_sp_ones(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0x00BB] = 0xE0
+        self._write(mpu.memory, 0x0000, [0x14, 0xBB]) #=> TRB $BD
+        mpu.a = 0x70
+        self.assertEquals(0xE0, mpu.memory[0x00BB])
+        mpu.step()
+        self.assertEquals(0x80, mpu.memory[0x00BB])
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+
+    def test_trb_sp_zeros(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0x00BB] = 0x80
+        self._write(mpu.memory, 0x0000, [0x14, 0xBB]) #=> TRB $BD
+        mpu.a = 0x60
+        self.assertEquals(0x80, mpu.memory[0x00BB])
+        mpu.step()
+        self.assertEquals(0x80, mpu.memory[0x00BB])
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+
+
+    # TRB Absolute
+
+    def test_trb_abs_ones(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0xFEED] = 0xE0
+        self._write(mpu.memory, 0x0000, [0x1C, 0xED, 0xFE]) #=> TRB $FEED
+        mpu.a = 0x70
+        self.assertEquals(0xE0, mpu.memory[0xFEED])
+        mpu.step()
+        self.assertEquals(0x80, mpu.memory[0xFEED])
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0003, mpu.pc)
+        self.assertEquals(6, mpu.processorCycles)
+
+    def test_trb_abs_zeros(self):
+        mpu = self._make_mpu(debug=True)
+        mpu.memory[0xFEED] = 0x80
+        self._write(mpu.memory, 0x0000, [0x1C, 0xED, 0xFE]) #=> TRB $FEED
+        mpu.a = 0x60
+        self.assertEquals(0x80, mpu.memory[0xFEED])
+        mpu.step()
+        self.assertEquals(0x80, mpu.memory[0xFEED])
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0003, mpu.pc)
+        self.assertEquals(6, mpu.processorCycles)
 
 
     # Test Helpers

@@ -19,6 +19,23 @@ class MPU(NMOS6502):
     def opSTZ(self, x):
         self.memory[x()] = 0x00
 
+    def opTSB(self, x):
+        address = x()
+        m = self.memory[address] 
+        self.flags &= ~self.ZERO
+        z = m & self.a
+        if z != 0:
+            self.flags |= self.ZERO
+        self.memory[address] = m | self.a
+
+    def opTRB(self, x):
+        address = x()
+        m = self.memory[address] 
+        self.flags &= ~self.ZERO
+        z = m & self.a
+        if z != 0:
+            self.flags |= self.ZERO
+        self.memory[address] = m & ~self.a
 
     # instructions
 
@@ -60,4 +77,33 @@ class MPU(NMOS6502):
       self.x = self.stPop()
       self.FlagsNZ(self.x)
 
-     
+    @instruction(name="TSB", mode="zpg", cycles=5)
+    def i04(self):
+      self.opTSB(self.ZeroPageAddr)
+      self.pc += 1
+
+    @instruction(name="TSB", mode="abs", cycles=6)
+    def i0c(self):
+      self.opTSB(self.AbsoluteAddr)
+      self.pc += 2
+
+    @instruction(name="TSB", mode="zpg", cycles=5)
+    def i04(self):
+      self.opTSB(self.ZeroPageAddr)
+      self.pc += 1
+
+    @instruction(name="TSB", mode="abs", cycles=6)
+    def i0c(self):
+      self.opTSB(self.AbsoluteAddr)
+      self.pc += 2
+
+    @instruction(name="TRB", mode="zpg", cycles=5)
+    def i14(self):
+      self.opTRB(self.ZeroPageAddr)
+      self.pc += 1
+
+    @instruction(name="TRB", mode="abs", cycles=6)
+    def i1c(self):
+      self.opTRB(self.AbsoluteAddr)
+      self.pc += 2
+
