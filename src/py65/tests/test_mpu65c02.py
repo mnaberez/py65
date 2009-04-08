@@ -1,26 +1,30 @@
 import unittest
 import sys
-from py65.mpu65c02 import MPU
+import py65.mpu65c02
+from py65.tests.test_mpu6502 import Common6502Tests
 
-from test_mpu6502 import make_common_tests
 
-MPUTests = make_common_tests(MPU)
-
-class MPU65C02SpecificTests(unittest.TestCase):
+class MPUTests(unittest.TestCase, Common6502Tests):
+    """CMOS 65C02 Tests"""
 
     def test_repr(self):
-        mpu = MPU()
+        mpu = self._make_mpu()
         self.assertEquals('<65C02: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>',
                           repr(mpu))
 
     def test_stz_zp_stores_zero(self):
-        mpu = MPU(debug=True)
+        mpu = self._make_mpu(debug=True)
         mpu.memory[0x0032] = 0x88
         mpu.memory[0x0000:0x0000+2] = [0x64, 0x32] #=> STZ $32
         self.assertEquals(0x88, mpu.memory[0x0032])
         mpu.step()
         self.assertEquals(0x00, mpu.memory[0x0032])
         self.assertEquals(3, mpu.processorCycles)
+
+    # Test Helpers
+
+    def _get_target_class(self):
+        return py65.mpu65c02.MPU
 
 
 def test_suite():
