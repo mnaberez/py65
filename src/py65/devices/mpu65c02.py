@@ -1,4 +1,4 @@
-from py65.mpu6502 import MPU as NMOS6502
+from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.utils.devices import make_instruction_decorator
 
 class MPU(NMOS6502):

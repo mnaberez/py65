@@ -1,6 +1,6 @@
 import unittest
 import sys
-import py65.mpu6502
+import py65.devices.mpu6502
 
 class Common6502Tests:
   """Tests common to 6502-based microprocessors"""
@@ -4593,7 +4593,7 @@ class Common6502Tests:
 
 
 class MPUTests(unittest.TestCase, Common6502Tests):      
-    """ NMOS 6502 (py65.mpu6502) tests """
+    """ NMOS 6502 tests """
 
     def test_repr(self):
         mpu = self._make_mpu()
@@ -4606,7 +4606,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertRaises(NotImplementedError, mpu.step)
 
     def _get_target_class(self):
-        return py65.mpu6502.MPU
+        return py65.devices.mpu6502.MPU
 
 
 def test_suite():

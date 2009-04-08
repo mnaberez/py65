@@ -1,7 +1,7 @@
 import unittest
 import sys
-import py65.mpu65c02
-from py65.tests.test_mpu6502 import Common6502Tests
+import py65.devices.mpu65c02
+from py65.tests.devices.test_mpu6502 import Common6502Tests
 
 
 class MPUTests(unittest.TestCase, Common6502Tests):
@@ -24,7 +24,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # Test Helpers
 
     def _get_target_class(self):
-        return py65.mpu65c02.MPU
+        return py65.devices.mpu65c02.MPU
 
 
 def test_suite():

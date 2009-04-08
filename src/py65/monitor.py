@@ -6,7 +6,7 @@ import re
 import shlex
 import asyncore
 import sys
-from py65.mpu6502 import MPU
+from py65.devices.mpu6502 import MPU
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
