@@ -9,10 +9,10 @@ class MPU(NMOS6502):
     instruct    = NMOS6502.instruct[:]
     cycletime   = NMOS6502.cycletime[:]
     extracycles = NMOS6502.extracycles[:]
+    disassemble = NMOS6502.disassemble[:]
 
-    instruction = \
-      make_instruction_decorator(instruct, cycletime, extracycles)
-
+    instruction = make_instruction_decorator(instruct, disassemble, 
+                                                cycletime, extracycles)
 
     # operations
 
@@ -22,40 +22,42 @@ class MPU(NMOS6502):
 
     # instructions
 
-    @instruction(0x5a, 3)
+    @instruction(name="PHY", mode="imp", cycles=3)
     def i5a(self):
         self.stPush(self.y)
 
-    @instruction(0x64, 3)
+    @instruction(name="STZ", mode="imp", cycles=3)
     def i64(self):
         self.opSTZ(self.ZeroPageAddr)
         self.pc += 1
 
-    @instruction(0x74, 4)
+    @instruction(name="STZ", mode="zpx", cycles=4)
     def i74(self):
         self.opSTZ(self.ZeroPageXAddr)
         self.pc += 1
 
-    @instruction(0x7a, 4)
-    def ifa(self):
+    @instruction(name="PHY", mode="imp", cycles=4)
+    def i7a(self):
       self.y = self.stPop()
       self.FlagsNZ(self.y)    
 
-    @instruction(0x9c, 4)
+    @instruction(name="STZ", mode="abs", cycles=4)
     def i9c(self):
         self.opSTZ(self.AbsoluteAddr)
         self.pc += 2
 
-    @instruction(0x9e, 5)
+    @instruction(name="STZ", mode="abx", cycles=5)
     def i9e(self):
         self.opSTZ(self.AbsoluteXAddr)
         self.pc+=2
 
-    @instruction(0xda, 3)
-    def i5a(self):
+    @instruction(name="PHX", mode="imp", cycles=3)
+    def ida(self):
         self.stPush(self.x)
 
-    @instruction(0xfa, 4)
+    @instruction(name="PLX", mode="imp", cycles=4)
     def ifa(self):
       self.x = self.stPop()
-      self.FlagsNZ(self.x)     
+      self.FlagsNZ(self.x)
+
+     

@@ -417,11 +417,12 @@ class MPU:
   instruct    = [ini] * 256
   cycletime   = [0] * 256
   extracycles = [0] * 256
+  disassemble = [('???', 'imp')] * 256
 
-  instruction = \
-    make_instruction_decorator(instruct, cycletime, extracycles)
+  instruction = make_instruction_decorator(instruct, disassemble, 
+                                                cycletime, extracycles)
 
-  @instruction(0x0, 7, 0)
+  @instruction(name="BRK", mode="imp", cycles=7)
   def i00(self):
     pc = (self.pc + 2) & 0xFFFF
     self.stPushWord(pc)
@@ -434,32 +435,32 @@ class MPU:
 
     self.breakFlag = True
 
-  @instruction(0x1, 6, 0)
+  @instruction(name="ORA", mode="inx", cycles=6)
   def i01(self):
     self.opORA(self.IndirectXAddr)
     self.pc += 1
 
-  @instruction(0x5, 3, 0)
+  @instruction(name="ORA", mode="zpg", cycles=3)
   def i05(self):
     self.opORA(self.ZeroPageAddr)
     self.pc += 1
 
-  @instruction(0x6, 5, 0)
+  @instruction(name="ASL", mode="zpg", cycles=5)
   def i06(self):
     self.opASL(self.ZeroPageAddr)
     self.pc += 1
   
-  @instruction(0x8, 3, 0)
+  @instruction(name="PHP", mode="imp", cycles=3)
   def i08(self):
     self.stPush(self.flags)
   
-  @instruction(0x9, 2, 0)
+  @instruction(name="ORA", mode="imm", cycles=2)
   def i09(self):
     self.a |= self.ImmediateByte()
     self.FlagsNZ(self.a)
     self.pc += 1
   
-  @instruction(0xa, 2, 0)
+  @instruction(name="ASL", mode="acc", cycles=2)
   def i0a(self):
     if self.a & 128:
       self.flags |= self.CARRY
@@ -469,90 +470,90 @@ class MPU:
     self.FlagsNZ(self.a)
     self.a &= 255
 
-  @instruction(0xd, 4, 0)
+  @instruction(name="ORA", mode="abs", cycles=4)
   def i0d(self):
     self.opORA(self.AbsoluteAddr)
     self.pc += 2
   
-  @instruction(0xe, 6, 0)
+  @instruction(name="ASL", mode="abs", cycles=6)
   def i0e(self):
     self.opASL(self.AbsoluteAddr)
     self.pc += 2
   
-  @instruction(0x10, 2, 2)
+  @instruction(name="BPL", mode="rel", cycles=2, extracycles=2)
   def i10(self):
     self.opBCL(self.NEGATIVE)
   
-  @instruction(0x11, 5, 1)
+  @instruction(name="ORA", mode="iny", cycles=5, extracycles=1)
   def i11(self):
     self.opORA(self.IndirectYAddr)
     self.pc += 1
   
-  @instruction(0x15, 4, 0)
+  @instruction(name="ORA", mode="zpx", cycles=4)
   def i15(self):
     self.opORA(self.ZeroPageXAddr)
     self.pc += 1
   
-  @instruction(0x16, 6, 0)
+  @instruction(name="ASL", mode="zpx", cycles=6)
   def i16(self):
     self.opASL(self.ZeroPageXAddr)
     self.pc += 1
   
-  @instruction(0x18, 2, 0)
+  @instruction(name="CLC", mode="imp", cycles=2)
   def i18(self):
     self.opCLR(self.CARRY)
   
-  @instruction(0x19, 4, 1)
+  @instruction(name="ORA", mode="aby", cycles=4, extracycles=1)
   def i19(self):
     self.opORA(self.AbsoluteYAddr)
     self.pc += 2 
   
-  @instruction(0x1d, 4, 1)
+  @instruction(name="ORA", mode="abx", cycles=4, extracycles=1)
   def i1d(self):
     self.opORA(self.AbsoluteXAddr)
     self.pc += 2
 
-  @instruction(0x1e, 7, 0)
+  @instruction(name="ASL", mode="abx", cycles=7)
   def i1e(self):
     self.opASL(self.AbsoluteXAddr)
     self.pc += 2
 
-  @instruction(0x20, 6, 0)
+  @instruction(name="JSR", mode="abs", cycles=6)
   def i20(self): 
     self.stPushWord((self.pc+1)&0xffff)
     self.pc=self.WordAt(self.pc)
   
-  @instruction(0x21, 6, 0)
+  @instruction(name="AND", mode="inx", cycles=6)
   def i21(self):
     self.opAND(self.IndirectXAddr)
     self.pc += 1
   
-  @instruction(0x24, 3, 0)
+  @instruction(name="BIT", mode="zpg", cycles=3)
   def i24(self):
     self.opBIT(self.ZeroPageAddr)
     self.pc += 1
   
-  @instruction(0x25, 3, 0)
+  @instruction(name="AND", mode="zpg", cycles=3)
   def i25(self):
     self.opAND(self.ZeroPageAddr)
     self.pc += 1
   
-  @instruction(0x26, 5, 0)
+  @instruction(name="ROL", mode="zpg", cycles=5)
   def i26(self):
     self.opROL(self.ZeroPageAddr)
     self.pc += 1
 
-  @instruction(0x28, 4, 0)
+  @instruction(name="PLP", mode="imp", cycles=4)
   def i28(self):
     self.flags = self.stPop()
   
-  @instruction(0x29, 2, 0)
+  @instruction(name="AND", mode="imm", cycles=2)
   def i29(self):
     self.a &= self.ImmediateByte()
     self.FlagsNZ(self.a)
     self.pc += 1
 
-  @instruction(0x2a, 2, 0)
+  @instruction(name="ROL", mode="acc", cycles=2)
   def i2a(self):
     if self.flags & self.CARRY:
       if (self.a & 128) == 0:
@@ -565,90 +566,90 @@ class MPU:
     self.FlagsNZ(self.a)
     self.a &= 255
 
-  @instruction(0x2c, 4, 0)
+  @instruction(name="BIT", mode="abs", cycles=4)
   def i2c(self):
     self.opBIT(self.AbsoluteAddr)
     self.pc+=2
 
-  @instruction(0x2d, 4, 0)
+  @instruction(name="AND", mode="abs", cycles=4)
   def i2d(self):
     self.opAND(self.AbsoluteAddr)
     self.pc+=2
 
-  @instruction(0x2e, 6, 0)
+  @instruction(name="ROL", mode="abs", cycles=6)
   def i2e(self):
     self.opROL(self.AbsoluteAddr)
     self.pc += 2
 
-  @instruction(0x30, 2, 2)
+  @instruction(name="BMI", mode="rel", cycles=2, extracycles=2)
   def i30(self):
     self.opBST(self.NEGATIVE)
 
-  @instruction(0x31, 5, 1)
+  @instruction(name="AND", mode="iny", cycles=5, extracycles=1)
   def i31(self):
     self.opAND(self.IndirectYAddr)
     self.pc += 1
 
-  @instruction(0x35, 4, 0)
+  @instruction(name="AND", mode="zpx", cycles=4)
   def i35(self):
     self.opAND(self.ZeroPageXAddr)
     self.pc += 1
 
-  @instruction(0x36, 6, 0)
+  @instruction(name="ROL", mode="zpx", cycles=6)
   def i36(self):
     self.opROL(self.ZeroPageXAddr)
     self.pc += 1
 
-  @instruction(0x38, 2, 0)
+  @instruction(name="SEC", mode="imp", cycles=2)
   def i38(self):
     self.opSET(self.CARRY)
 
-  @instruction(0x39, 4, 1)
+  @instruction(name="AND", mode="aby", cycles=4, extracycles=1)
   def i39(self):
     self.opAND(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0x3d, 4, 1)
+  @instruction(name="AND", mode="abx", cycles=4, extracycles=1)
   def i3d(self):
     self.opAND(self.AbsoluteXAddr)
     self.pc += 2 
 
-  @instruction(0x3e, 7, 0)
+  @instruction(name="ROL", mode="abx", cycles=7)
   def i3e(self):
     self.opROL(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0x40, 6, 0)
+  @instruction(name="RTI", mode="imp", cycles=6)
   def i40(self):
     self.flags = self.stPop()
     self.pc = self.stPopWord()
 
-  @instruction(0x41, 6, 0)
+  @instruction(name="EOR", mode="inx", cycles=6)
   def i41(self):
     self.opEOR(self.IndirectXAddr)
     self.pc+=1
 
-  @instruction(0x45, 3, 0)
+  @instruction(name="EOR", mode="zpg", cycles=3)
   def i45(self):
     self.opEOR(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x46, 5, 0)
+  @instruction(name="LSR", mode="zpg", cycles=5)
   def i46(self):
     self.opLSR(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x48, 3, 0)
+  @instruction(name="PHA", mode="imp", cycles=3)
   def i48(self):
     self.stPush(self.a)
 
-  @instruction(0x49, 2, 0)
+  @instruction(name="EOR", mode="imm", cycles=2)
   def i49(self):
     self.a ^= self.ImmediateByte()
     self.FlagsNZ(self.a)
     self.pc+=1
 
-  @instruction(0x4a, 2, 0)
+  @instruction(name="LSR", mode="acc", cycles=2)
   def i4a(self):
     self.flags &= ~(self.CARRY+self.NEGATIVE+self.ZERO)
     if self.a & 1:
@@ -661,84 +662,84 @@ class MPU:
       self.flags |= self.ZERO
     self.a &= 255
 
-  @instruction(0x4c, 3, 0)
+  @instruction(name="JMP", mode="abs", cycles=3)
   def i4c(self):
     self.pc=self.WordAt(self.pc)
 
-  @instruction(0x4d, 4, 0)
+  @instruction(name="EOR", mode="abs", cycles=4)
   def i4d(self):
     self.opEOR(self.AbsoluteAddr)
     self.pc+=2
   
-  @instruction(0x4e, 6, 0)
+  @instruction(name="LSR", mode="abs", cycles=6)
   def i4e(self):
     self.opLSR(self.AbsoluteAddr)
     self.pc += 2
 
-  @instruction(0x50, 2, 2)
+  @instruction(name="BVC", mode="rel", cycles=2, extracycles=2)
   def i50(self):
     self.opBCL(self.OVERFLOW)
 
-  @instruction(0x51, 5, 1)
+  @instruction(name="EOR", mode="iny", cycles=5, extracycles=1)
   def i51(self):
     self.opEOR(self.IndirectYAddr)
     self.pc+=1
 
-  @instruction(0x55, 4, 0)
+  @instruction(name="EOR", mode="zpx", cycles=4)
   def i55(self):
     self.opEOR(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0x56, 6, 0)
+  @instruction(name="LSR", mode="zpx", cycles=6)
   def i56(self):
     self.opLSR(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0x58, 2, 0)
+  @instruction(name="CLI", mode="imp", cycles=2)
   def i58(self):
     self.opCLR(self.INTERRUPT)
 
-  @instruction(0x59, 4, 1)
+  @instruction(name="EOR", mode="aby", cycles=4, extracycles=1)
   def i59(self):
     self.opEOR(self.AbsoluteYAddr)
     self.pc +=2
 
-  @instruction(0x5d, 4, 1)
+  @instruction(name="EOR", mode="abx", cycles=4, extracycles=1)
   def i5d(self):
     self.opEOR(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0x5e, 7, 0)
+  @instruction(name="LSR", mode="abx", cycles=7)
   def i5e(self):
     self.opLSR(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0x60, 6, 0)
+  @instruction(name="RTS", mode="imp", cycles=6)
   def i60(self):
     self.pc=self.stPopWord()
     self.pc+=1
 
-  @instruction(0x61, 6, 0)
+  @instruction(name="ADC", mode="inx", cycles=6)
   def i61(self):
     self.opADC(self.IndirectXAddr)
     self.pc+=1
 
-  @instruction(0x65, 3, 0)
+  @instruction(name="ADC", mode="zpg", cycles=3)
   def i65(self):
     self.opADC(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x66, 5, 0)
+  @instruction(name="ROR", mode="zpg", cycles=5)
   def i66(self):
     self.opROR(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x68, 4, 0)
+  @instruction(name="PLA", mode="imp", cycles=4)
   def i68(self):
     self.a = self.stPop()
     self.FlagsNZ(self.a)
 
-  @instruction(0x69, 2, 0)
+  @instruction(name="ADC", mode="imm", cycles=2)
   def i69(self):
     data = self.ImmediateByte()
 
@@ -775,7 +776,7 @@ class MPU:
       self.a=data
     self.pc += 1
 
-  @instruction(0x6a, 2, 0)
+  @instruction(name="ROR", mode="acc", cycles=2)
   def i6a(self):
     if self.flags & self.CARRY:
       if (self.a & 1) == 0:
@@ -788,265 +789,265 @@ class MPU:
     self.FlagsNZ(self.a)
     self.a &= 255
 
-  @instruction(0x6c, 5, 0)
+  @instruction(name="JMP", mode="ind", cycles=5)
   def i6c(self):
     ta = self.WordAt(self.pc)
     self.pc = self.WordAt(ta)
 
-  @instruction(0x6d, 4, 0)
+  @instruction(name="ADC", mode="abs", cycles=4)
   def i6d(self):
     self.opADC(self.AbsoluteAddr)
     self.pc +=2 
 
-  @instruction(0x6e, 6, 0)
+  @instruction(name="ROR", mode="abs", cycles=6)
   def i6e(self):
     self.opROR(self.AbsoluteAddr)
     self.pc+=2
   
-  @instruction(0x70, 2, 2)
+  @instruction(name="BVS", mode="rel", cycles=2, extracycles=2)
   def i70(self):
     self.opBST(self.OVERFLOW)
 
-  @instruction(0x71, 5, 1)
+  @instruction(name="ADC", mode="iny", cycles=5, extracycles=1)
   def i71(self):
     self.opADC(self.IndirectYAddr)
     self.pc+=1
 
-  @instruction(0x75, 4, 0)
+  @instruction(name="ADC", mode="zpx", cycles=4)
   def i75(self):
     self.opADC(self.ZeroPageXAddr)
     self.pc+=1
   
-  @instruction(0x76, 6, 0)
+  @instruction(name="ROR", mode="zpx", cycles=6)
   def i76(self):
     self.opROR(self.ZeroPageXAddr)
     self.pc+=1
   
-  @instruction(0x78, 2, 0)
+  @instruction(name="SEI", mode="imp", cycles=2)
   def i78(self):
     self.opSET(self.INTERRUPT)
 
-  @instruction(0x79, 4, 1)
+  @instruction(name="ADC", mode="aby", cycles=4, extracycles=1)
   def i79(self):
     self.opADC(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0x7d, 4, 1)
+  @instruction(name="ADC", mode="abx", cycles=4, extracycles=1)
   def i7d(self):
     self.opADC(self.AbsoluteXAddr)
     self.pc+=2
   
-  @instruction(0x7e, 7, 0)
+  @instruction(name="ROR", mode="abx", cycles=7)
   def i7e(self):
     self.opROR(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0x81, 6, 0)
+  @instruction(name="STA", mode="inx", cycles=6)
   def i81(self):
     self.opSTA(self.IndirectXAddr)
     self.pc+=1
 
-  @instruction(0x84, 3, 0)
+  @instruction(name="STY", mode="zpg", cycles=3)
   def i84(self):
     self.opSTY(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x85, 3, 0)
+  @instruction(name="STA", mode="zpg", cycles=3)
   def i85(self):
     self.opSTA(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x86, 3, 0)
+  @instruction(name="STX", mode="zpg", cycles=3)
   def i86(self):
     self.opSTX(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0x88, 2, 0)
+  @instruction(name="DEY", mode="imp", cycles=2)
   def i88(self):
     self.y -= 1
     self.y&=255
     self.FlagsNZ(self.y)
   
-  @instruction(0x8a, 2, 0)
+  @instruction(name="TXA", mode="imp", cycles=2)
   def i8a(self):
     self.a=self.x
     self.FlagsNZ(self.a)
   
-  @instruction(0x8c, 4, 0)
+  @instruction(name="STY", mode="abs", cycles=4)
   def i8c(self):
     self.opSTY(self.AbsoluteAddr)
     self.pc+=2
   
-  @instruction(0x8d, 4, 0)
+  @instruction(name="STA", mode="abs", cycles=4)
   def i8d(self):
     self.opSTA(self.AbsoluteAddr)
     self.pc+=2
 
-  @instruction(0x8e, 4, 0)
+  @instruction(name="STX", mode="abs", cycles=4)
   def i8e(self):
     self.opSTX(self.AbsoluteAddr)
     self.pc+=2
   
-  @instruction(0x90, 2, 2)
+  @instruction(name="BCC", mode="rel", cycles=2, extracycles=2)
   def i90(self):
     self.opBCL(self.CARRY)
   
-  @instruction(0x91, 6, 0)
+  @instruction(name="STA", mode="iny", cycles=6)
   def i91(self):
     self.opSTA(self.IndirectYAddr)
     self.pc+=1
   
-  @instruction(0x94, 4, 0)
+  @instruction(name="STY", mode="zpx", cycles=4)
   def i94(self):
     self.opSTY(self.ZeroPageXAddr)
     self.pc+=1
   
-  @instruction(0x95, 4, 0)
+  @instruction(name="STA", mode="zpx", cycles=4)
   def i95(self):
     self.opSTA(self.ZeroPageXAddr)
     self.pc+=1
   
-  @instruction(0x96, 4, 0)
+  @instruction(name="STX", mode="zpy", cycles=4)
   def i96(self):
     self.opSTX(self.ZeroPageYAddr)
     self.pc+=1
   
-  @instruction(0x98, 2, 0)
+  @instruction(name="TYA", mode="imp", cycles=2)
   def i98(self):
     self.a = self.y
     self.FlagsNZ(self.a)
   
-  @instruction(0x99, 5, 0)
+  @instruction(name="STA", mode="aby", cycles=5)
   def i99(self):
     self.opSTA(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0x9a, 2, 0)
+  @instruction(name="TXS", mode="imp", cycles=2)
   def i9a(self):
     self.sp=self.x
 
-  @instruction(0x9d, 5, 0)
+  @instruction(name="STA", mode="abx", cycles=5)
   def i9d(self):
     self.opSTA(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0xa0, 2, 0)
+  @instruction(name="LDY", mode="imm", cycles=2)
   def ia0(self):
     self.y=self.ImmediateByte()
     self.FlagsNZ(self.y)
     self.pc+=1
 
-  @instruction(0xa1, 6, 0)
+  @instruction(name="LDA", mode="inx", cycles=6)
   def ia1(self):
     self.opLDA(self.IndirectXAddr)
     self.pc+=1
 
-  @instruction(0xa2, 2, 0)
+  @instruction(name="LDX", mode="imm", cycles=2)
   def ia2(self):
     self.x=self.ImmediateByte()
     self.FlagsNZ(self.x)
     self.pc+=1
 
-  @instruction(0xa4, 3, 0)
+  @instruction(name="LDY", mode="zpg", cycles=3)
   def ia4(self):
     self.opLDY(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0xa5, 3, 0)
+  @instruction(name="LDA", mode="zpg", cycles=3)
   def ia5(self):
     self.opLDA(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0xa6, 3, 0)
+  @instruction(name="LDX", mode="zpg", cycles=3)
   def ia6(self):
     self.opLDX(self.ZeroPageAddr)
     self.pc+=1
   
-  @instruction(0xa8, 2, 0)
+  @instruction(name="TAY", mode="imp", cycles=2)
   def ia8(self):
     self.y = self.a
     self.FlagsNZ(self.y)
 
-  @instruction(0xa9, 2, 0)
+  @instruction(name="LDA", mode="imm", cycles=2)
   def ia9(self):
     self.a = self.ImmediateByte()
     self.FlagsNZ(self.a)
     self.pc += 1
 
-  @instruction(0xaa, 2, 0)
+  @instruction(name="TAX", mode="imp", cycles=2)
   def iaa(self):
     self.x = self.a
     self.FlagsNZ(self.x)
 
-  @instruction(0xac, 4, 0)
+  @instruction(name="LDY", mode="abs", cycles=4)
   def iac(self):
     self.opLDY(self.AbsoluteAddr)
     self.pc += 2
 
-  @instruction(0xad, 4, 0)
+  @instruction(name="LDA", mode="abs", cycles=4)
   def iad(self):
     self.opLDA(self.AbsoluteAddr)
     self.pc += 2
 
-  @instruction(0xae, 4, 0)
+  @instruction(name="LDX", mode="abs", cycles=4)
   def iae(self):
     self.opLDX(self.AbsoluteAddr)
     self.pc += 2
   
-  @instruction(0xb0, 2, 2)
+  @instruction(name="BCS", mode="rel", cycles=2, extracycles=2)
   def ib0(self):
     self.opBST(self.CARRY)
   
-  @instruction(0xb1, 5, 1)
+  @instruction(name="LDA", mode="iny", cycles=5, extracycles=1)
   def ib1(self):
     self.opLDA(self.IndirectYAddr)
     self.pc+=1
 
-  @instruction(0xb4, 4, 0)
+  @instruction(name="LDY", mode="zpx", cycles=4)
   def ib4(self):
     self.opLDY(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0xb5, 4, 0)
+  @instruction(name="LDA", mode="zpx", cycles=4)
   def ib5(self):
     self.opLDA(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0xb6, 4, 0)
+  @instruction(name="LDX", mode="zpy", cycles=4)
   def ib6(self):
     self.opLDX(self.ZeroPageYAddr)
     self.pc+=1
 
-  @instruction(0xb8, 2, 0)
+  @instruction(name="CLV", mode="imp", cycles=2)
   def ib8(self):
     self.opCLR(self.OVERFLOW)
 
-  @instruction(0xb9, 4, 1)
+  @instruction(name="LDA", mode="aby", cycles=4, extracycles=1)
   def ib9(self):
     self.opLDA(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0xba, 2, 0)
+  @instruction(name="TSX", mode="imp", cycles=2)
   def iba(self):
     self.x = self.sp
     self.FlagsNZ(self.x)
     
-  @instruction(0xbc, 4, 1)
+  @instruction(name="LDY", mode="abx", cycles=4, extracycles=1)
   def ibc(self):
     self.opLDY(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0xbd, 4, 1)
+  @instruction(name="LDA", mode="abx", cycles=4, extracycles=1)
   def ibd(self):
     self.opLDA(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0xbe, 4, 1)
+  @instruction(name="LDX", mode="aby", cycles=4, extracycles=1)
   def ibe(self):
     self.opLDX(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0xc0, 2, 0)
+  @instruction(name="CPY", mode="imm", cycles=2)
   def ic0(self):
     tbyte = self.ImmediateByte()
     self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
@@ -1058,33 +1059,33 @@ class MPU:
       self.flags |= self.NEGATIVE
     self.pc += 1
 
-  @instruction(0xc1, 6, 0)
+  @instruction(name="CMP", mode="inx", cycles=6)
   def ic1(self):
     self.opCMP(self.IndirectXAddr)
     self.pc+=1
 
-  @instruction(0xc4, 3, 0)
+  @instruction(name="CPY", mode="zpg", cycles=3)
   def ic4(self):
     self.opCPY(self.ZeroPageAddr)
     self.pc += 1
 
-  @instruction(0xc5, 3, 0)
+  @instruction(name="CMP", mode="zpg", cycles=3)
   def ic5(self):
     self.opCMP(self.ZeroPageAddr)
     self.pc += 1
 
-  @instruction(0xc6, 5, 0)
+  @instruction(name="DEC", mode="zpg", cycles=5)
   def ic6(self):
     self.opDECR(self.ZeroPageAddr)
     self.pc += 1
 
-  @instruction(0xc8, 2, 0)
+  @instruction(name="INY", mode="imp", cycles=2)
   def ic8(self):
     self.y += 1
     self.y &= 255
     self.FlagsNZ(self.y)
 
-  @instruction(0xc9, 2, 0)
+  @instruction(name="CMP", mode="imm", cycles=2)
   def ic9(self):
     tbyte = self.ImmediateByte()
     self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
@@ -1096,66 +1097,66 @@ class MPU:
       self.flags |= self.NEGATIVE
     self.pc +=1
 
-  @instruction(0xca, 2, 0)
+  @instruction(name="DEX", mode="imp", cycles=2)
   def ica(self):
     self.x -= 1
     self.x &= 255
     self.FlagsNZ(self.x)
 
-  @instruction(0xcc, 4, 0)
+  @instruction(name="CPY", mode="abs", cycles=4)
   def icc(self):
     self.opCPY(self.AbsoluteAddr)
     self.pc += 2
 
-  @instruction(0xcd, 4, 0)
+  @instruction(name="CMP", mode="abs", cycles=4)
   def icd(self):
     self.opCMP(self.AbsoluteAddr)
     self.pc += 2
 
-  @instruction(0xce, 3, 0)
+  @instruction(name="DEC", mode="abs", cycles=3)
   def ice(self):
     self.opDECR(self.AbsoluteAddr)
     self.pc += 2
   
-  @instruction(0xd0, 2, 2)
+  @instruction(name="BNE", mode="rel", cycles=2, extracycles=2)
   def id0(self):
     self.opBCL(self.ZERO)
 
-  @instruction(0xd1, 5, 1)
+  @instruction(name="CMP", mode="iny", cycles=5, extracycles=1)
   def id1(self):
     self.opCMP(self.IndirectYAddr)
     self.pc+=1
   
-  @instruction(0xd5, 4, 0)
+  @instruction(name="CMP", mode="zpx", cycles=4)
   def id5(self):
     self.opCMP(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0xd6, 6, 0)
+  @instruction(name="DEC", mode="zpx", cycles=6)
   def id6(self):
     self.opDECR(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0xd8, 2, 0)
+  @instruction(name="CLD", mode="imp", cycles=2)
   def id8(self):
     self.opCLR(self.DECIMAL)
 
-  @instruction(0xd9, 4, 1)
+  @instruction(name="CMP", mode="aby", cycles=4, extracycles=1)
   def id9(self):
     self.opCMP(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0xdd, 4, 1)
+  @instruction(name="CMP", mode="abx", cycles=4, extracycles=1)
   def idd(self):
     self.opCMP(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0xde, 7, 0)
+  @instruction(name="DEC", mode="abx", cycles=7)
   def ide(self):
     self.opDECR(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0xe0, 2, 0)
+  @instruction(name="CPX", mode="imm", cycles=2)
   def ie0(self):
     tbyte = self.ImmediateByte()
     self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
@@ -1167,33 +1168,33 @@ class MPU:
       self.flags |= self.NEGATIVE
     self.pc += 1
 
-  @instruction(0xe1, 6, 0)
+  @instruction(name="SBC", mode="inx", cycles=6)
   def ie1(self):
     self.opSBC(self.IndirectXAddr)
     self.pc+=1
   
-  @instruction(0xe4, 3, 0)
+  @instruction(name="CPX", mode="zpg", cycles=3)
   def ie4(self):
     self.opCPX(self.ZeroPageAddr)
     self.pc+=1
   
-  @instruction(0xe5, 3, 0)
+  @instruction(name="SBC", mode="zpg", cycles=3)
   def ie5(self):
     self.opSBC(self.ZeroPageAddr)
     self.pc+=1
 
-  @instruction(0xe6, 5, 0)
+  @instruction(name="INC", mode="zpg", cycles=5)
   def ie6(self):
     self.opINCR(self.ZeroPageAddr)
     self.pc+=1
   
-  @instruction(0xe8, 2, 0)
+  @instruction(name="INX", mode="imp", cycles=2)
   def ie8(self):
     self.x+=1
     self.x&=255 
     self.FlagsNZ(self.x)
   
-  @instruction(0xe9, 2, 0)
+  @instruction(name="SBC", mode="imm", cycles=2)
   def ie9(self):
     data=self.ImmediateByte()
 
@@ -1230,59 +1231,59 @@ class MPU:
       self.a = data
     self.pc += 1
 
-  @instruction(0xea, 2, 0)
+  @instruction(name="NOP", mode="imp", cycles=2)
   def iea(self):
     pass
 
-  @instruction(0xec, 4, 0)
+  @instruction(name="CPX", mode="abs", cycles=4)
   def iec(self):
     self.opCPX(self.AbsoluteAddr)
     self.pc+=2
   
-  @instruction(0xed, 4, 0)
+  @instruction(name="SBC", mode="abs", cycles=4)
   def ied(self):
     self.opSBC(self.AbsoluteAddr)
     self.pc+=2
 
-  @instruction(0xee, 6, 0)
+  @instruction(name="INC", mode="abs", cycles=6)
   def iee(self):
     self.opINCR(self.AbsoluteAddr)
     self.pc+=2
 
-  @instruction(0xf0, 2, 2)
+  @instruction(name="BEQ", mode="rel", cycles=2, extracycles=2)
   def if0(self):
     self.opBST(self.ZERO)
 
-  @instruction(0xf1, 5, 1)
+  @instruction(name="SBC", mode="iny", cycles=5, extracycles=1)
   def if1(self):
     self.opSBC(self.IndirectYAddr)
     self.pc+=1
 
-  @instruction(0xf5, 4, 0)
+  @instruction(name="SBC", mode="zpx", cycles=4)
   def if5(self):
     self.opSBC(self.ZeroPageXAddr)
     self.pc+=1
 
-  @instruction(0xf6, 6, 0)
+  @instruction(name="INC", mode="zpx", cycles=6)
   def if6(self):
     self.opINCR(self.ZeroPageXAddr)
     self.pc+=1
   
-  @instruction(0xf8, 2, 0)
+  @instruction(name="SED", mode="imp", cycles=2)
   def if8(self):
     self.opSET(self.DECIMAL)
   
-  @instruction(0xf9, 4, 1)
+  @instruction(name="SBC", mode="aby", cycles=4, extracycles=1)
   def if9(self):
     self.opSBC(self.AbsoluteYAddr)
     self.pc+=2
 
-  @instruction(0xfd, 4, 1)
+  @instruction(name="SBC", mode="abx", cycles=4, extracycles=1)
   def ifd(self):
     self.opSBC(self.AbsoluteXAddr)
     self.pc+=2
 
-  @instruction(0xfe, 7, 0)  
+  @instruction(name="INC", mode="abx", cycles=7)  
   def ife(self):
     self.opINCR(self.AbsoluteXAddr)
     self.pc+=2

@@ -1,5 +1,5 @@
 import re
-from py65.disassembler import Disassembler
+from py65.devices.mpu6502 import MPU
 from py65.utils.addressing import AddressParser
 
 class Assembler:
@@ -24,13 +24,17 @@ class Assembler:
         ['imm', re.compile(r'^#\$([0-9A-F]{2})$')]                  # "#$12"
     ]
     
-    def __init__(self, address_parser=None):
+    def __init__(self, address_parser=None, mpu=None):
         """ If a configured AddressParser is passed, symbolic addresses
         may be used in the assembly statements.
         """
         if address_parser is None:
             address_parser = AddressParser()
 
+        if mpu is None:
+            mpu = MPU()
+
+        self._mpu = mpu
         self._address_parser = address_parser
 
     def assemble(self, statement, pc=0000):
@@ -45,7 +49,7 @@ class Assembler:
 
             if match:
                 try:
-                    bytes = [ Disassembler.Instructions.index([opcode, mode]) ]
+                    bytes = [ self._mpu.disassemble.index((opcode, mode)) ]
                 except ValueError:
                     continue
 
