@@ -49,6 +49,11 @@ class MPU(NMOS6502):
         self.opORA(self.IndirectXAddr)
         self.pc += 1
 
+    @instruction(name="AND", mode="zpi", cycles=5)
+    def i32(self):
+        self.opAND(self.ZeroPageIndirectAddr)
+        self.pc += 1
+
     @instruction(name="PHY", mode="imp", cycles=3)
     def i5a(self):
         self.stPush(self.y)

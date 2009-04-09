@@ -12,6 +12,35 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals('<65C02: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>',
                           repr(mpu))
 
+    # AND Zero Page, Indirect
+    
+    def test_and_zp_indirect_all_zeros_setting_zero_flag(self):
+        mpu = self._make_mpu()
+        mpu.a = 0xFF
+        self._write(mpu.memory, 0x0000, (0x32, 0x10)) #=> AND ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+  
+    def test_and_zp_indirect_zeros_and_ones_setting_negative_flag(self):
+        mpu = self._make_mpu()
+        mpu.a = 0xFF
+        self._write(mpu.memory, 0x0000, (0x32, 0x10)) #=> AND ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD    
+        mpu.memory[0xABCD] = 0xAA
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0xAA, mpu.a)
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+
     # LDA Zero Page, Indirect
 
     def test_lda_zp_indirect_loads_a_sets_n_flag(self):
@@ -22,6 +51,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0xABCD] = 0x80
         mpu.step()
         self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
         self.assertEquals(0x80, mpu.a)
         self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
         self.assertEquals(0, mpu.flags & mpu.ZERO)
@@ -34,6 +64,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0xABCD] = 0x00
         mpu.step()
         self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
         self.assertEquals(0x00, mpu.a)
         self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
         self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
@@ -49,9 +80,10 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0xABCD] = 0x00
         mpu.step()
         self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
         self.assertEquals(0x00, mpu.a)
         self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
-  
+          
     def test_ora_zp_indirect_x_turns_bits_on_sets_n_flag(self):
         mpu = self._make_mpu()
         mpu.flags &= ~(mpu.NEGATIVE)
@@ -61,6 +93,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0xABCD] = 0x82
         mpu.step()
         self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
         self.assertEquals(0x83, mpu.a)
         self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
         self.assertEquals(0, mpu.flags & mpu.ZERO)
