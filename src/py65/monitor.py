@@ -6,7 +6,8 @@ import re
 import shlex
 import asyncore
 import sys
-from py65.devices.mpu65c02 import MPU
+from py65.devices.mpu6502 import MPU as NMOS6502
+from py65.devices.mpu65c02 import MPU as CMOS65C02
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
@@ -16,16 +17,11 @@ from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
 
-    def __init__(self, options={}, completekey='tab', stdin=None, stdout=None):
-        self.options = options
+    def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None, stdout=None):
+        self._reset(mpu_type)
         self._width = 78
-        self._mpu = MPU()
-        self._install_mpu_observers()
         self._update_prompt()
         self._add_shortcuts()
-        self._address_parser = AddressParser()
-        self._disassembler = Disassembler(self._mpu, self._address_parser)
-        self._assembler = Assembler(self._mpu, self._address_parser)
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
 
     def onecmd(self, line):
@@ -43,6 +39,13 @@ class Monitor(cmd.Cmd):
 
         self._update_prompt()
         return result
+
+    def _reset(self, mpu_type):
+        self._mpu = mpu_type()
+        self._install_mpu_observers()
+        self._address_parser = AddressParser()
+        self._disassembler = Disassembler(self._mpu, self._address_parser)
+        self._assembler = Assembler(self._mpu, self._address_parser)
 
     def _add_shortcuts(self):
         self._shortcuts = {'~':   'tilde',
@@ -117,8 +120,32 @@ class Monitor(cmd.Cmd):
         self._output("reset\t\tReset the microprocessor")
 
     def do_reset(self, args):
-        self._mpu = MPU()
-        self._install_mpu_observers()
+        klass = self._mpu.__class__
+        self._reset(mpu_type=klass)
+
+    def do_mpu(self, args):                                         
+        mpus = {'6502': NMOS6502, '65C02': CMOS65C02}
+        
+        def available_mpus():
+            mpu_list = ', '.join(mpus.keys())
+            self._output("Available MPUs: %s" % mpu_list)            
+        
+        if args == '':                      
+            self._output("Current MPU is %s" % self._mpu.name)
+            available_mpus()
+        else:
+            requested = args.upper()
+            new_mpu = mpus.get(requested, None)
+            if new_mpu is None:
+                self._output("Unknown MPU: %s" % args)
+                available_mpus()
+            else:
+                self._reset(new_mpu)
+                self._output("Reset with new MPU %s" % self._mpu.name)
+
+    def help_mpu(self):
+        self._output("mpu\t\tPrint available microprocessors.")
+        self._output("mpu <type>\tSelect a new microprocessor.")
         
     def do_EOF(self, args):
         self._output('')
@@ -440,8 +467,8 @@ class Monitor(cmd.Cmd):
         self._output("Set the width used by some commands to wrap output.")
         self._output("With no argument, the current width is printed.")
 
-def main(args=None, options=None):
-    c = Monitor(options)
+def main(args=None):
+    c = Monitor()
 
     try:
         import readline

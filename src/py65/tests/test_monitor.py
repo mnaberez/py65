@@ -67,6 +67,59 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("assemble <address>"))
 
+    # mpu
+
+    def test_mpu_with_no_args_prints_current_lists_available_mpus(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mpu('') 
+
+        lines = stdout.getvalue().splitlines()
+        self.assertEqual(2, len(lines))
+        self.assertTrue(lines[0].startswith('Current MPU is '))
+        self.assertTrue(lines[1].startswith('Available MPUs:'))
+
+    def test_mpu_with_bad_arg_gives_error_lists_available_mpus(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mpu('z80') 
+
+        lines = stdout.getvalue().splitlines()
+        self.assertEqual(2, len(lines))
+        self.assertEqual('Unknown MPU: z80', lines[0])
+        self.assertTrue(lines[1].startswith('Available MPUs:'))
+
+    def test_mpu_selects_6502(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mpu('6502') 
+
+        lines = stdout.getvalue().splitlines()
+        self.assertEqual(1, len(lines))
+        self.assertEqual('Reset with new MPU 6502', lines[0])
+        self.assertEqual('6502', mon._mpu.name)
+
+    def test_mpu_selects_65C02(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mpu('65C02') 
+
+        lines = stdout.getvalue().splitlines()
+        self.assertEqual(1, len(lines))
+        self.assertEqual('Reset with new MPU 65C02', lines[0])
+        self.assertEqual('65C02', mon._mpu.name)
+
+    def test_help_mpu(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_mpu()  
+        
+        lines = stdout.getvalue().splitlines()    
+        self.assertEqual("mpu\t\tPrint available microprocessors.", 
+                         lines[0])
+        self.assertEqual("mpu <type>\tSelect a new microprocessor.",
+                         lines[1]) 
+
     # pwd
 
     def test_pwd_shows_os_getcwd(self):
@@ -135,8 +188,10 @@ class MonitorTests(unittest.TestCase):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         old_mpu = mon._mpu
+        old_name = mon._mpu.name
         mon.do_reset('')
         self.assertNotEqual(old_mpu, mon._mpu)
+        self.assertEqual(old_name, mon._mpu.name)
 
     def test_help_reset(self):
         stdout = StringIO()
