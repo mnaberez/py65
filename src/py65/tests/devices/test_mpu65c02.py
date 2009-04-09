@@ -250,6 +250,36 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(0xAB,   mpu.y)
         self.assertEquals(0xFF,   mpu.sp)
         self.assertEquals(4, mpu.processorCycles) 
+
+    # STA Zero Page, Indirect
+    
+    def test_sta_zp_indirect_stores_a_leaves_a_and_n_flag_unchanged(self):
+        mpu = self._make_mpu()
+        mpu.flags = flags = 0xFF & ~(mpu.NEGATIVE)
+        mpu.a = 0xFF
+        self._write(mpu.memory, 0x0000, (0x92, 0x10)) #=> STA ($0010)
+        self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
+        mpu.memory[0xFEED] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0xFF, mpu.memory[0xFEED])
+        self.assertEquals(0xFF, mpu.a)
+        self.assertEquals(flags, mpu.flags)
+  
+    def test_sta_zp_indirect_stores_a_leaves_a_and_z_flag_unchanged(self):
+        mpu = self._make_mpu()
+        mpu.flags = flags = 0xFF & ~(mpu.ZERO)
+        mpu.a = 0x00
+        self._write(mpu.memory, 0x0000, (0x92, 0x10)) #=> STA ($0010)
+        self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
+        mpu.memory[0xFEED] = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x00, mpu.memory[0xFEED])
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(flags, mpu.flags)
         
     # STZ Zero Page
 

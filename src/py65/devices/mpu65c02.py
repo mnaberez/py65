@@ -80,8 +80,13 @@ class MPU(NMOS6502):
 
     @instruction(name="PHY", mode="imp", cycles=4)
     def i7a(self):
-      self.y = self.stPop()
-      self.FlagsNZ(self.y)    
+        self.y = self.stPop()
+        self.FlagsNZ(self.y)    
+
+    @instruction(name="STA", mode="zpi", cycles=5)
+    def i92(self):
+        self.opSTA(self.ZeroPageIndirectAddr)
+        self.pc += 1
 
     @instruction(name="STZ", mode="abs", cycles=4)
     def i9c(self):
@@ -104,36 +109,36 @@ class MPU(NMOS6502):
 
     @instruction(name="PLX", mode="imp", cycles=4)
     def ifa(self):
-      self.x = self.stPop()
-      self.FlagsNZ(self.x)
+        self.x = self.stPop()
+        self.FlagsNZ(self.x)
 
     @instruction(name="TSB", mode="zpg", cycles=5)
     def i04(self):
-      self.opTSB(self.ZeroPageAddr)
-      self.pc += 1
+        self.opTSB(self.ZeroPageAddr)
+        self.pc += 1
 
     @instruction(name="TSB", mode="abs", cycles=6)
     def i0c(self):
-      self.opTSB(self.AbsoluteAddr)
-      self.pc += 2
+        self.opTSB(self.AbsoluteAddr)
+        self.pc += 2
 
     @instruction(name="TSB", mode="zpg", cycles=5)
     def i04(self):
-      self.opTSB(self.ZeroPageAddr)
-      self.pc += 1
+        self.opTSB(self.ZeroPageAddr)
+        self.pc += 1
 
     @instruction(name="TSB", mode="abs", cycles=6)
     def i0c(self):
-      self.opTSB(self.AbsoluteAddr)
-      self.pc += 2
+        self.opTSB(self.AbsoluteAddr)
+        self.pc += 2
 
     @instruction(name="TRB", mode="zpg", cycles=5)
     def i14(self):
-      self.opTRB(self.ZeroPageAddr)
-      self.pc += 1
+        self.opTRB(self.ZeroPageAddr)
+        self.pc += 1
 
     @instruction(name="TRB", mode="abs", cycles=6)
     def i1c(self):
-      self.opTRB(self.AbsoluteAddr)
-      self.pc += 2
+        self.opTRB(self.AbsoluteAddr)
+        self.pc += 2
 
