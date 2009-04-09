@@ -79,6 +79,13 @@ class Disassembler:
             disasm += ' ' + address_or_label
             length = 2
 
+        elif addressing == 'zpi':
+            zp_address = self._mpu.ByteAt(pc + 1)
+            address_or_label = self._address_parser.label_for(zp_address, 
+                '($%02x)' % zp_address)
+            disasm += ' %s' % address_or_label
+            length = 2
+
         elif addressing == 'zpg':
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(zp_address, 

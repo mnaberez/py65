@@ -12,6 +12,32 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals('<65C02: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>',
                           repr(mpu))
 
+    # LDA Zero Page, Indirect
+
+    def test_lda_zp_indirect_loads_a_sets_n_flag(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x00
+        self._write(mpu.memory, 0x0000, (0xB2, 0x10)) #=> LDA ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0x80
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(0x80, mpu.a)
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+
+    def test_lda_zp_indirect_loads_a_sets_z_flag(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x00
+        self._write(mpu.memory, 0x0000, (0xB2, 0x10)) #=> LDA ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
     # PHX
   
     def test_phx_pushes_x_and_updates_sp(self):

@@ -14,6 +14,11 @@ class MPU(NMOS6502):
     instruction = make_instruction_decorator(instruct, disassemble, 
                                                 cycletime, extracycles)
 
+    # addressing modes
+
+    def ZeroPageIndirectAddr(self):
+        return self.WordAt( 255 & (self.ByteAt(self.pc)))
+
     # operations
 
     def opSTZ(self, x):
@@ -66,7 +71,12 @@ class MPU(NMOS6502):
     @instruction(name="STZ", mode="abx", cycles=5)
     def i9e(self):
         self.opSTZ(self.AbsoluteXAddr)
-        self.pc+=2
+        self.pc += 2
+
+    @instruction(name="LDA", mode="zpi", cycles=5)
+    def ib2(self):
+        self.opLDA(self.ZeroPageIndirectAddr)
+        self.pc += 1
 
     @instruction(name="PHX", mode="imp", cycles=3)
     def ida(self):

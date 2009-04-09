@@ -8,6 +8,7 @@ class Assembler:
                            r'[,xXyY\s]*)$')
                            
     Addressing = [
+        ['zpi', re.compile(r'^\(\$00([0-9A-F]{2})\)$')],            # "($0012)"
         ['zpx', re.compile(r'^\$00([0-9A-F]{2}),X$')],              # "$0012,X"
         ['zpy', re.compile(r'^\$00([0-9A-F]{2}),Y$')],              # "$0012,Y"
         ['zpg', re.compile(r'^\$00([0-9A-F]{2})$')],                # "$0012"
