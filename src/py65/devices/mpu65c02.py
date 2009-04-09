@@ -54,6 +54,11 @@ class MPU(NMOS6502):
         self.opAND(self.ZeroPageIndirectAddr)
         self.pc += 1
 
+    @instruction(name="BIT", mode="zpx", cycles=4)
+    def inst_0x34(self):
+        self.opBIT(self.ZeroPageXAddr)
+        self.pc += 1
+
     @instruction(name="EOR", mode="zpi", cycles=5)
     def inst_0x52(self):
         self.opEOR(self.ZeroPageIndirectAddr)

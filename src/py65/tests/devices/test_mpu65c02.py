@@ -113,6 +113,98 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
         self.assertEquals(0, mpu.flags & mpu.ZERO)
 
+    # BIT (Zero Page)
+  
+    def test_bit_zp_x_copies_bit_7_of_memory_to_n_flag_when_0(self):
+        mpu = self._make_mpu()
+        mpu.flags &= ~(mpu.NEGATIVE)
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0xFF
+        mpu.x = 0x03
+        mpu.a = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles)
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+  
+    def test_bit_zp_x_copies_bit_7_of_memory_to_n_flag_when_1(self):
+        mpu = self._make_mpu()
+        mpu.flags &= mpu.NEGATIVE
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0x00
+        mpu.x = 0x03
+        mpu.a = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+    
+    def test_bit_zp_x_copies_bit_6_of_memory_to_v_flag_when_0(self):
+        mpu = self._make_mpu()
+        mpu.flags &= ~(mpu.OVERFLOW)
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0xFF
+        mpu.x = 0x03
+        mpu.a = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles)
+        self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)
+  
+    def test_bit_zp_x_copies_bit_6_of_memory_to_v_flag_when_1(self):
+        mpu = self._make_mpu()
+        mpu.flags &= mpu.OVERFLOW
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0x00
+        mpu.x = 0x03
+        mpu.a = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles)
+        self.assertEquals(0, mpu.flags & mpu.OVERFLOW)
+  
+    def test_bit_zp_x_stores_result_of_and_in_z_while_preserving_a_when_1(self):
+        mpu = self._make_mpu()   
+        mpu.flags &= mpu.ZERO
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0x00
+        mpu.x = 0x03
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles) 
+        self.assertEquals(0x01, mpu.a)  
+        self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+  
+    def test_bit_zp_x_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
+        mpu = self._make_mpu()   
+        mpu.flags &= mpu.ZERO
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0x01
+        mpu.x = 0x03
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEquals(0, mpu.flags & mpu.ZERO) # result of AND is non-zero
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles)
+        self.assertEquals(0x01, mpu.a)
+        self.assertEquals(0x01, mpu.memory[0x0010 + mpu.x])
+  
+    def test_bit_zp_x_stores_result_of_and_when_zero_in_z_while_preserving_a(self):
+        mpu = self._make_mpu()   
+        mpu.flags &= ~(mpu.ZERO)
+        self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
+        mpu.memory[0x0013] = 0x00
+        mpu.x = 0x03
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(4, mpu.processorCycles)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO) # result of AND is zero
+        self.assertEquals(0x01, mpu.a)
+        self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+   
     # EOR Zero Page, Indirect
   
     def test_eor_zp_indirect_flips_bits_over_setting_z_flag(self):
