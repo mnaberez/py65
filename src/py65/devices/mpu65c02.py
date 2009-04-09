@@ -19,6 +19,9 @@ class MPU(NMOS6502):
     def ZeroPageIndirectAddr(self):
         return self.WordAt( 255 & (self.ByteAt(self.pc)))
 
+    def AccumulatorAddr(self):
+        return self.a
+
     # operations
 
     def opSTZ(self, x):
@@ -136,6 +139,21 @@ class MPU(NMOS6502):
     def inst_0x1c(self):
         self.opTRB(self.AbsoluteAddr)
         self.pc += 2
+
+    @instruction(name="DEC", mode="imp", cycles=2)
+    def inst_0x3a(self):
+        tbyte = self.a
+        self.flags &= ~(self.ZERO + self.NEGATIVE)
+        tbyte = (tbyte - 1) & 0xFF
+        if tbyte:
+            self.flags |= tbyte & self.NEGATIVE
+        else:
+            self.flags |= self.ZERO
+        self.a = tbyte
+
+    @instruction(name="BRA", mode="rel", cycles=1, extracycles=1)
+    def inst_0x80(self):
+        self.BranchRelAddr()
 
     @instruction(name="SBC", mode="zpi", cycles=5)
     def inst_0xf2(self):

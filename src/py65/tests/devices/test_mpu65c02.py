@@ -595,6 +595,47 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(0x0003, mpu.pc)
         self.assertEquals(6, mpu.processorCycles)
 
+    def test_dec_a_decreases_a(self):
+        mpu = self._make_mpu(debug=True)
+        self._write(mpu.memory, 0x0000, [0x3A]) #=> DEC A
+        mpu.a = 0x48
+        mpu.step()
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0x47, mpu.a)
+
+    def test_dec_a_sets_zero_flag(self):
+        mpu = self._make_mpu(debug=True)
+        self._write(mpu.memory, 0x0000, [0x3A]) #=> DEC A
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0x00, mpu.a)
+
+    def test_dec_a_wraps_at_zero(self):
+        mpu = self._make_mpu(debug=True)
+        self._write(mpu.memory, 0x0000, [0x3A]) #=> DEC A
+        mpu.a = 0x00
+        mpu.step()
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0xFF, mpu.a)
+
+    def test_bra_forward(self):
+        mpu = self._make_mpu(debug=True)
+        self._write(mpu.memory, 0x0000, [0x80, 0x10]) #=> BRA $10
+        mpu.step()
+        self.assertEquals(0x12, mpu.pc)
+        self.assertEquals(2, mpu.processorCycles)
+
+    def test_bra_backward(self):
+        mpu = self._make_mpu(debug=True)
+        self._write(mpu.memory, 0x0204, [0x80, 0xF0]) #=> BRA $F0
+        mpu.pc = 0x0204
+        mpu.step()
+        self.assertEquals(0x1F6, mpu.pc)
+        self.assertEquals(3, mpu.processorCycles) # Crossed boundry
 
     # Test Helpers
 
