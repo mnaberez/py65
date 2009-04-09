@@ -12,6 +12,79 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals('<65C02: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>',
                           repr(mpu))
 
+    # ADC Zero Page, Indirect
+    
+    def test_adc_bcd_off_zp_indirect_carry_clear_in_accumulator_zeroes(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x00
+        self._write(mpu.memory, 0x0000, (0x72, 0x10)) #=> $0000 ADC ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(0, mpu.flags & mpu.CARRY)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+       
+    def test_adc_bcd_off_zp_indirect_carry_set_in_accumulator_zero(self):
+        mpu = self._make_mpu()
+        mpu.a = 0
+        mpu.flags |= mpu.CARRY
+        self._write(mpu.memory, 0x0000, (0x72, 0x10)) #=> $0000 ADC ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x01, mpu.a)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+        self.assertNotEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
+    
+    def test_adc_bcd_off_zp_indirect_carry_clear_in_no_carry_clear_out(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x01
+        self._write(mpu.memory, 0x0000, (0x72, 0x10)) #=> $0000 ADC ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0xFE
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0xFF, mpu.a)
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.CARRY)    
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+    
+    def test_adc_bcd_off_zp_indirect_carry_clear_in_carry_set_out(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x02
+        self._write(mpu.memory, 0x0000, (0x72, 0x10)) #=> $0000 ADC ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0xFF
+        mpu.step()    
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x01, mpu.a)
+        self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)        
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.ZERO)
+    
+    def test_adc_bcd_off_zp_indirect_overflow(self):
+        mpu = self._make_mpu()
+        mpu.a = 0xFF
+        self._write(mpu.memory, 0x0000, (0x72, 0x10)) #=> $0000 ADC ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0xFE, mpu.a)
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+        self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+        self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
     # AND Zero Page, Indirect
     
     def test_and_zp_indirect_all_zeros_setting_zero_flag(self):

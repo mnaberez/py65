@@ -68,6 +68,11 @@ class MPU(NMOS6502):
         self.opSTZ(self.ZeroPageAddr)
         self.pc += 1
 
+    @instruction(name="ADC", mode="zpi", cycles=5)
+    def i72(self):
+        self.opADC(self.ZeroPageIndirectAddr)
+        self.pc += 1
+
     @instruction(name="STZ", mode="zpx", cycles=4)
     def i74(self):
         self.opSTZ(self.ZeroPageXAddr)
