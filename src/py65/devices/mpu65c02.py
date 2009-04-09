@@ -142,3 +142,8 @@ class MPU(NMOS6502):
         self.opTRB(self.AbsoluteAddr)
         self.pc += 2
 
+    @instruction(name="SBC", mode="zpi", cycles=5)
+    def if2(self):
+        self.opSBC(self.ZeroPageIndirectAddr)
+        self.pc += 1
+

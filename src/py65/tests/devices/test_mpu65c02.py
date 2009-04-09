@@ -280,7 +280,73 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(0x00, mpu.memory[0xFEED])
         self.assertEquals(0x00, mpu.a)
         self.assertEquals(flags, mpu.flags)
-        
+
+    # SBC Zero Page, Indirect
+ 
+    def test_sbc_zp_indirect_all_zeros_and_no_borrow_is_zero(self):
+        mpu = self._make_mpu()
+        mpu.flags &= ~(mpu.DECIMAL)
+        mpu.flags |= mpu.CARRY # borrow = 0
+        mpu.a = 0x00
+        self._write(mpu.memory, 0x0000, (0xF2, 0x10)) #=> SBC ($10)
+        self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
+        mpu.memory[0xFEED] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(mpu.CARRY, mpu.CARRY)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    
+    def test_sbc_zp_indirect_downto_zero_no_borrow_sets_z_clears_n(self):
+        mpu = self._make_mpu()
+        mpu.flags &= ~(mpu.DECIMAL)
+        mpu.flags |= mpu.CARRY # borrow = 0
+        mpu.a = 0x01
+        self._write(mpu.memory, 0x0000, (0xF2, 0x10)) #=> SBC ($10)
+        self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
+        mpu.memory[0xFEED] = 0x01
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(mpu.CARRY, mpu.CARRY)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+  
+    def test_sbc_zp_indirect_downto_zero_with_borrow_sets_z_clears_n(self):
+        mpu = self._make_mpu()
+        mpu.flags &= ~(mpu.DECIMAL)
+        mpu.flags &= ~(mpu.CARRY) # borrow = 1
+        mpu.a = 0x01
+        self._write(mpu.memory, 0x0000, (0xF2, 0x10)) #=> SBC ($10)
+        self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
+        mpu.memory[0xFEED] = 0x00
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(mpu.CARRY, mpu.CARRY)
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)  
+            
+    def test_sbc_zp_indirect_downto_four_with_borrow_clears_z_n(self):
+        mpu = self._make_mpu()
+        mpu.flags &= ~(mpu.DECIMAL)
+        mpu.flags &= ~(mpu.CARRY) # borrow = 1
+        mpu.a = 0x07
+        self._write(mpu.memory, 0x0000, (0xF2, 0x10)) #=> SBC ($10)
+        self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
+        mpu.memory[0xFEED] = 0x02
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        self.assertEquals(0x04, mpu.a)
+        self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.ZERO)  
+        self.assertEquals(mpu.CARRY, mpu.CARRY)
+            
     # STZ Zero Page
 
     def test_stz_zp_stores_zero(self):
