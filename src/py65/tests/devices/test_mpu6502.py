@@ -1125,6 +1125,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0xFF
     mpu.a = 0xFF
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
 
   def test_bit_zp_copies_bit_7_of_memory_to_n_flag_when_1(self):
@@ -1134,6 +1136,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0x00
     mpu.a = 0xFF
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
   
   def test_bit_zp_copies_bit_6_of_memory_to_v_flag_when_0(self):
@@ -1143,6 +1147,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0xFF
     mpu.a = 0xFF
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)
 
   def test_bit_zp_copies_bit_6_of_memory_to_v_flag_when_1(self):
@@ -1152,6 +1158,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0x00
     mpu.a = 0xFF
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(0, mpu.flags & mpu.OVERFLOW)
 
   def test_bit_zp_stores_result_of_and_in_z_while_preserving_a_when_1(self):
@@ -1161,6 +1169,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0x00
     mpu.a = 0x01
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
     self.assertEquals(0x01, mpu.a)  
     self.assertEquals(0x00, mpu.memory[0x0010])
@@ -1172,6 +1182,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0x01
     mpu.a = 0x01
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(0, mpu.flags & mpu.ZERO) # result of AND is non-zero
     self.assertEquals(0x01, mpu.a)
     self.assertEquals(0x01, mpu.memory[0x0010])
@@ -1183,6 +1195,8 @@ class Common6502Tests:
     mpu.memory[0x0010] = 0x00
     mpu.a = 0x01
     mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(3, mpu.processorCycles)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO) # result of AND is zero
     self.assertEquals(0x01, mpu.a)
     self.assertEquals(0x00, mpu.memory[0x0010])
