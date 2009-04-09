@@ -127,16 +127,6 @@ class MPU(NMOS6502):
         self.opTSB(self.AbsoluteAddr)
         self.pc += 2
 
-    @instruction(name="TSB", mode="zpg", cycles=5)
-    def inst_0x04(self):
-        self.opTSB(self.ZeroPageAddr)
-        self.pc += 1
-
-    @instruction(name="TSB", mode="abs", cycles=6)
-    def inst_0x0c(self):
-        self.opTSB(self.AbsoluteAddr)
-        self.pc += 2
-
     @instruction(name="TRB", mode="zpg", cycles=5)
     def inst_0x14(self):
         self.opTRB(self.ZeroPageAddr)
