@@ -46,7 +46,7 @@ class MPU(NMOS6502):
     
     @instruction(name="ORA", mode="zpi", cycles=5)
     def inst_0x12(self):
-        self.opORA(self.IndirectXAddr)
+        self.opORA(self.ZeroPageIndirectAddr)
         self.pc += 1
 
     @instruction(name="AND", mode="zpi", cycles=5)

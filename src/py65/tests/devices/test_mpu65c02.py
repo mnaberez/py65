@@ -264,7 +264,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     # ORA Zero Page, Indirect
     
-    def test_ora_zp_indirect_x_zeroes_or_zeros_sets_z_flag(self):
+    def test_ora_zp_indirect_zeroes_or_zeros_sets_z_flag(self):
         mpu = self._make_mpu()
         mpu.flags &= ~(mpu.ZERO)
         mpu.a = 0x00
@@ -277,7 +277,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(0x00, mpu.a)
         self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
           
-    def test_ora_zp_indirect_x_turns_bits_on_sets_n_flag(self):
+    def test_ora_zp_indirect_turns_bits_on_sets_n_flag(self):
         mpu = self._make_mpu()
         mpu.flags &= ~(mpu.NEGATIVE)
         mpu.a = 0x03
