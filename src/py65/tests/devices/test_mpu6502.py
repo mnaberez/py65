@@ -2815,7 +2815,7 @@ class Common6502Tests:
     mpu.flags &= ~(mpu.NEGATIVE)
     mpu.a = 0x03
     mpu.x = 0x03
-    self._write(mpu.memory, 0x0000, (0x01, 0x10)) #=> ORA ($ABCD,X)
+    self._write(mpu.memory, 0x0000, (0x01, 0x10)) #=> ORA ($0010,X)
     self._write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
     mpu.memory[0xABCD] = 0x82
     mpu.step()
