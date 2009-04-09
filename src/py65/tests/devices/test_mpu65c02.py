@@ -40,6 +40,34 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
         self.assertEquals(0, mpu.flags & mpu.ZERO)
 
+    # EOR Zero Page, Indirect
+  
+    def test_eor_zp_indirect_flips_bits_over_setting_z_flag(self):
+        mpu = self._make_mpu()
+        mpu.a = 0xFF
+        self._write(mpu.memory, 0x0000, (0x52, 0x10)) #=> EOR ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles) 
+        self.assertEquals(0x00, mpu.a)
+        self.assertEquals(0xFF, mpu.memory[0xABCD])
+        self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+  
+    def test_eor_zp_indirect_flips_bits_over_setting_n_flag(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x00
+        self._write(mpu.memory, 0x0000, (0x52, 0x10)) #=> EOR ($0010)
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+        mpu.memory[0xABCD] = 0xFF
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles) 
+        self.assertEquals(0xFF, mpu.a)
+        self.assertEquals(0xFF, mpu.memory[0xABCD])
+        self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
+        self.assertEquals(0, mpu.flags & mpu.ZERO)      
 
     # LDA Zero Page, Indirect
 
