@@ -43,6 +43,11 @@ class MPU(NMOS6502):
         self.memory[address] = m & ~self.a
 
     # instructions
+    
+    @instruction(name="ORA", mode="zpi", cycles=5)
+    def i12(self):
+        self.opORA(self.IndirectXAddr)
+        self.pc += 1
 
     @instruction(name="PHY", mode="imp", cycles=3)
     def i5a(self):
