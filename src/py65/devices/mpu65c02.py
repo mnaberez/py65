@@ -24,6 +24,10 @@ class MPU(NMOS6502):
 
     # operations
 
+    def opRMB(self, x, mask):
+        address = x()
+        self.memory[address] &= mask
+
     def opSTZ(self, x):
         self.memory[x()] = 0x00
 
@@ -46,10 +50,25 @@ class MPU(NMOS6502):
         self.memory[address] = m & ~self.a
 
     # instructions
+
+    @instruction(name="RMB0", mode="zpg", cycles=5)
+    def inst_0x07(self):
+        self.opRMB(self.ZeroPageAddr, 0xFE)
+        self.pc += 1
     
     @instruction(name="ORA", mode="zpi", cycles=5)
     def inst_0x12(self):
         self.opORA(self.ZeroPageIndirectAddr)
+        self.pc += 1
+
+    @instruction(name="RMB1", mode="zpg", cycles=5)
+    def inst_0x17(self):
+        self.opRMB(self.ZeroPageAddr, 0xFD)
+        self.pc += 1
+
+    @instruction(name="RMB2", mode="zpg", cycles=5)
+    def inst_0x27(self):
+        self.opRMB(self.ZeroPageAddr, 0xFB)
         self.pc += 1
 
     @instruction(name="AND", mode="zpi", cycles=5)
@@ -62,9 +81,24 @@ class MPU(NMOS6502):
         self.opBIT(self.ZeroPageXAddr)
         self.pc += 1
 
+    @instruction(name="RMB3", mode="zpg", cycles=5)
+    def inst_0x37(self):
+        self.opRMB(self.ZeroPageAddr, 0xF7)
+        self.pc += 1
+
+    @instruction(name="RMB4", mode="zpg", cycles=5)
+    def inst_0x47(self):
+        self.opRMB(self.ZeroPageAddr, 0xEF)
+        self.pc += 1
+
     @instruction(name="EOR", mode="zpi", cycles=5)
     def inst_0x52(self):
         self.opEOR(self.ZeroPageIndirectAddr)
+        self.pc += 1
+
+    @instruction(name="RMB5", mode="zpg", cycles=5)
+    def inst_0x57(self):
+        self.opRMB(self.ZeroPageAddr, 0xDF)
         self.pc += 1
 
     @instruction(name="PHY", mode="imp", cycles=3)
@@ -74,6 +108,11 @@ class MPU(NMOS6502):
     @instruction(name="STZ", mode="imp", cycles=3)
     def inst_0x64(self):
         self.opSTZ(self.ZeroPageAddr)
+        self.pc += 1
+
+    @instruction(name="RMB6", mode="zpg", cycles=5)
+    def inst_0x67(self):
+        self.opRMB(self.ZeroPageAddr, 0xBF)
         self.pc += 1
 
     @instruction(name="ADC", mode="zpi", cycles=5)
@@ -90,6 +129,11 @@ class MPU(NMOS6502):
     def inst_0x7a(self):
         self.y = self.stPop()
         self.FlagsNZ(self.y)    
+
+    @instruction(name="RMB7", mode="zpg", cycles=5)
+    def inst_0x77(self):
+        self.opRMB(self.ZeroPageAddr, 0x7F)
+        self.pc += 1
 
     @instruction(name="STA", mode="zpi", cycles=5)
     def inst_0x92(self):
