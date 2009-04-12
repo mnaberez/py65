@@ -28,6 +28,10 @@ class MPU(NMOS6502):
         address = x()
         self.memory[address] &= mask
 
+    def opSMB(self, x, mask):
+        address = x()
+        self.memory[address] |= mask
+
     def opSTZ(self, x):
         self.memory[x()] = 0x00
 
@@ -135,9 +139,19 @@ class MPU(NMOS6502):
         self.opRMB(self.ZeroPageAddr, 0x7F)
         self.pc += 1
 
+    @instruction(name="SMB0", mode="zpg", cycles=5)
+    def inst_0x87(self):
+        self.opSMB(self.ZeroPageAddr, 0x01)
+        self.pc += 1
+
     @instruction(name="STA", mode="zpi", cycles=5)
     def inst_0x92(self):
         self.opSTA(self.ZeroPageIndirectAddr)
+        self.pc += 1
+
+    @instruction(name="SMB1", mode="zpg", cycles=5)
+    def inst_0x97(self):
+        self.opSMB(self.ZeroPageAddr, 0x02)
         self.pc += 1
 
     @instruction(name="STZ", mode="abs", cycles=4)
@@ -150,14 +164,44 @@ class MPU(NMOS6502):
         self.opSTZ(self.AbsoluteXAddr)
         self.pc += 2
 
+    @instruction(name="SMB2", mode="zpg", cycles=5)
+    def inst_0xa7(self):
+        self.opSMB(self.ZeroPageAddr, 0x04)
+        self.pc += 1
+
     @instruction(name="LDA", mode="zpi", cycles=5)
     def inst_0xb2(self):
         self.opLDA(self.ZeroPageIndirectAddr)
         self.pc += 1
 
+    @instruction(name="SMB3", mode="zpg", cycles=5)
+    def inst_0xb7(self):
+        self.opSMB(self.ZeroPageAddr, 0x08)
+        self.pc += 1
+
+    @instruction(name="SMB4", mode="zpg", cycles=5)
+    def inst_0xc7(self):
+        self.opSMB(self.ZeroPageAddr, 0x10)
+        self.pc += 1
+
+    @instruction(name="SMB5", mode="zpg", cycles=5)
+    def inst_0xd7(self):
+        self.opSMB(self.ZeroPageAddr, 0x20)
+        self.pc += 1
+
     @instruction(name="PHX", mode="imp", cycles=3)
     def inst_0xda(self):
         self.stPush(self.x)
+
+    @instruction(name="SMB6", mode="zpg", cycles=5)
+    def inst_0xe7(self):
+        self.opSMB(self.ZeroPageAddr, 0x40)
+        self.pc += 1
+
+    @instruction(name="SMB7", mode="zpg", cycles=5)
+    def inst_0xf7(self):
+        self.opSMB(self.ZeroPageAddr, 0x80)
+        self.pc += 1
 
     @instruction(name="PLX", mode="imp", cycles=4)
     def inst_0xfa(self):

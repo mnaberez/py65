@@ -469,6 +469,174 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(0x00, mpu.a)
         self.assertEquals(flags, mpu.flags)
 
+    # SMB0
+    
+    def test_smb0_sets_bit_0_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0x87, 0x43)) #=> SMB0 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('00000001', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb0_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0x87, 0x43)) #=> SMB0 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
+    # SMB1
+    
+    def test_smb1_sets_bit_1_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0x97, 0x43)) #=> SMB1 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('00000010', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb1_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0x97, 0x43)) #=> SMB1 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
+    # SMB2
+
+    def test_smb2_sets_bit_2_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xA7, 0x43)) #=> SMB2 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('00000100', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb2_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xA7, 0x43)) #=> SMB2 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
+    # SMB3
+
+    def test_smb3_sets_bit_3_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xB7, 0x43)) #=> SMB3 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('00001000', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb3_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xB7, 0x43)) #=> SMB3 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
+    # SMB4
+
+    def test_smb4_sets_bit_4_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xC7, 0x43)) #=> SMB4 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('00010000', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb4_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xC7, 0x43)) #=> SMB4 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
+    # SMB5
+
+    def test_smb5_sets_bit_5_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xD7, 0x43)) #=> SMB5 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('00100000', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb5_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xD7, 0x43)) #=> SMB5 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
+    # SMB6
+
+    def test_smb6_sets_bit_6_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xE7, 0x43)) #=> SMB6 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('01000000', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb6_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xE7, 0x43)) #=> SMB6 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+ 
+    # SMB7
+
+    def test_smb7_sets_bit_7_without_affecting_other_bits(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xF7, 0x43)) #=> SMB7 $43
+        mpu.step()
+        self.assertEquals(0x0002, mpu.pc)
+        self.assertEquals(5, mpu.processorCycles)
+        expected = int('10000000', 2)
+        self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_smb7_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('00000000',2)
+        self._write(mpu.memory, 0x0000, (0xF7, 0x43)) #=> SMB7 $43
+        expected = int('11001100', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
     # SBC Zero Page, Indirect
  
     def test_sbc_zp_indirect_all_zeros_and_no_borrow_is_zero(self):
