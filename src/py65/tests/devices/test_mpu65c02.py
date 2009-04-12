@@ -355,6 +355,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         expected = int('11111110', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
 
+    def test_rmb0_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x07, 0x43)) #=> RMB0 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
     # RMB1
     
     def test_rmb1_clears_bit_1_without_affecting_other_bits(self):
@@ -366,6 +375,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(5, mpu.processorCycles)
         expected = int('11111101', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_rmb1_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x17, 0x43)) #=> RMB1 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
 
     # RMB2
     
@@ -379,6 +397,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         expected = int('11111011', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
 
+    def test_rmb2_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x27, 0x43)) #=> RMB2 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
     # RMB3
     
     def test_rmb3_clears_bit_3_without_affecting_other_bits(self):
@@ -390,6 +417,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(5, mpu.processorCycles)
         expected = int('11110111', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_rmb3_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x37, 0x43)) #=> RMB3 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
 
     # RMB4
     
@@ -403,6 +439,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         expected = int('11101111', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
 
+    def test_rmb4_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x47, 0x43)) #=> RMB4 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
     # RMB5
     
     def test_rmb5_clears_bit_5_without_affecting_other_bits(self):
@@ -414,6 +459,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(5, mpu.processorCycles)
         expected = int('11011111', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_rmb5_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x57, 0x43)) #=> RMB5 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
 
     # RMB6
     
@@ -427,6 +481,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         expected = int('10111111', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
 
+    def test_rmb6_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x67, 0x43)) #=> RMB6 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
+
     # RMB7
     
     def test_rmb7_clears_bit_7_without_affecting_other_bits(self):
@@ -438,6 +501,15 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEquals(5, mpu.processorCycles)
         expected = int('01111111', 2)
         self.assertEquals(expected, mpu.memory[0x0043])
+
+    def test_rmb7_does_not_affect_status_register(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0043] = int('11111111',2)
+        self._write(mpu.memory, 0x0000, (0x77, 0x43)) #=> RMB7 $43
+        expected = int('01010101', 2)
+        mpu.flags = expected
+        mpu.step()
+        self.assertEquals(expected, mpu.flags)
 
     # STA Zero Page, Indirect
     
