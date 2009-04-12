@@ -237,7 +237,7 @@ class MPU(mpu6502.MPU):
         self.opTRB(self.AbsoluteAddr)
         self.pc += 2
 
-    @instruction(name="DEC", mode="imp", cycles=2)
+    @instruction(name="DEA", mode="imp", cycles=2)
     def inst_0x3a(self):
         tbyte = self.a
         self.flags &= ~(self.ZERO + self.NEGATIVE)
