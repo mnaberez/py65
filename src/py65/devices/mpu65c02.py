@@ -232,6 +232,17 @@ class MPU(mpu6502.MPU):
         self.opTRB(self.ZeroPageAddr)
         self.pc += 1
 
+    @instruction(name="INA", mode="imp", cycles=2)
+    def inst_0x1a(self):
+        tbyte = self.a
+        self.flags &= ~(self.ZERO + self.NEGATIVE)
+        tbyte = (tbyte + 1) & 0xFF
+        if tbyte:
+            self.flags |= tbyte & self.NEGATIVE
+        else:
+            self.flags |= self.ZERO
+        self.a = tbyte
+
     @instruction(name="TRB", mode="abs", cycles=6)
     def inst_0x1c(self):
         self.opTRB(self.AbsoluteAddr)
