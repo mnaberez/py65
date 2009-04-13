@@ -1,15 +1,24 @@
-from py65.devices.mpu6502 import MPU as NMOS6502
+from py65.devices import mpu6502 
 from py65.utils.devices import make_instruction_decorator
 
-class MPU(NMOS6502):
+class MPU(mpu6502.MPU):
     def __init__(self, *args, **kwargs):
-        NMOS6502.__init__(self, *args, **kwargs)
+        mpu6502.MPU.__init__(self, *args, **kwargs)
         self.name = '65C02'
+        self.waiting = False
 
-    instruct    = NMOS6502.instruct[:]
-    cycletime   = NMOS6502.cycletime[:]
-    extracycles = NMOS6502.extracycles[:]
-    disassemble = NMOS6502.disassemble[:]
+    def step(self):
+        if self.waiting:
+            self.processorCycles += 1
+        else:
+            mpu6502.MPU.step(self)
+        return self
+
+    # Make copies of the lists
+    instruct    = mpu6502.MPU.instruct[:]
+    cycletime   = mpu6502.MPU.cycletime[:]
+    extracycles = mpu6502.MPU.extracycles[:]
+    disassemble = mpu6502.MPU.disassemble[:]
 
     instruction = make_instruction_decorator(instruct, disassemble, 
                                                 cycletime, extracycles)
@@ -242,6 +251,10 @@ class MPU(NMOS6502):
     @instruction(name="BRA", mode="rel", cycles=1, extracycles=1)
     def inst_0x80(self):
         self.BranchRelAddr()
+
+    @instruction(name="WAI", mode='imp', cycles=3)
+    def inst_0xCB(self):
+        self.waiting = True
 
     @instruction(name="SBC", mode="zpi", cycles=5)
     def inst_0xf2(self):
