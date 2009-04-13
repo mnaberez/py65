@@ -268,6 +268,8 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu = self._make_mpu()
         mpu.flags &= ~(mpu.ZERO)
         mpu.a = 0x00
+        mpu.y = 0x12 # These should not affect the ORA
+        mpu.x = 0x34
         self._write(mpu.memory, 0x0000, (0x12, 0x10)) #=> ORA ($0010)
         self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
         mpu.memory[0xABCD] = 0x00
