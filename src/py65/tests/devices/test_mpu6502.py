@@ -1288,7 +1288,7 @@ class Common6502Tests:
     self.assertEquals(0xABCD, mpu.pc)
 
     self.assertEquals(0xC0,      mpu.memory[0x1FF]) # PCH
-    self.assertEquals(0x03,      mpu.memory[0x1FE]) # PCL
+    self.assertEquals(0x02,      mpu.memory[0x1FE]) # PCL
     self.assertEquals(mpu.BREAK, mpu.memory[0x1FD]) # Status (P)
     self.assertEquals(0xFC,      mpu.sp)
 
@@ -4541,6 +4541,36 @@ class Common6502Tests:
     for name, mode in mpu.disassemble:
         self.assert_(mode in valid_modes)
     
+  def test_brk_interrupt(self):
+    mpu = self._make_mpu()
+    mpu.flags = 0x00
+    self._write(mpu.memory, 0xFFFE, (0x00, 0x04)) # 0x0400
+
+    self._write(mpu.memory, 0x0000, (0xA9, 0x01,  #=> LDA #$01
+                                     0x00, 0xEA,  #=> BRK (and skipped byte)
+                                     0xEA, 0xEA,  #=> NOP, NOP
+                                     0xA9, 0x03)) #=> LDA #$03
+
+    self._write(mpu.memory, 0x0400, (0xA9, 0x02, #=> LDA #$02
+                                     0x40))      #=> RTI
+
+    mpu.step() # LDA #$01
+    self.assertEquals(0x01, mpu.a)
+    self.assertEquals(0x0002, mpu.pc)
+    mpu.step() # BRK
+    self.assertEquals(0x0400, mpu.pc)
+    mpu.step() # LDA #$02
+    self.assertEquals(0x02, mpu.a)
+    self.assertEquals(0x0402, mpu.pc)
+    mpu.step() # RTI
+
+    self.assertEquals(0x0004, mpu.pc)
+    mpu.step() # A NOP
+    mpu.step() # The second NOP
+
+    mpu.step() # LDA #$03
+    self.assertEquals(0x03, mpu.a)
+    self.assertEquals(0x0008, mpu.pc)
 
   # Test Helpers
 
