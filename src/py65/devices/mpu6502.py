@@ -23,7 +23,6 @@ class MPU:
     self.name = '6502'
     
     # vm status
-    self.breakFlag = False
     self.excycles = 0
     self.addcycles = False
     self.processorCycles = 0
@@ -43,7 +42,6 @@ class MPU:
                   self.flags, self.sp, self.pc)
 
   def step(self):
-    breakFlag = False
     instructCode = self.ImmediateByte()
     self.pc +=1
     self.pc &=0xffff
@@ -61,7 +59,6 @@ class MPU:
     self.x = 0
     self.y = 0
     self.flags = self.UNUSED
-    self.breakFlag = False
     self.processorCycles = 0
 
   # Helpers for addressing modes
@@ -432,8 +429,6 @@ class MPU:
 
     self.flags |= self.INTERRUPT
     self.pc = self.WordAt(self.IrqTo)
-
-    self.breakFlag = True
 
   @instruction(name="ORA", mode="inx", cycles=6)
   def inst_0x01(self):
