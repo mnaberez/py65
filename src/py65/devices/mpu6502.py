@@ -417,7 +417,7 @@ class MPU:
   disassemble = [('???', 'imp')] * 256
 
   instruction = make_instruction_decorator(instruct, disassemble, 
-                                                cycletime, extracycles)
+                                           cycletime, extracycles)
 
   @instruction(name="BRK", mode="imp", cycles=7)
   def inst_0x00(self):
