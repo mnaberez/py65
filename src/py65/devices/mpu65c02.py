@@ -99,6 +99,11 @@ class MPU(mpu6502.MPU):
         self.opRMB(self.ZeroPageAddr, 0xF7)
         self.pc += 1
 
+    @instruction(name="BIT", mode="abx", cycles=4)
+    def inst_0x3c(self):
+        self.opBIT(self.AbsoluteXAddr)
+        self.pc += 2
+
     @instruction(name="RMB4", mode="zpg", cycles=5)
     def inst_0x47(self):
         self.opRMB(self.ZeroPageAddr, 0xEF)
