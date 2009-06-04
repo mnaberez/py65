@@ -1,4 +1,4 @@
-0.3
+0.3 (2009-06-03)
 
   - Added shortcuts for monitor commands such as "m" for "memory".  These
     are mostly the same as the VICE monitor shortcuts.
@@ -6,7 +6,28 @@
   - The terminal width can now be changed in the monitor using the new
     "width" command.  Some commands, like "mem", will wrap to this width.
 
-0.2
+  - Fixed a bug where BRK would increment PC by 3 instead of 2.  Thanks
+    to Oscar Lindberg.
+
+  - Added a new 65C02 MPU simulation started by Oscar Lindberg.  It is
+    now mostly complete.
+    
+  - Added a new "mpu" command to the monitor.  It will switch between the
+    NMOS 6502 and CMOS 65C02 simulations.
+
+  - A new "devices" module has been added to organize device simulations.
+
+  - The mpu6502 and mpu65c02 devices have been reorganized internally to
+    use Python decorators to build their lookup tables based on an
+    idea by Oscar Lindberg.
+
+  - A new "utils" module has been added with various utility functions.
+
+  - The ObservableMemory interface has been changed for clarity.
+
+  - Python 2.4 or later is now required.
+
+0.2 (2008-11-09)
 
   - Added a new "disassemble" command to the monitor.  It can disassemble
     any range of memory ("disassemble c000:c010").  If labels have been
@@ -32,6 +53,6 @@
   - Documented all remaining monitor commands.  In the monitor, use the
     command "help command" for help on any command.
 
-0.1
+0.1 (2008-11-21)
 
   - First release.
