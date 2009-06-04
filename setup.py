@@ -1,12 +1,5 @@
 __revision__ = '$Id$'
 
-import urllib
-import urllib2
-if not hasattr(urllib2, 'splituser'):
-    # setuptools wants to import this from urllib2 but it's not
-    # in there in Python 2.3.3, so we just alias it.
-    urllib2.splituser = urllib.splituser
-
 from ez_setup import use_setuptools
 use_setuptools()
 
@@ -26,8 +19,7 @@ from setuptools import setup, find_packages
 here = os.path.abspath(os.path.normpath(os.path.dirname(__file__)))
 
 DESC = """\
-Py65 is a simulation of the original NMOS 6502 microprocessor 
-from MOS Technology, written in Python. """
+Simulate 6502-based microcomputer systems in Python."""
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -52,8 +44,8 @@ dist = setup(
     name = 'py65',
     version = py65_version,
     license = 'License :: OSI Approved :: BSD License',
-    url = '',
-    download_url = '',
+    url = 'http://github.com/mnaberez/py65',
+    download_url = 'http://github.com/mnaberez/py65/downloads',
     description = '6502 microprocessor simulation package',
     long_description= DESC,
     classifiers = CLASSIFIERS,
@@ -66,7 +58,7 @@ dist = setup(
     # put data files in egg 'doc' dir
     data_files=[ ('doc', [
         'CHANGES',
-        'README',
+        'README.markdown',
         'TODO',
         ]
     )],
