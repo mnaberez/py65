@@ -1,22 +1,20 @@
-__revision__ = '$Id$'
+__version__ = '0.3'
 
 from ez_setup import use_setuptools
 use_setuptools()
 
 import os
 import sys
-import string
 
-version, extra = string.split(sys.version, ' ', 1)
-maj, minor = string.split(version, '.', 1)
-
-if not maj[0] >= '2' and minor[0] >= '4':
+if sys.version_info[:2] < (2, 4):
     msg = ("Py65 requires Python 2.4 or better, you are attempting to "
            "install it using version %s.  Please install with a "
-           "supported version" % version)
+           "supported version" % sys.version)
+    sys.stderr.write(msg)
+    sys.exit(1)
 
 from setuptools import setup, find_packages
-here = os.path.abspath(os.path.normpath(os.path.dirname(__file__)))
+here = os.path.abspath(os.path.dirname(__file__))
 
 DESC = """\
 Simulate 6502-based microcomputer systems in Python."""
@@ -37,12 +35,9 @@ CLASSIFIERS = [
     'Topic :: System :: Hardware'
     ]
 
-version_txt = os.path.join(here, 'src/py65/version.txt')
-py65_version = open(version_txt).read().strip()
-
-dist = setup(
+setup(
     name = 'py65',
-    version = py65_version,
+    version = __version__,
     license = 'License :: OSI Approved :: BSD License',
     url = 'http://github.com/mnaberez/py65',
     download_url = 'http://github.com/mnaberez/py65/downloads',
