@@ -1,4 +1,4 @@
-__version__ = '0.3'
+__version__ = '0.4'
 
 from ez_setup import use_setuptools
 use_setuptools()

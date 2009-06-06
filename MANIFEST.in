@@ -1,3 +1,4 @@
 include CHANGES
 include README.markdown
 include TODO
+include ez_setup.py

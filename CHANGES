@@ -1,3 +1,7 @@
+0.4 (2009-06-06)
+
+  - Added ez_setup.py to bootstrap setuptools installation.
+
 0.3 (2009-06-03)
 
   - Added shortcuts for monitor commands such as "m" for "memory".  These
