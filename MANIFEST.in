@@ -1,4 +1,4 @@
-include CHANGES
+include CHANGES.txt
 include README.markdown
-include TODO
+include TODO.txt
 include ez_setup.py

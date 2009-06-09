@@ -52,9 +52,9 @@ setup(
     packages = find_packages(os.path.join(here, 'src')),
     # put data files in egg 'doc' dir
     data_files=[ ('doc', [
-        'CHANGES',
+        'CHANGES.txt',
         'README.markdown',
-        'TODO',
+        'TODO.txt',
         ]
     )],
     install_requires = [],
