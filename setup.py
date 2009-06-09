@@ -53,6 +53,7 @@ setup(
     # put data files in egg 'doc' dir
     data_files=[ ('doc', [
         'CHANGES.txt',
+        'LICENSE.txt',
         'README.markdown',
         'TODO.txt',
         ]
