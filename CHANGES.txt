@@ -1,4 +1,4 @@
-Next Release
+0.5 (2009-08-06)
 
   - Fixed signatures of getc/putc callbacks in monitor that were broken
     when the ObservableMemory interface changed in 0.3.  Closes #1.
