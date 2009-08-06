@@ -238,9 +238,10 @@ class MPU:
     else:
       if tbyte & 128:
         self.flags |= self.CARRY
-      tbyte = tbyte << 1
+      tbyte = tbyte << 1     
+    tbyte &= 0xFF
     self.FlagsNZ(tbyte)
-    self.memory[addr] = tbyte & 0xFF
+    self.memory[addr] = tbyte
 
   def opEOR(self, x):
     self.a ^= self.ByteAt(x())
@@ -558,8 +559,8 @@ class MPU:
       if self.a & 128:
         self.flags |= self.CARRY
       self.a = self.a << 1
+    self.a &= 0xFF
     self.FlagsNZ(self.a)
-    self.a &= 255
 
   @instruction(name="BIT", mode="abs", cycles=4)
   def inst_0x2c(self):

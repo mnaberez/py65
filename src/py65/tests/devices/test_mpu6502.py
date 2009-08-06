@@ -2955,6 +2955,18 @@ class Common6502Tests:
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
 
+  def test_rol_accumulator_80_and_carry_zero_sets_z_flag(self):
+    mpu = self._make_mpu()
+    mpu.a = 0x80
+    mpu.flags &= ~(mpu.CARRY)
+    mpu.flags &= ~(mpu.ZERO)
+    mpu.memory[0x0000] = 0x2A #=> ROL A
+    mpu.step()
+    self.assertEquals(0x0001, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
   def test_rol_accumulator_zero_and_carry_one_clears_z_flag(self):
     mpu = self._make_mpu()
     mpu.a = 0x00
@@ -3004,6 +3016,18 @@ class Common6502Tests:
     mpu.flags &= ~(mpu.CARRY)
     self._write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
     mpu.memory[0xABCD] = 0x00
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_rol_absolute_80_and_carry_zero_sets_z_flag(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.CARRY)
+    mpu.flags &= ~(mpu.ZERO)
+    self._write(mpu.memory, 0x0000, (0x2E, 0xCD, 0xAB)) #=> ROL $ABCD
+    mpu.memory[0xABCD] = 0x80
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
     self.assertEquals(0x00, mpu.memory[0xABCD])
@@ -3060,6 +3084,18 @@ class Common6502Tests:
     mpu.flags &= ~(mpu.CARRY)
     self._write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
     mpu.memory[0x0010] = 0x00
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_rol_zp_80_and_carry_zero_sets_z_flag(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.CARRY)
+    mpu.flags &= ~(mpu.ZERO)
+    self._write(mpu.memory, 0x0000, (0x26, 0x10)) #=> ROL $0010
+    mpu.memory[0x0010] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.memory[0x0010])
@@ -3123,6 +3159,19 @@ class Common6502Tests:
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
 
+  def test_rol_absolute_x_indexed_80_and_carry_zero_sets_z_flag(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.CARRY)
+    mpu.flags &= ~(mpu.ZERO)
+    mpu.x = 0x03
+    self._write(mpu.memory, 0x0000, (0x3E, 0xCD, 0xAB)) #=> ROL $ABCD,X
+    mpu.memory[0xABCD + mpu.x] = 0x80
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0xABCD + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
   def test_rol_absolute_x_indexed_zero_and_carry_one_clears_z_flag(self):
     mpu = self._make_mpu()
     mpu.x = 0x03
@@ -3177,6 +3226,19 @@ class Common6502Tests:
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
+
+  def test_rol_zp_x_indexed_80_and_carry_zero_sets_z_flag(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.CARRY)
+    mpu.flags &= ~(mpu.ZERO)
+    mpu.x = 0x03
+    self._write(mpu.memory, 0x0000, (0x36, 0x10)) #=> ROL $0010,X
+    mpu.memory[0x0010 + mpu.x] = 0x80
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.memory[0x0010 + mpu.x])

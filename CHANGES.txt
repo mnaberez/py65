@@ -3,6 +3,8 @@ Next Release
   - Fixed signatures of getc/putc callbacks in monitor that were broken
     when the ObservableMemory interface changed in 0.3.  Closes #1.
 
+  - Fixed that ROL would not properly set the Z flag.  Closes #2.
+
 0.4 (2009-06-06)
 
   - Added ez_setup.py to bootstrap setuptools installation.
