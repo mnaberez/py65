@@ -86,11 +86,11 @@ class Monitor(cmd.Cmd):
         return line
 
     def _install_mpu_observers(self):
-        def putc(operation, address, value):
+        def putc(address, value):
             self.stdout.write(chr(value))
             self.stdout.flush()
 
-        def getc(operation, address):
+        def getc(address):
             return getch(self.stdin)
 
         m = ObservableMemory()
