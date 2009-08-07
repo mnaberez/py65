@@ -248,7 +248,11 @@ class MPU:
     self.FlagsNZ(self.a)
 
   def opADC(self, x):
-    data=self.ByteAt(x())
+    if callable(x):
+      data = self.ByteAt(x())
+    else:
+      data = x
+      
     if self.flags & self.DECIMAL:
       if self.flags & self.CARRY:
         tmp = 1
@@ -737,39 +741,7 @@ class MPU:
 
   @instruction(name="ADC", mode="imm", cycles=2)
   def inst_0x69(self):
-    data = self.ImmediateByte()
-
-    if self.flags & self.CARRY:
-      tmp = 1
-    else:
-      tmp = 0
-
-    if self.flags & self.DECIMAL:
-      data = convert_to_bin(data) + convert_to_bin(self.a) + tmp
-      self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-      if data > 99:
-        self.flags |= self.CARRY+self.OVERFLOW
-        data -= 100
-      if data == 0:
-        self.flags |= self.ZERO
-      else:
-        self.flags |= self.data & 128
-      self.a = convert_to_bcd(data)
-    else:
-      if self.flags & self.CARRY:
-        tmp = 1
-      else:
-        tmp = 0
-      data += self.a + tmp
-      self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-      if data > 255:
-        self.flags |= self.OVERFLOW + self.CARRY
-        data &= 255
-      if data == 0:
-        self.flags |= self.ZERO
-      else:
-        self.flags |= data & 128
-      self.a=data
+    self.opADC(self.ImmediateByte())
     self.pc += 1
 
   @instruction(name="ROR", mode="acc", cycles=2)
