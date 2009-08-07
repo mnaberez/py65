@@ -85,7 +85,7 @@ class Common6502Tests:
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
 
-  def test_adc_bcd_off_absolute_carry_set_in_accumulator_zero(self):
+  def test_adc_bcd_off_zp_carry_set_in_accumulator_zero(self):
     mpu = self._make_mpu()
     mpu.a = 0
     mpu.flags |= mpu.CARRY
@@ -98,7 +98,7 @@ class Common6502Tests:
     self.assertEquals(0, mpu.flags & mpu.ZERO)
     self.assertNotEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
     
-  def test_adc_bcd_off_absolute_carry_clear_in_no_carry_clear_out(self):
+  def test_adc_bcd_off_zp_carry_clear_in_no_carry_clear_out(self):
     mpu = self._make_mpu()
     mpu.a = 0x01
     self._write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
@@ -110,7 +110,7 @@ class Common6502Tests:
     self.assertEquals(0, mpu.flags & mpu.CARRY)    
     self.assertEquals(0, mpu.flags & mpu.ZERO)
 
-  def test_adc_bcd_off_absolute_carry_clear_in_carry_set_out(self):
+  def test_adc_bcd_off_zp_carry_clear_in_carry_set_out(self):
     mpu = self._make_mpu()
     mpu.a = 0x02
     self._write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
@@ -122,7 +122,7 @@ class Common6502Tests:
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
     self.assertEquals(0, mpu.flags & mpu.ZERO)
 
-  def test_adc_bcd_off_absolute_overflow(self):
+  def test_adc_bcd_off_zp_overflow(self):
     mpu = self._make_mpu()
     mpu.a = 0xFF
     self._write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
@@ -2031,30 +2031,6 @@ class Common6502Tests:
     self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
     self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
 
-  # LDA Absolute
-  
-  def test_lda_absolute_loads_a_sets_n_flag(self):
-    mpu = self._make_mpu()
-    mpu.a = 0x00
-    self._write(mpu.memory, 0x0000, (0xAD, 0xCD, 0xAB)) #=> LDA $ABCD
-    mpu.memory[0xABCD] = 0x80
-    mpu.step()
-    self.assertEquals(0x0003, mpu.pc)
-    self.assertEquals(0x80, mpu.a)
-    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
-    self.assertEquals(0, mpu.flags & mpu.ZERO)
-
-  def test_lda_absolute_loads_a_sets_z_flag(self):
-    mpu = self._make_mpu()
-    mpu.a = 0xFF
-    self._write(mpu.memory, 0x0000, (0xAD, 0xCD, 0xAB)) #=> LDA $ABCD
-    mpu.memory[0xABCD] = 0x00
-    mpu.step()
-    self.assertEquals(0x0003, mpu.pc)
-    self.assertEquals(0x00, mpu.a)
-    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
-    self.assertEquals(0, mpu.flags & mpu.NEGATIVE)
-
   # LDA Zero Page
 
   def test_lda_zp_loads_a_sets_n_flag(self):
@@ -2091,10 +2067,10 @@ class Common6502Tests:
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)
     self.assertEquals(0, mpu.flags & mpu.ZERO)
 
-  def test_ldx_immediate_loads_x_sets_z_flag(self):
+  def test_lda_immediate_loads_a_sets_z_flag(self):
     mpu = self._make_mpu()
     mpu.a = 0xFF
-    self._write(mpu.memory, 0x0000, (0xA2, 0x00)) #=> LDA #$00
+    self._write(mpu.memory, 0x0000, (0xA9, 0x00)) #=> LDA #$00
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0x00, mpu.a)
