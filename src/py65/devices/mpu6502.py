@@ -68,7 +68,10 @@ class MPU:
 
   def WordAt(self, addr):
     return self.ByteAt(addr) + (self.ByteAt(addr + 1) << 8)
-  
+
+  def ProgramCounter(self):
+    return self.pc
+
   # Addressing modes
 
   def ImmediateByte(self):
@@ -248,10 +251,7 @@ class MPU:
     self.FlagsNZ(self.a)
 
   def opADC(self, x):
-    if callable(x):
-      data = self.ByteAt(x())
-    else:
-      data = x
+    data = self.ByteAt(x())
       
     if self.flags & self.DECIMAL:
       if self.flags & self.CARRY:
@@ -342,6 +342,7 @@ class MPU:
 
   def opSBC(self, x):
     data = self.ByteAt(x())
+      
     if self.flags & self.DECIMAL:
       if self.flags & self.CARRY:
         borrow = 0
@@ -456,8 +457,7 @@ class MPU:
   
   @instruction(name="ORA", mode="imm", cycles=2)
   def inst_0x09(self):
-    self.a |= self.ImmediateByte()
-    self.FlagsNZ(self.a)
+    self.opORA(self.ProgramCounter)
     self.pc += 1
   
   @instruction(name="ASL", mode="acc", cycles=2)
@@ -549,8 +549,7 @@ class MPU:
   
   @instruction(name="AND", mode="imm", cycles=2)
   def inst_0x29(self):
-    self.a &= self.ImmediateByte()
-    self.FlagsNZ(self.a)
+    self.opAND(self.ProgramCounter)
     self.pc += 1
 
   @instruction(name="ROL", mode="acc", cycles=2)
@@ -645,9 +644,8 @@ class MPU:
 
   @instruction(name="EOR", mode="imm", cycles=2)
   def inst_0x49(self):
-    self.a ^= self.ImmediateByte()
-    self.FlagsNZ(self.a)
-    self.pc+=1
+    self.opEOR(self.ProgramCounter)
+    self.pc += 1
 
   @instruction(name="LSR", mode="acc", cycles=2)
   def inst_0x4a(self):
@@ -741,7 +739,7 @@ class MPU:
 
   @instruction(name="ADC", mode="imm", cycles=2)
   def inst_0x69(self):
-    self.opADC(self.ImmediateByte())
+    self.opADC(self.ProgramCounter)
     self.pc += 1
 
   @instruction(name="ROR", mode="acc", cycles=2)
@@ -900,10 +898,9 @@ class MPU:
     self.pc+=2
 
   @instruction(name="LDY", mode="imm", cycles=2)
-  def inst_0xa0(self):
-    self.y=self.ImmediateByte()
-    self.FlagsNZ(self.y)
-    self.pc+=1
+  def inst_0xa0(self):               
+    self.opLDY(self.ProgramCounter)
+    self.pc += 1
 
   @instruction(name="LDA", mode="inx", cycles=6)
   def inst_0xa1(self):
@@ -912,9 +909,8 @@ class MPU:
 
   @instruction(name="LDX", mode="imm", cycles=2)
   def inst_0xa2(self):
-    self.x=self.ImmediateByte()
-    self.FlagsNZ(self.x)
-    self.pc+=1
+    self.opLDX(self.ProgramCounter)
+    self.pc += 1
 
   @instruction(name="LDY", mode="zpg", cycles=3)
   def inst_0xa4(self):
@@ -937,9 +933,8 @@ class MPU:
     self.FlagsNZ(self.y)
 
   @instruction(name="LDA", mode="imm", cycles=2)
-  def inst_0xa9(self):
-    self.a = self.ImmediateByte()
-    self.FlagsNZ(self.a)
+  def inst_0xa9(self):              
+    self.opLDA(self.ProgramCounter)
     self.pc += 1
 
   @instruction(name="TAX", mode="imp", cycles=2)
@@ -1003,28 +998,21 @@ class MPU:
   @instruction(name="LDY", mode="abx", cycles=4, extracycles=1)
   def inst_0xbc(self):
     self.opLDY(self.AbsoluteXAddr)
-    self.pc+=2
+    self.pc += 2
 
   @instruction(name="LDA", mode="abx", cycles=4, extracycles=1)
   def inst_0xbd(self):
     self.opLDA(self.AbsoluteXAddr)
-    self.pc+=2
+    self.pc += 2
 
   @instruction(name="LDX", mode="aby", cycles=4, extracycles=1)
   def inst_0xbe(self):
     self.opLDX(self.AbsoluteYAddr)
-    self.pc+=2
+    self.pc += 2
 
   @instruction(name="CPY", mode="imm", cycles=2)
   def inst_0xc0(self):
-    tbyte = self.ImmediateByte()
-    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if self.y == tbyte:
-      self.flags |= self.CARRY+self.ZERO
-    elif self.y > tbyte:
-      self.flags |= self.CARRY
-    else:
-      self.flags |= self.NEGATIVE
+    self.opCPY(self.ProgramCounter)
     self.pc += 1
 
   @instruction(name="CMP", mode="inx", cycles=6)
@@ -1054,15 +1042,8 @@ class MPU:
     self.FlagsNZ(self.y)
 
   @instruction(name="CMP", mode="imm", cycles=2)
-  def inst_0xc9(self):
-    tbyte = self.ImmediateByte()
-    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if self.a == tbyte:
-      self.flags |= self.CARRY + self.ZERO
-    elif self.a > tbyte:
-      self.flags |= self.CARRY
-    else:
-      self.flags |= self.NEGATIVE
+  def inst_0xc9(self):              
+    self.opCMP(self.ProgramCounter)
     self.pc +=1
 
   @instruction(name="DEX", mode="imp", cycles=2)
@@ -1126,14 +1107,7 @@ class MPU:
 
   @instruction(name="CPX", mode="imm", cycles=2)
   def inst_0xe0(self):
-    tbyte = self.ImmediateByte()
-    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if self.x == tbyte:
-      self.flags |= self.CARRY + self.ZERO
-    elif self.x > tbyte:
-      self.flags |= self.CARRY
-    else:
-      self.flags |= self.NEGATIVE
+    self.opCPX(self.ProgramCounter)
     self.pc += 1
 
   @instruction(name="SBC", mode="inx", cycles=6)
@@ -1164,39 +1138,7 @@ class MPU:
   
   @instruction(name="SBC", mode="imm", cycles=2)
   def inst_0xe9(self):
-    data=self.ImmediateByte()
-
-    if self.flags & self.DECIMAL:
-      if self.flags & self.CARRY:
-        tmp = 0
-      else:
-        tmp = 1
-      data = convert_to_bin(self.a) - convert_to_bin(data) - tmp
-      self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE+self.OVERFLOW)
-      if data == 0:
-        self.flags |= self.ZERO + self.CARRY
-      elif data > 0:
-        self.flags |= self.CARRY
-      else:
-        self.flags |= self.NEGATIVE
-        data +=100
-      self.a = convert_to_bcd(data)
-    else:
-      if self.flags & self.CARRY:
-        tmp = 0
-      else:
-        tmp = 1    
-      data = self.a - data - tmp
-      self.flags &= ~(self.CARRY+self.ZERO+self.OVERFLOW+self.NEGATIVE)
-      if data == 0:
-        self.flags |= self.ZERO + self.CARRY
-      elif data > 0:
-        self.flags |= self.CARRY
-      else:
-        self.flags |= self.OVERFLOW
-      data &= 255
-      self.flags |= data & 128
-      self.a = data
+    self.opSBC(self.ProgramCounter)
     self.pc += 1
 
   @instruction(name="NOP", mode="imp", cycles=2)
