@@ -280,7 +280,7 @@ class Common6502Tests:
     mpu.a = 0
     mpu.y = 0x03
     mpu.flags |= mpu.CARRY
-    self._write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
+    self._write(mpu.memory, 0x0000, (0x79, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
     mpu.memory[0xC000 + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
