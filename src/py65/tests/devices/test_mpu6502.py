@@ -2096,7 +2096,7 @@ class Common6502Tests:
     mpu.a = 0xFF
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0xBD, 0xCD, 0xAB)) #=> LDA $ABCD,X
-    mpu.memory[0xABCD + mpu.y] = 0x00
+    mpu.memory[0xABCD + mpu.x] = 0x00
     mpu.step()
     self.assertEquals(0x0003, mpu.pc)
     self.assertEquals(0x00, mpu.a)
@@ -3865,7 +3865,7 @@ class Common6502Tests:
     mpu.a = 0x00 
     mpu.y = 0x03
     self._write(mpu.memory, 0x0000, (0xF1, 0x10)) #=> SBC ($10),Y
-    self._write(mpu.memory, 0x0013, (0xED, 0xFE)) #=> Vector to $FEED
+    self._write(mpu.memory, 0x0010, (0xED, 0xFE)) #=> Vector to $FEED
     mpu.memory[0xFEED + mpu.y] = 0x00
     mpu.step()
     self.assertEquals(0x00, mpu.a)
@@ -4617,7 +4617,10 @@ class Common6502Tests:
  
   def _make_mpu(self, *args, **kargs):
     klass = self._get_target_class()
-    return klass(*args, **kargs)
+    mpu = klass(*args, **kargs)
+    if not kargs.has_key('memory'):
+        mpu.memory = 0x10000 * [0xAA]
+    return mpu
   
   def _get_target_class(self):
     raise NotImplementedError, "Target class not specified"
