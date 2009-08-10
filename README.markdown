@@ -72,3 +72,6 @@ These people are responsible for Py65:
  
  - [Oscar Lindberg](http://github.com/offe) started the 65C02 simulation 
    module and contributed greatly to its implementation. 
+
+ - [Ed Spittles](http://github.com/biged) helped with testing and provided 
+   many useful issue reports and small patches.
