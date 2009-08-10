@@ -2969,7 +2969,7 @@ class Common6502Tests:
     mpu = self._make_mpu()
     mpu.a = 0x7F
     mpu.flags &= ~(mpu.CARRY)
-    mpu.memory[0x0000] = 0x0A #=> ROL A
+    mpu.memory[0x0000] = 0x2A #=> ROL A
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
     self.assertEquals(0xFE, mpu.a)
