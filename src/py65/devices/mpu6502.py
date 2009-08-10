@@ -172,24 +172,35 @@ class MPU:
     self.FlagsNZ(self.a)
 
   def opASL(self, x):
-    addr = x()
-    tbyte = self.ByteAt(addr)
+    if x is None:
+      tbyte = self.a
+    else:
+      addr = x()
+      tbyte = self.ByteAt(addr)
+
     self.flags &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
 
     if tbyte & 128:
       self.flags |= self.CARRY
-      
     tbyte = (tbyte << 1) & 0xFF
+
     if tbyte:
       self.flags |= tbyte & 128
     else:
       self.flags |= self.ZERO
-
-    self.memory[addr] = tbyte
+    
+    if x is None:
+      self.a = tbyte
+    else:
+      self.memory[addr] = tbyte
 
   def opLSR(self, x):
-    addr = x()
-    tbyte = self.ByteAt(addr)
+    if x is None:
+      tbyte = self.a
+    else:
+      addr = x()
+      tbyte = self.ByteAt(addr)
+
     self.flags &=~(self.CARRY+self.NEGATIVE+self.ZERO)
     self.flags |=tbyte&1
 
@@ -198,7 +209,11 @@ class MPU:
       pass # {}
     else:
       self.flags |= self.ZERO
-    self.memory[addr]=tbyte
+
+    if x is None:
+      self.a = tbyte
+    else:
+      self.memory[addr]=tbyte
 
   def opBCL(self, x):
     if self.flags & x: 
@@ -230,8 +245,12 @@ class MPU:
     self.flags |= tbyte&(128+64)
 
   def opROL(self, x):
-    addr = x()
-    tbyte = self.ByteAt(addr)
+    if x is None:
+      tbyte = self.a
+    else:
+      addr = x()
+      tbyte = self.ByteAt(addr)
+
     if self.flags & self.CARRY:
       if tbyte & 128:
         pass
@@ -244,7 +263,11 @@ class MPU:
       tbyte = tbyte << 1     
     tbyte &= 0xFF
     self.FlagsNZ(tbyte)
-    self.memory[addr] = tbyte
+
+    if x is None:
+      self.a = tbyte
+    else:
+      self.memory[addr] = tbyte
 
   def opEOR(self, x):
     self.a ^= self.ByteAt(x())
@@ -286,8 +309,12 @@ class MPU:
       self.a = data
 
   def opROR(self, x):
-    addr=x()
-    tbyte = self.ByteAt(addr)
+    if x is None:
+      tbyte = self.a
+    else:
+      addr=x()
+      tbyte = self.ByteAt(addr)
+
     if self.flags & self.CARRY:
       if tbyte & 1:
         pass # {}
@@ -299,7 +326,11 @@ class MPU:
         self.flags |= self.CARRY
       tbyte=tbyte>>1
     self.FlagsNZ(tbyte)
-    self.memory[addr]=tbyte
+
+    if x is None:
+      self.a = tbyte
+    else:
+      self.memory[addr] = tbyte
 
   def opSTA(self, x):
     self.memory[x()] = self.a
@@ -377,26 +408,42 @@ class MPU:
       self.a = data & 0xFF
 
   def opDECR(self, x):
-    addr = x()
-    tbyte = self.ByteAt(addr)
+    if x is None:
+      tbyte = self.a
+    else:
+      addr = x()
+      tbyte = self.ByteAt(addr)
+
     self.flags &= ~(self.ZERO + self.NEGATIVE)
     tbyte = (tbyte - 1) & 0xFF
     if tbyte:
       self.flags |= tbyte & self.NEGATIVE
     else:
       self.flags |= self.ZERO
-    self.memory[addr] = tbyte
+
+    if x is None:
+      self.a = tbyte
+    else:
+      self.memory[addr] = tbyte
 
   def opINCR(self, x):
-    addr = x()
-    tbyte = self.ByteAt(addr)
+    if x is None:
+      tbyte = self.a
+    else:
+      addr = x()
+      tbyte = self.ByteAt(addr)
+
     self.flags &= ~(self.ZERO + self.NEGATIVE)
     tbyte = (tbyte + 1) & 0xFF
     if tbyte:
       self.flags |= tbyte & self.NEGATIVE
     else:
       self.flags |= self.ZERO
-    self.memory[addr] = tbyte
+
+    if x is None:
+      self.a = tbyte
+    else:
+      self.memory[addr] = tbyte
 
   def opLDA(self, x):
     self.a = self.ByteAt(x())
@@ -462,13 +509,7 @@ class MPU:
   
   @instruction(name="ASL", mode="acc", cycles=2)
   def inst_0x0a(self):
-    if self.a & 128:
-      self.flags |= self.CARRY
-    else:
-      self.flags &= ~self.CARRY
-    self.a = self.a << 1
-    self.FlagsNZ(self.a)
-    self.a &= 255
+    self.opASL(None)
 
   @instruction(name="ORA", mode="abs", cycles=4)
   def inst_0x0d(self):
@@ -554,16 +595,7 @@ class MPU:
 
   @instruction(name="ROL", mode="acc", cycles=2)
   def inst_0x2a(self):
-    if self.flags & self.CARRY:
-      if (self.a & 128) == 0:
-        self.flags &=~self.CARRY
-      self.a = (self.a<<1) | 1
-    else:
-      if self.a & 128:
-        self.flags |= self.CARRY
-      self.a = self.a << 1
-    self.a &= 0xFF
-    self.FlagsNZ(self.a)
+    self.opROL(None)
 
   @instruction(name="BIT", mode="abs", cycles=4)
   def inst_0x2c(self):
@@ -649,16 +681,7 @@ class MPU:
 
   @instruction(name="LSR", mode="acc", cycles=2)
   def inst_0x4a(self):
-    self.flags &= ~(self.CARRY+self.NEGATIVE+self.ZERO)
-    if self.a & 1:
-      self.flags |= self.CARRY
-
-    self.a = self.a >> 1
-    if self.a:
-      pass # {}
-    else:
-      self.flags |= self.ZERO
-    self.a &= 255
+    self.opLSR(None)
 
   @instruction(name="JMP", mode="abs", cycles=3)
   def inst_0x4c(self):
@@ -744,16 +767,7 @@ class MPU:
 
   @instruction(name="ROR", mode="acc", cycles=2)
   def inst_0x6a(self):
-    if self.flags & self.CARRY:
-      if (self.a & 1) == 0:
-        self.flags &= ~self.CARRY
-      self.a = (self.a >> 1) | 128
-    else:
-      if self.a & 1:
-        self.flags |= self.CARRY
-      self.a = self.a >> 1
-    self.FlagsNZ(self.a)
-    self.a &= 255
+    self.opROR(None)
 
   @instruction(name="JMP", mode="ind", cycles=5)
   def inst_0x6c(self):

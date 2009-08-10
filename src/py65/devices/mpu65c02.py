@@ -239,14 +239,7 @@ class MPU(mpu6502.MPU):
 
     @instruction(name="INC", mode="acc", cycles=2)
     def inst_0x1a(self):
-        tbyte = self.a
-        self.flags &= ~(self.ZERO + self.NEGATIVE)
-        tbyte = (tbyte + 1) & 0xFF
-        if tbyte:
-            self.flags |= tbyte & self.NEGATIVE
-        else:
-            self.flags |= self.ZERO
-        self.a = tbyte
+        self.opINCR(None)
 
     @instruction(name="TRB", mode="abs", cycles=6)
     def inst_0x1c(self):
@@ -255,14 +248,7 @@ class MPU(mpu6502.MPU):
 
     @instruction(name="DEC", mode="acc", cycles=2)
     def inst_0x3a(self):
-        tbyte = self.a
-        self.flags &= ~(self.ZERO + self.NEGATIVE)
-        tbyte = (tbyte - 1) & 0xFF
-        if tbyte:
-            self.flags |= tbyte & self.NEGATIVE
-        else:
-            self.flags |= self.ZERO
-        self.a = tbyte
+        self.opDECR(None)
 
     @instruction(name="BRA", mode="rel", cycles=1, extracycles=1)
     def inst_0x80(self):
