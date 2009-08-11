@@ -786,6 +786,16 @@ class Common6502Tests:
     self.assertEquals(0xFE, mpu.a)
     self.assertEquals(mpu.CARRY, mpu.flags & mpu.CARRY)
 
+  def test_asl_accumulator_80_sets_z_flag(self):
+    mpu = self._make_mpu()
+    mpu.a = 0x80
+    mpu.flags &= ~(mpu.ZERO)
+    mpu.memory[0x0000] = 0x0A #=> ASL A
+    mpu.step()
+    self.assertEquals(0x0001, mpu.pc)
+    self.assertEquals(0x00, mpu.a)
+    self.assertEquals(mpu.ZERO, mpu.flags & mpu.ZERO)
+
   # ASL Absolute
 
   def test_asl_absolute_sets_z_flag(self):
