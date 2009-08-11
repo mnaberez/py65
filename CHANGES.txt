@@ -1,4 +1,4 @@
-Next Release
+0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".
 
