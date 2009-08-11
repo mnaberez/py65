@@ -4,6 +4,13 @@ Next Release
 
   - Fixed that ASL would not properly set the Z flag.  Closes #7.
 
+  - Fixed that ADC would not properly set the Overflow (V) flag.  The
+    overflow calculation that is now used originated from XGS: Apple
+    IIGS Emulator (cputable.h).  Originally written and Copyright 
+    (C)1996 by Joshua M. Thompson.  Copyright (C) 2006 by Samuel A. 
+    Falvo II.  http://bitbucket.org/kc5tja/lib65816/src/tip/src/cputable.h
+    Closes #3.
+
 0.5 (2009-08-06)
 
   - Fixed signatures of getc/putc callbacks in monitor that were broken

@@ -71,6 +71,19 @@ class Common6502Tests:
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
 
+  def test_adc_bcd_off_absolute_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.OVERFLOW)
+    mpu.a = 0x40
+    self._write(mpu.memory, 0x0000, (0x6D, 0x00, 0xC0)) #=> $0000 ADC $C000
+    mpu.memory[0xC000] = 0x40
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
   # ADC Zero Page
   
   def test_adc_bcd_off_zp_carry_clear_in_accumulator_zeroes(self):
@@ -133,6 +146,19 @@ class Common6502Tests:
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
+  def test_adc_bcd_off_zp_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.a = 0x40
+    mpu.flags &= ~(mpu.OVERFLOW)
+    self._write(mpu.memory, 0x0000, (0x65, 0xB0)) #=> $0000 ADC $00B0
+    mpu.memory[0x00B0] = 0x40
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
       
   # ADC Immediate
   
@@ -188,6 +214,17 @@ class Common6502Tests:
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xFE, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
+  def test_adc_bcd_off_immediate_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.a = 0x40
+    self._write(mpu.memory, 0x0000, (0x69, 0x40)) #=> $0000 ADC #$40
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
@@ -260,6 +297,20 @@ class Common6502Tests:
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
 
+  def test_adc_bcd_off_abs_x_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.OVERFLOW)
+    mpu.a = 0x40
+    mpu.x = 0x03
+    self._write(mpu.memory, 0x0000, (0x7D, 0x00, 0xC0)) #=> $0000 ADC $C000,X
+    mpu.memory[0xC000 + mpu.x] = 0x40
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
   # ADC Absolute, Y-Indexed
   
   def test_adc_bcd_off_abs_y_carry_clear_in_accumulator_zeroes(self):
@@ -328,6 +379,20 @@ class Common6502Tests:
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
 
+  def test_adc_bcd_off_abs_y_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.OVERFLOW)
+    mpu.a = 0x40
+    mpu.y = 0x03
+    self._write(mpu.memory, 0x0000, (0x79, 0x00, 0xC0)) #=> $0000 ADC $C000,Y
+    mpu.memory[0xC000 + mpu.y] = 0x40
+    mpu.step()
+    self.assertEquals(0x0003, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
   # ADC Zero Page, X-Indexed
   
   def test_adc_bcd_off_zp_x_carry_clear_in_accumulator_zeroes(self):
@@ -392,6 +457,20 @@ class Common6502Tests:
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xFE, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
+  def test_adc_bcd_off_zp_x_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.OVERFLOW)
+    mpu.a = 0x40
+    mpu.x = 0x03
+    self._write(mpu.memory, 0x0000, (0x75, 0x10)) #=> $0000 ADC $0010,X
+    mpu.memory[0x0010 + mpu.x] = 0x40
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
@@ -469,6 +548,21 @@ class Common6502Tests:
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       
 
+  def test_adc_bcd_off_indirect_indexed_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.OVERFLOW)
+    mpu.a = 0x40
+    mpu.x = 0x03
+    self._write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
+    self._write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
+    mpu.memory[0xABCD] = 0x40
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
   # ADC Indexed, Indirect (Y)
 
   def test_adc_bcd_off_indexed_indirect_carry_clear_in_accumulator_zeroes(self):
@@ -531,13 +625,28 @@ class Common6502Tests:
   def test_adc_bcd_off_indexed_indirect_indexed_overflow(self):
     mpu = self._make_mpu()
     mpu.a = 0xFF
-    mpu.x = 0x03
-    self._write(mpu.memory, 0x0000, (0x61, 0x10)) #=> $0000 ADC ($0010,X)
-    self._write(mpu.memory, 0x0013, (0xCD, 0xAB)) #=> Vector to $ABCD
-    mpu.memory[0xABCD] = 0xFF
+    mpu.y = 0x03
+    self._write(mpu.memory, 0x0000, (0x71, 0x10)) #=> $0000 ADC ($0010),Y
+    self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+    mpu.memory[0xABCD + mpu.y] = 0xFF
     mpu.step()
     self.assertEquals(0x0002, mpu.pc)
     self.assertEquals(0xFE, mpu.a)
+    self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
+    self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
+    self.assertEquals(0, mpu.flags & mpu.ZERO)       
+
+  def test_adc_bcd_off_indexed_indirect_overflow_set_on_40_plus_40(self):
+    mpu = self._make_mpu()
+    mpu.flags &= ~(mpu.OVERFLOW)
+    mpu.a = 0x40
+    mpu.y = 0x03
+    self._write(mpu.memory, 0x0000, (0x71, 0x10)) #=> $0000 ADC ($0010),Y
+    self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
+    mpu.memory[0xABCD + mpu.y] = 0x40
+    mpu.step()
+    self.assertEquals(0x0002, mpu.pc)
+    self.assertEquals(0x80, mpu.a)
     self.assertEquals(mpu.NEGATIVE, mpu.flags & mpu.NEGATIVE)    
     self.assertEquals(mpu.OVERFLOW, mpu.flags & mpu.OVERFLOW)       
     self.assertEquals(0, mpu.flags & mpu.ZERO)       

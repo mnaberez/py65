@@ -296,8 +296,11 @@ class MPU:
         tmp = 1
       else:
         tmp = 0
-      data += self.a + tmp
+      result = data + self.a + tmp
       self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
+      if ( ~(self.a ^ data) & (self.a ^ result) ) & 0x80:
+        self.flags |= self.OVERFLOW
+      data = result
       if data > 255:
         self.flags|=self.OVERFLOW+self.CARRY
         data &=255
