@@ -26,7 +26,6 @@ class MPU:
     self.excycles = 0
     self.addcycles = False
     self.processorCycles = 0
-    self.internalCycleDelay = 0
 
     if memory is None:
         memory = 0x10000 * [0x00]
