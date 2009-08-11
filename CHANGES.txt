@@ -1,3 +1,9 @@
+Next Release
+
+  - Added monitor shortcut "a" for "assemble".
+
+  - Fixed that ASL would not properly set the Z flag.  Closes #7.
+
 0.5 (2009-08-06)
 
   - Fixed signatures of getc/putc callbacks in monitor that were broken

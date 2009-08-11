@@ -50,6 +50,7 @@ class Monitor(cmd.Cmd):
     def _add_shortcuts(self):
         self._shortcuts = {'~':   'tilde',
                            '?':   'help',
+                           'a':   'assemble',
                            'al':  'add_label',
                            'd':   'disassemble',
                            'dl':  'delete_label',
