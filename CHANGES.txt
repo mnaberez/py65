@@ -1,3 +1,8 @@
+Next Release
+
+  - When using the monitor, the nonblocking character input at
+    $F004 should now work on the Microsoft Windows platform.
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".
