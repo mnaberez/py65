@@ -343,32 +343,12 @@ class MPU:
   def opSTX(self, y):
     self.memory[y()] = self.x
 
-  def opCPY(self, x):
-    tbyte=self.ByteAt(x())
-    self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if self.y == tbyte:
-      self.flags |= self.CARRY + self.ZERO
-    elif self.y > tbyte:
-       self.flags |= self.CARRY
-    else:
-      self.flags |= self.NEGATIVE
-
-  def opCPX(self, y):
-    tbyte = self.ByteAt(y())
-    self.flags &=~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if self.x == tbyte:
-      self.flags |= self.CARRY + self.ZERO
-    elif self.x > tbyte:
-      self.flags |= self.CARRY
-    else:
-      self.flags |= self.NEGATIVE
-
-  def opCMP(self, x):
-    tbyte = self.ByteAt(x())
+  def opCMPR(self, get_address, register_value):
+    tbyte = self.ByteAt(get_address())
     self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
-    if self.a == tbyte:
+    if register_value == tbyte:
       self.flags |= self.CARRY + self.ZERO
-    elif self.a > tbyte:
+    elif register_value > tbyte:
       self.flags |= self.CARRY
     else:
       self.flags |= self.NEGATIVE
@@ -1028,22 +1008,22 @@ class MPU:
 
   @instruction(name="CPY", mode="imm", cycles=2)
   def inst_0xc0(self):
-    self.opCPY(self.ProgramCounter)
+    self.opCMPR(self.ProgramCounter, self.y)
     self.pc += 1
 
   @instruction(name="CMP", mode="inx", cycles=6)
   def inst_0xc1(self):
-    self.opCMP(self.IndirectXAddr)
+    self.opCMPR(self.IndirectXAddr, self.a)
     self.pc += 1
 
   @instruction(name="CPY", mode="zpg", cycles=3)
   def inst_0xc4(self):
-    self.opCPY(self.ZeroPageAddr)
+    self.opCMPR(self.ZeroPageAddr, self.y)
     self.pc += 1
 
   @instruction(name="CMP", mode="zpg", cycles=3)
   def inst_0xc5(self):
-    self.opCMP(self.ZeroPageAddr)
+    self.opCMPR(self.ZeroPageAddr, self.a)
     self.pc += 1
 
   @instruction(name="DEC", mode="zpg", cycles=5)
@@ -1059,7 +1039,7 @@ class MPU:
 
   @instruction(name="CMP", mode="imm", cycles=2)
   def inst_0xc9(self):              
-    self.opCMP(self.ProgramCounter)
+    self.opCMPR(self.ProgramCounter, self.a)
     self.pc +=1
 
   @instruction(name="DEX", mode="imp", cycles=2)
@@ -1070,12 +1050,12 @@ class MPU:
 
   @instruction(name="CPY", mode="abs", cycles=4)
   def inst_0xcc(self):
-    self.opCPY(self.AbsoluteAddr)
+    self.opCMPR(self.AbsoluteAddr, self.y)
     self.pc += 2
 
   @instruction(name="CMP", mode="abs", cycles=4)
   def inst_0xcd(self):
-    self.opCMP(self.AbsoluteAddr)
+    self.opCMPR(self.AbsoluteAddr, self.a)
     self.pc += 2
 
   @instruction(name="DEC", mode="abs", cycles=3)
@@ -1089,12 +1069,12 @@ class MPU:
 
   @instruction(name="CMP", mode="iny", cycles=5, extracycles=1)
   def inst_0xd1(self):
-    self.opCMP(self.IndirectYAddr)
+    self.opCMPR(self.IndirectYAddr, self.a)
     self.pc += 1
   
   @instruction(name="CMP", mode="zpx", cycles=4)
   def inst_0xd5(self):
-    self.opCMP(self.ZeroPageXAddr)
+    self.opCMPR(self.ZeroPageXAddr, self.a)
     self.pc += 1
 
   @instruction(name="DEC", mode="zpx", cycles=6)
@@ -1108,12 +1088,12 @@ class MPU:
 
   @instruction(name="CMP", mode="aby", cycles=4, extracycles=1)
   def inst_0xd9(self):
-    self.opCMP(self.AbsoluteYAddr)
+    self.opCMPR(self.AbsoluteYAddr, self.a)
     self.pc += 2
 
   @instruction(name="CMP", mode="abx", cycles=4, extracycles=1)
   def inst_0xdd(self):
-    self.opCMP(self.AbsoluteXAddr)
+    self.opCMPR(self.AbsoluteXAddr, self.a)
     self.pc += 2
 
   @instruction(name="DEC", mode="abx", cycles=7)
@@ -1123,7 +1103,7 @@ class MPU:
 
   @instruction(name="CPX", mode="imm", cycles=2)
   def inst_0xe0(self):
-    self.opCPX(self.ProgramCounter)
+    self.opCMPR(self.ProgramCounter, self.x)
     self.pc += 1
 
   @instruction(name="SBC", mode="inx", cycles=6)
@@ -1133,7 +1113,7 @@ class MPU:
   
   @instruction(name="CPX", mode="zpg", cycles=3)
   def inst_0xe4(self):
-    self.opCPX(self.ZeroPageAddr)
+    self.opCMPR(self.ZeroPageAddr, self.x)
     self.pc += 1
   
   @instruction(name="SBC", mode="zpg", cycles=3)
@@ -1163,7 +1143,7 @@ class MPU:
 
   @instruction(name="CPX", mode="abs", cycles=4)
   def inst_0xec(self):
-    self.opCPX(self.AbsoluteAddr)
+    self.opCMPR(self.AbsoluteAddr, self.x)
     self.pc += 2
   
   @instruction(name="SBC", mode="abs", cycles=4)
