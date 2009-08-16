@@ -59,6 +59,14 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertEqual("Assemble failed: foo\n", out)
 
+    def test_do_assemble_passes_addr_for_relative_branch_calc(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('4000 bvs $4005')
+
+        out = stdout.getvalue()
+        self.assertEqual("$4000  70 03     BVS $4005\n", out)
+
     def test_help_assemble(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)

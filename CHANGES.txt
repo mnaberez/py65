@@ -3,6 +3,9 @@ Next Release
   - When using the monitor, the nonblocking character input at
     $F004 should now work on the Microsoft Windows platform.
 
+  - Fixed that relative branch calculations would not use the correct 
+    start address when assembling in the monitor.  Closes #10.
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".

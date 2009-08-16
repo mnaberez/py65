@@ -173,7 +173,7 @@ class Monitor(cmd.Cmd):
             self._output("Bad label: %s" % start)
             return
 
-        bytes = self._assembler.assemble(statement)
+        bytes = self._assembler.assemble(statement, start)
         if bytes is None:
             self._output("Assemble failed: %s" % statement)
         else:
