@@ -16,6 +16,9 @@ Next Release
   - The processor status register is now initialized to 0 on reset.
     Previously, its unused bit (bit 5) was set to 1 on reset.
 
+  - Applied patch from Ed Spittles to change the CMP algorithm so that
+    it no longer fails Rob Finch's test suite.  Closes #8. 
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".
