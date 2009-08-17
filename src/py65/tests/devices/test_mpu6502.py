@@ -6,6 +6,17 @@ import py65.devices.mpu6502
 class Common6502Tests:
   """Tests common to 6502-based microprocessors"""
 
+  # Reset
+  
+  def test_reset_sets_registers_to_initial_states(self):
+    mpu = self._make_mpu()
+    mpu.reset()
+    self.assertEquals(0xFF, mpu.sp)
+    self.assertEquals(0, mpu.a)
+    self.assertEquals(0, mpu.x)
+    self.assertEquals(0, mpu.y)
+    self.assertEquals(0, mpu.flags)
+
   # ADC Absolute
   
   def test_adc_bcd_off_absolute_carry_clear_in_accumulator_zeroes(self):

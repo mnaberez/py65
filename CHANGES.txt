@@ -13,6 +13,9 @@ Next Release
   - MPU objects now return a two-line string as their __repr__ with 
     the processor status register displayed as binary for readability.  
 
+  - The processor status register is now initialized to 0 on reset.
+    Previously, its unused bit (bit 5) was set to 1 on reset.
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".

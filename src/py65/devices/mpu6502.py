@@ -44,7 +44,7 @@ class MPU:
           "%s: %04x %02x %02x %02x %02x %s" 
     
     return out % (indent, self.name, 
-                  self.pc, self.a, self.x, self.y, self.pc, flags)
+                  self.pc, self.a, self.x, self.y, self.sp, flags)
 
   def step(self):
     instructCode = self.ImmediateByte()
@@ -63,7 +63,7 @@ class MPU:
     self.a = 0
     self.x = 0
     self.y = 0
-    self.flags = self.UNUSED
+    self.flags = 0
     self.processorCycles = 0
 
   # Helpers for addressing modes
