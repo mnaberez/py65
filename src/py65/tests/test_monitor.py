@@ -266,13 +266,14 @@ class MonitorTests(unittest.TestCase):
     def test_registers_updates_all_registers(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_registers('a=42,x=43,y=44, sp=45, pc=4600')
+        mon.do_registers('a=42,x=43,y=44,p=45, sp=46, pc=4600')
         out = stdout.getvalue()
         self.assertEqual("", out)         
         self.assertEqual(0x42, mon._mpu.a)
         self.assertEqual(0x43, mon._mpu.x)
         self.assertEqual(0x44, mon._mpu.y)
-        self.assertEqual(0x45, mon._mpu.sp)
+        self.assertEqual(0x45, mon._mpu.flags)
+        self.assertEqual(0x46, mon._mpu.sp)
         self.assertEqual(0x4600, mon._mpu.pc)
 
     def test_help_registers(self):

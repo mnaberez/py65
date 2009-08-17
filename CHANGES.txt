@@ -6,6 +6,10 @@ Next Release
   - Fixed that relative branch calculations would not use the correct 
     start address when assembling in the monitor.  Closes #10.
 
+  - The processor status register ("p" or "flags") can now be changed 
+    in the monitor using the "registers" command with an argument of
+    "p", such as "registers p=00".
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".

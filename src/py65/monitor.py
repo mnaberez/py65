@@ -295,13 +295,15 @@ class Monitor(cmd.Cmd):
             return self._output("Syntax error: %s" % args)
 
         for register, value in pairs:
-            if register not in ('pc', 'sp', 'a', 'x', 'y'):
+            if register not in ('pc', 'sp', 'a', 'x', 'y', 'p'):
                 self._output("Invalid register: %s" % register)
             else:
                 try:
                     intval = self._address_parser.number(value) & 0xFFFF
                     if len(register) == 1:
                         intval &= 0xFF
+                    if register == 'p':
+                        register = 'flags'
                     setattr(self._mpu, register, intval)
                 except KeyError, why:
                     self._output(why[0])
