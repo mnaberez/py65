@@ -1,5 +1,6 @@
-from py65.utils.conversions import convert_to_bin, convert_to_bcd
+from py65.utils.conversions import convert_to_bin, convert_to_bcd, itoa
 from py65.utils.devices import make_instruction_decorator
+from os import linesep
 
 class MPU:
   # vectors
@@ -36,9 +37,14 @@ class MPU:
     self.reset()
 
   def __repr__(self):
-    out = '<%s: A=%02x, X=%02x, Y=%02x, Flags=%02x, SP=%02x, PC=%04x>'
-    return out % (self.name, self.a, self.x, self.y,
-                  self.flags, self.sp, self.pc)
+    flags  = itoa(self.flags, 2).rjust(8, '0')
+    indent = ' ' * (len(self.name) + 2)
+
+    out = "%s PC  AC XR YR SP NV-BDIZC" + linesep + \
+          "%s: %04x %02x %02x %02x %02x %s" 
+    
+    return out % (indent, self.name, 
+                  self.pc, self.a, self.x, self.y, self.pc, flags)
 
   def step(self):
     instructCode = self.ImmediateByte()

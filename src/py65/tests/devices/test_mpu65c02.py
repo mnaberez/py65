@@ -9,8 +9,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     def test_repr(self):
         mpu = self._make_mpu()
-        self.assertEquals('<65C02: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>',
-                          repr(mpu))
+        self.assert_('65C02' in repr(mpu))
 
     # ADC Zero Page, Indirect
     

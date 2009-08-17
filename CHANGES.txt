@@ -10,6 +10,9 @@ Next Release
     in the monitor using the "registers" command with an argument of
     "p", such as "registers p=00".
 
+  - MPU objects now return a two-line string as their __repr__ with 
+    the processor status register displayed as binary for readability.  
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".
