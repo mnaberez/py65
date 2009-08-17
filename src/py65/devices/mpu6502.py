@@ -308,7 +308,7 @@ class MPU:
         self.flags |= self.OVERFLOW
       data = result
       if data > 255:
-        self.flags|=self.OVERFLOW+self.CARRY
+        self.flags |= self.CARRY
         data &=255
       if data == 0:
         self.flags |= self.ZERO
