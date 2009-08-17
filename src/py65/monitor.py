@@ -101,17 +101,17 @@ class Monitor(cmd.Cmd):
         self._mpu.memory = m
 
     def _update_prompt(self):
-        self.prompt = "\n%s\n." % repr(self._mpu)
+        self.prompt = os.linesep + repr(self._mpu) + os.linesep + '.'
         
     def _output(self, stuff):
         if stuff is not None:
-            self.stdout.write(stuff + '\n')
+            self.stdout.write(stuff + os.linesep)
 
     def help_version(self):
         self._output("version\t\tDisplay Py65 version information.")
 
     def do_version(self, args):
-        self._output("\nPy65 Monitor")
+        self._output(os.linesep + "Py65 Monitor")
 
     def help_help(self):
         self._output("help\t\tPrint a list of available actions.")
