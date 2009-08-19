@@ -19,6 +19,12 @@ Next Release
   - Applied patch from Ed Spittles to change the CMP algorithm so that
     it no longer fails Rob Finch's test suite.  Closes #8. 
 
+  - Added a new interactive assembly mode to the monitor.  Entering the
+    the assemble command with a statement such as "a c000 lda #0" works
+    as before.  Entering "a c000" will start the interactive assembler
+    at that address.  Entering "a" alone will start it at the current
+    program counter.
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".

@@ -9,14 +9,6 @@ class MonitorTests(unittest.TestCase):
 
     # assemble
     
-    def test_do_assemble_shows_help_for_invalid_args(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_assemble('c000')
-
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith("assemble <address>"))
-
     def test_do_assemble_assembles_valid_statement(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)

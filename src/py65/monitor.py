@@ -11,6 +11,7 @@ from py65.devices.mpu65c02 import MPU as CMOS65C02
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
+from py65.utils.console import getch
 from py65.utils.console import getch_noblock
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
@@ -83,6 +84,9 @@ class Monitor(cmd.Cmd):
             if (not quoted) and (line[pos] == ';'):
                 line = line[:pos]
                 break
+        
+        if line == 'a':
+          line = 'assemble'
 
         return line
 
@@ -169,7 +173,7 @@ class Monitor(cmd.Cmd):
     def do_assemble(self, args):
         split = args.split(None, 1)
         if len(split) != 2:
-            return self.help_assemble()
+            return self._interactive_assemble(args)
         
         start, statement = split
         try:
@@ -189,6 +193,65 @@ class Monitor(cmd.Cmd):
     def help_assemble(self):
         self._output("assemble <address> <statement>")
         self._output("Assemble a statement at the address.")
+
+    def _interactive_assemble(self, args):
+        if args == '':
+          start = self._mpu.pc
+        else:
+          try:
+              start = self._address_parser.number(args)
+          except KeyError:
+              self._output("Bad label: %s" % start)
+              return
+          
+        assembling = True
+
+        while assembling:
+          collecting_line = True
+          line = ''
+          prompt = "\r$%04x            " % (start)
+  
+          self.stdout.write(prompt)
+
+          while collecting_line:
+            char = getch(self.stdin)
+            if char in ("\n", "\r"):
+              break                            
+            elif ord(char) in (0x7f, 0x08): # backspace
+              if len(line) > 0:
+                line = line[:-1]
+                self.stdout.write("\r%s\r%s%s" % \
+                  (' ' * (len(prompt+line) +5), prompt, line))
+            elif ord(char) == 0x1b: # escape
+              pass
+            else: 
+              line += char
+              self.stdout.write(char)
+
+          if not line:
+            self.stdout.write("\n")
+            return
+              
+          bytes = self._assembler.assemble(line)
+          if bytes is None:
+              self._output("Assemble failed: %s\n" % line)
+              return
+
+          end = start + len(bytes)
+          self._mpu.memory[start:end] = bytes  
+
+          bytes, disasm = self._disassembler.instruction_at(start)
+
+          mem = ''
+          for byte in self._mpu.memory[start:start+bytes]:
+              mem += '%02x ' % byte
+
+          self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ))
+          line = "\r$%04x  %-10s%s\n" % (start, mem, disasm)
+          self.stdout.write(line)                
+
+          start += bytes
+      
 
     def do_disassemble(self, args):
         start, end = self._address_parser.range(args)
