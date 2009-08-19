@@ -3,15 +3,15 @@ import sys
 if sys.platform[:3] == "win":
     import msvcrt
 
-    def getch(stdin):
-        """ Performs a nonblocking read of one byte from the Windows
-        console and returns its ordinal value.  The stdin argument
-        is for function signature compatibility and is ignored.  If 
-        no byte is available, 0 is returned.
+    def getch_noblock(stdin):
+        """ Performs a nonblocking read of one character from the Windows
+        console and returns it.  The stdin argument is for function 
+        signature compatibility and is ignored.  If no character is 
+        available, an empty string is returned.
         """
         if msvcrt.kbhit():
-            return ord(msvcrt.getch())
-        return 0
+            return msvcrt.getch()
+        return ''
 
 else:
     import select
@@ -19,9 +19,10 @@ else:
     import termios
     import fcntl
 
-    def getch(stdin):
-        """ Performs a nonblocking read of one byte from stdin and returns 
-        its ordinal value.  If no byte is available, 0 is returned.
+    def getch_noblock(stdin):
+        """ Performs a nonblocking read of one character from stdin  
+        returns it.  If no character is available, an empty string 
+        is returned.
         """
     
         fd = stdin.fileno()
@@ -38,11 +39,12 @@ else:
             byte = 0
             r, w, e = select.select([fd], [], [], 0.1)
             if r:
-                c = stdin.read(1)
-                byte = ord(c)
-                if byte == 0x0a:
-                    byte = 0x0d
+                char = stdin.read(1)
+                if char == "\n":
+                    char = "\r" 
+            else:
+              char = ''
         finally:
             termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
             fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
-        return byte
+        return char

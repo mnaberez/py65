@@ -11,7 +11,7 @@ from py65.devices.mpu65c02 import MPU as CMOS65C02
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
-from py65.utils.console import getch
+from py65.utils.console import getch_noblock
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
@@ -92,7 +92,12 @@ class Monitor(cmd.Cmd):
             self.stdout.flush()
 
         def getc(address):
-            return getch(self.stdin)
+            char = getch_noblock(self.stdin)
+            if char:
+                byte = ord(char)
+            else:
+                byte = 0
+            return byte
 
         m = ObservableMemory()
         m.subscribe_to_write([0xF001], putc)
