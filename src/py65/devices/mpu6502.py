@@ -1,6 +1,5 @@
 from py65.utils.conversions import convert_to_bin, convert_to_bcd, itoa
 from py65.utils.devices import make_instruction_decorator
-from os import linesep
 
 class MPU:
   # vectors
@@ -40,7 +39,7 @@ class MPU:
     flags  = itoa(self.flags, 2).rjust(8, '0')
     indent = ' ' * (len(self.name) + 2)
 
-    out = "%s PC  AC XR YR SP NV-BDIZC" + linesep + \
+    out = "%s PC  AC XR YR SP NV-BDIZC\n" + \
           "%s: %04x %02x %02x %02x %02x %s" 
     
     return out % (indent, self.name, 
