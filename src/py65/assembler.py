@@ -25,15 +25,12 @@ class Assembler:
         ['imm', re.compile(r'^#\$([0-9A-F]{2})$')]                  # "#$12"
     ]
     
-    def __init__(self, mpu=None, address_parser=None):
+    def __init__(self, mpu, address_parser=None):
         """ If a configured AddressParser is passed, symbolic addresses
         may be used in the assembly statements.
         """
         if address_parser is None:
             address_parser = AddressParser()
-
-        if mpu is None:
-            mpu = MPU()
 
         self._mpu = mpu
         self._address_parser = address_parser

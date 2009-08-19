@@ -1,5 +1,10 @@
+from py65.utils.addressing import AddressParser
+
 class Disassembler:
-    def __init__(self, mpu, address_parser):
+    def __init__(self, mpu, address_parser=None):
+        if address_parser is None:
+            address_parser = AddressParser()
+
         self._mpu = mpu
         self._address_parser = address_parser
 
