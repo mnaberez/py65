@@ -355,7 +355,7 @@ class MPU:
       self.flags |= self.CARRY + self.ZERO
     elif register_value > tbyte:
       self.flags |= self.CARRY
-    self.flags |= (self.a - tbyte) & self.NEGATIVE
+    self.flags |= (register_value - tbyte) & self.NEGATIVE
 
   def opSBC(self, x):
     data = self.ByteAt(x())
