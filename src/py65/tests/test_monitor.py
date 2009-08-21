@@ -7,6 +7,16 @@ from StringIO import StringIO
 
 class MonitorTests(unittest.TestCase):
 
+    # line processing
+    
+    def test_preprocess_line_removes_leading_dots(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('...help')        
+        
+        out = stdout.getvalue()
+        self.assert_('Documented commands' in out)
+
     # assemble
     
     def test_do_assemble_assembles_valid_statement(self):

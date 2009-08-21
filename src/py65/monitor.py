@@ -68,6 +68,10 @@ class Monitor(cmd.Cmd):
                            'z':   'step'}
 
     def _preprocess_line(self, line):
+        # ignore leading dots
+        while line.startswith('.'):
+          line = line[1:]
+      
         # command shortcuts
         for shortcut, command in self._shortcuts.iteritems():
             pattern = '^%s\s+' % re.escape(shortcut)
