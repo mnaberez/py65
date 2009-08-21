@@ -382,14 +382,15 @@ class MPU:
       else:
         borrow = 1
 
-      data = self.a - data - borrow
+      result = self.a - data - borrow
       self.flags &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
+      if ( (self.a ^ data) & (self.a ^ result) ) & 0x80:
+        self.flags |= self.OVERFLOW
+      data = result
       if data == 0:
         self.flags |= self.ZERO + self.CARRY
       elif data > 0:
         self.flags |= self.CARRY
-      else:
-        self.flags |= self.OVERFLOW
       self.flags |= data & self.NEGATIVE
       self.a = data & 0xFF
 

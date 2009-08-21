@@ -25,6 +25,10 @@ Next Release
     at that address.  Entering "a" alone will start it at the current
     program counter.
 
+  - Applied patch from Ed Spittles so that SBC now properly sets the
+    Overflow (V) flag.  This fixes a failure in Rob Finch's test suite.
+    Closes #6.
+
 0.6 (2009-08-11)
 
   - Added monitor shortcut "a" for "assemble".
