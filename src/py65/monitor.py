@@ -69,8 +69,7 @@ class Monitor(cmd.Cmd):
 
     def _preprocess_line(self, line):
         # ignore leading dots
-        while line.startswith('.'):
-          line = line[1:]
+        line = line.lstrip('.')
       
         # command shortcuts
         for shortcut, command in self._shortcuts.iteritems():
