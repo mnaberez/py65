@@ -124,6 +124,10 @@ class Monitor(cmd.Cmd):
         if stuff is not None:
             self.stdout.write(stuff + "\n")
 
+    def do_help(self, args):
+        args = self._shortcuts.get(args.strip(), args)
+        return cmd.Cmd.do_help(self, args)
+
     def help_version(self):
         self._output("version\t\tDisplay Py65 version information.")
 

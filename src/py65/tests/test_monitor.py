@@ -99,6 +99,21 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("assemble <address>"))
 
+    # help
+    
+    def test_help_accepts_command_shortcuts(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        
+        mon.onecmd("help assemble \t ")
+        help_for_command = stdout.getvalue()
+
+        stdout.truncate(0)
+        mon.onecmd("help a \t ")
+        help_for_shortcut = stdout.getvalue()
+
+        self.assertEqual(help_for_command, help_for_shortcut)
+
     # mpu
 
     def test_mpu_with_no_args_prints_current_lists_available_mpus(self):
