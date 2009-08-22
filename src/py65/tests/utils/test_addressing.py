@@ -3,6 +3,22 @@ import sys
 from py65.utils.addressing import AddressParser
 
 class AddressParserTests(unittest.TestCase):
+  def test_maxwidth_can_be_set_in_constructor(self):
+    parser = AddressParser(maxwidth=24)
+    self.assertEqual(24, parser.maxwidth)
+    self.assertEqual(0xFFFFFF, parser._maxaddr)
+
+  def test_maxwidth_defaults_to_16_bits(self):
+    parser = AddressParser()
+    self.assertEqual(16, parser.maxwidth)                                   
+    self.assertEqual(0xFFFF, parser._maxaddr)
+
+  def test_maxwidth_setter(self):
+    parser = AddressParser()
+    parser.maxwidth = 24
+    self.assertEqual(24, parser.maxwidth)
+    self.assertEqual(0xFFFFFF, parser._maxaddr)       
+
   def test_number_hex_literal(self):
     parser = AddressParser()
     self.assertEqual(49152, parser.number('$c000'))
@@ -80,6 +96,17 @@ class AddressParserTests(unittest.TestCase):
       self.fail()
     except KeyError, why:
       self.assertEqual('Label not found: bad_label', why[0])    
+
+  def test_number_truncates_address_at_maxwidth_16(self):
+    parser = AddressParser()
+    parser.labels = {'foo': 0xFFFF}
+    self.assertEqual(0xFFFF, parser.number('foo+5'))
+
+  def test_number_truncates_address_at_maxwidth_24(self):
+    parser = AddressParser()
+    parser.maxwidth = 24
+    parser.labels = {'foo': 0xFFFFFF}
+    self.assertEqual(0xFFFFFF, parser.number('foo+5'))
 
   def test_label_for_returns_label(self):
     parser = AddressParser(labels={'chrout':0xFFD2})

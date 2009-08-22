@@ -1,17 +1,28 @@
 import re
 
-class AddressParser:
+class AddressParser(object):
     """Parse user input into addresses or ranges of addresses.
     """
 
-    def __init__(self, radix=16, labels={}):
-        """Radix is the default radix to use when one is not specified
+    def __init__(self, maxwidth=16, radix=16, labels={}):
+        """Maxwidth is the maximum width of an address in bits.
+        Radix is the default radix to use when one is not specified
         as a prefix of any input.  Labels are a dictionary of label
         names that can be substituted for addresses.
         """
         self.radix = radix
         self.labels = labels
+        self.maxwidth = maxwidth
+        
+    def _get_maxwidth(self):
+        return self._maxwidth    
 
+    def _set_maxwidth(self, width):
+        self._maxwidth = width
+        self._maxaddr = pow(2, width) - 1
+
+    maxwidth = property(_get_maxwidth, _set_maxwidth)
+              
     def label_for(self, address, default=None):
         """Given an address, return the corresponding label or a default.
         """
@@ -53,8 +64,8 @@ class AddressParser:
 
                 if address < 0:
                     address = 0
-                if address > 0xFFFF:
-                    address = 0xFFFF
+                if address > self._maxaddr:
+                    address = self._maxaddr
                 return address
 
             else:
