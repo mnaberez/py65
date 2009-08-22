@@ -232,7 +232,23 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("reset\t"))        
 
-   # tilde
+    # tilde
+
+    def test_tilde_shortcut_with_space(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('~ $10')
+        out = stdout.getvalue()  
+        expected = "+16\n$10\n0020\n00010000\n"
+        self.assertEqual(expected, out)
+
+    def test_tilde_shortcut_without_space_for_vice_compatibility(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('~$10')
+        out = stdout.getvalue()  
+        expected = "+16\n$10\n0020\n00010000\n"
+        self.assertEqual(expected, out)
    
     def test_do_tilde(self):
         stdout = StringIO()

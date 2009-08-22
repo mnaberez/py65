@@ -76,8 +76,12 @@ class Monitor(cmd.Cmd):
                 line = line[:pos]
                 break
 
-        # whitepsace & leading dots
+        # whitespace & leading dots
         line = line.strip(' \t').lstrip('.')
+
+        # special case for vice compatibility
+        if line.startswith('~'):
+          line = self._shortcuts['~'] + ' ' + line[1:]
       
         # command shortcuts
         for shortcut, command in self._shortcuts.iteritems():
