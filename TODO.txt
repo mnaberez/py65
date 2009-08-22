@@ -4,5 +4,3 @@ Instructions needing unit tests:
   cpy
 
 Better error messages when assembling fails.
-
-Ability to assemble more than one instruction at a time.
