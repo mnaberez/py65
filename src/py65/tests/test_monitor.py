@@ -274,7 +274,7 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(0x42, mon._mpu.a)
         self.assertEqual(0x43, mon._mpu.x)
         self.assertEqual(0x44, mon._mpu.y)
-        self.assertEqual(0x45, mon._mpu.flags)
+        self.assertEqual(0x45, mon._mpu.p)
         self.assertEqual(0x46, mon._mpu.sp)
         self.assertEqual(0x4600, mon._mpu.pc)
 

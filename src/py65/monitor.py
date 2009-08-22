@@ -373,8 +373,6 @@ class Monitor(cmd.Cmd):
                     intval = self._address_parser.number(value) & 0xFFFF
                     if len(register) == 1:
                         intval &= 0xFF
-                    if register == 'p':
-                        register = 'flags'
                     setattr(self._mpu, register, intval)
                 except KeyError, why:
                     self._output(why[0])
