@@ -68,3 +68,30 @@ else:
             termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
             fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
         return char
+
+
+def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
+    """ Read a line from stdin, printing each character as it is typed. 
+    Does not echo a newline at the end.  This allows the calling program
+    to overwrite the line by first sending a carriage return ('\r'), which
+    is useful in modes like the interactive assembler.
+    """
+    stdout.write(prompt)
+    line = ''
+    while True:
+      char = getch(stdin)
+      code = ord(char)
+      if char in ("\n", "\r"):
+        break                            
+      elif code in (0x7f, 0x08): # backspace
+        if len(line) > 0:
+          line = line[:-1]
+          stdout.write("\r%s\r%s%s" % \
+            (' ' * (len(prompt+line) +5), prompt, line))
+      elif code == 0x1b: # escape
+        pass
+      else: 
+        line += char
+        stdout.write(char)
+    return line
+  

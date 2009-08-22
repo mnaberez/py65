@@ -4,15 +4,14 @@ import cmd
 import os
 import re
 import shlex
-import asyncore
 import sys
+from asyncore import compact_traceback
 from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.devices.mpu65c02 import MPU as CMOS65C02
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
-from py65.utils.console import getch
-from py65.utils.console import getch_noblock
+from py65.utils import console
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
@@ -34,7 +33,7 @@ class Monitor(cmd.Cmd):
         except KeyboardInterrupt:
             self._output("Interrupt")
         except Exception,e:
-            (file, fun, line), t, v, tbinfo = asyncore.compact_traceback()
+            (file, fun, line), t, v, tbinfo = compact_traceback()
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
             self._output(error)
 
@@ -101,7 +100,7 @@ class Monitor(cmd.Cmd):
             self.stdout.flush()
 
         def getc(address):
-            char = getch_noblock(self.stdin)
+            char = console.getch_noblock(self.stdin)
             if char:
                 byte = ord(char)
             else:
@@ -212,51 +211,29 @@ class Monitor(cmd.Cmd):
         assembling = True
 
         while assembling:
-          collecting_line = True
-          line = ''
           prompt = "\r$%04x            " % (start)
-  
-          self.stdout.write(prompt)
-
-          while collecting_line:
-            char = getch(self.stdin)
-            if char in ("\n", "\r"):
-              break                            
-            elif ord(char) in (0x7f, 0x08): # backspace
-              if len(line) > 0:
-                line = line[:-1]
-                self.stdout.write("\r%s\r%s%s" % \
-                  (' ' * (len(prompt+line) +5), prompt, line))
-            elif ord(char) == 0x1b: # escape
-              pass
-            else: 
-              line += char
-              self.stdout.write(char)
+          line = console.line_input(prompt, 
+                    stdin=self.stdin, stdout=self.stdout)
 
           if not line:
             self.stdout.write("\n")
             return
-              
+
+          # assemble into memory
           bytes = self._assembler.assemble(line)
           if bytes is None:
               self.stdout.write("\r$%04x  ???\n" % start)
               continue
-
           end = start + len(bytes)
           self._mpu.memory[start:end] = bytes  
 
+          # print disassembly
           bytes, disasm = self._disassembler.instruction_at(start)
-
-          mem = ''
-          for byte in self._mpu.memory[start:start+bytes]:
-              mem += '%02x ' % byte
-
-          self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ))
-          line = "\r$%04x  %-10s%s\n" % (start, mem, disasm)
-          self.stdout.write(line)                
+          disassembly = self._format_disassembly(start, bytes, disasm)
+          self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ) + "\r")
+          self.stdout.write(disassembly + "\n")
 
           start += bytes
-      
 
     def do_disassemble(self, args):
         start, end = self._address_parser.range(args)
@@ -266,15 +243,15 @@ class Monitor(cmd.Cmd):
         address = start
         while address < end:
             bytes, disasm = self._disassembler.instruction_at(address)
-            
-            mem = ''
-            for byte in self._mpu.memory[address:address+bytes]:
-                mem += '%02x ' % byte
-            
-            line = "$%04x  %-10s%s" % (address, mem, disasm)
-            self._output(line)                
-
+            self._output(self._format_disassembly(address, bytes, disasm))                
             address += bytes
+    
+    def _format_disassembly(self, address, bytes, disasm):
+        mem = ''
+        for byte in self._mpu.memory[address:address+bytes]:
+            mem += '%02x ' % byte
+        
+        return "$%04x  %-10s%s" % (address, mem, disasm)
 
     def help_disassemble(self):
         self._output("disassemble <address_range>")
