@@ -239,8 +239,8 @@ class Monitor(cmd.Cmd):
               
           bytes = self._assembler.assemble(line)
           if bytes is None:
-              self._output("Assemble failed: %s\n" % line)
-              return
+              self.stdout.write("\r$%04x  ???\n" % start)
+              continue
 
           end = start + len(bytes)
           self._mpu.memory[start:end] = bytes  
