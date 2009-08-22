@@ -36,7 +36,7 @@ class MPU:
     self.reset()
 
   def __repr__(self):
-    flags  = itoa(self.flags, 2).rjust(8, '0')
+    flags  = itoa(self.p, 2).rjust(8, '0')
     indent = ' ' * (len(self.name) + 2)
 
     out = "%s PC  AC XR YR SP NV-BDIZC\n" + \
@@ -62,7 +62,7 @@ class MPU:
     self.a = 0
     self.x = 0
     self.y = 0
-    self.flags = 0
+    self.p = 0
     self.processorCycles = 0
 
   # Helpers for addressing modes
@@ -163,11 +163,11 @@ class MPU:
     return z
 
   def FlagsNZ(self, value):
-    self.flags &= ~(self.ZERO + self.NEGATIVE)
+    self.p &= ~(self.ZERO + self.NEGATIVE)
     if value == 0:
-      self.flags |= self.ZERO
+      self.p |= self.ZERO
     else:
-      self.flags |= value & self.NEGATIVE
+      self.p |= value & self.NEGATIVE
 
   # operations
 
@@ -182,16 +182,16 @@ class MPU:
       addr = x()
       tbyte = self.ByteAt(addr)
 
-    self.flags &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
+    self.p &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
 
     if tbyte & 128:
-      self.flags |= self.CARRY
+      self.p |= self.CARRY
     tbyte = (tbyte << 1) & 0xFF
 
     if tbyte:
-      self.flags |= tbyte & 128
+      self.p |= tbyte & 128
     else:
-      self.flags |= self.ZERO
+      self.p |= self.ZERO
     
     if x is None:
       self.a = tbyte
@@ -205,14 +205,14 @@ class MPU:
       addr = x()
       tbyte = self.ByteAt(addr)
 
-    self.flags &=~(self.CARRY+self.NEGATIVE+self.ZERO)
-    self.flags |=tbyte&1
+    self.p &=~(self.CARRY+self.NEGATIVE+self.ZERO)
+    self.p |=tbyte&1
 
     tbyte = tbyte >> 1
     if tbyte:
       pass # {}
     else:
-      self.flags |= self.ZERO
+      self.p |= self.ZERO
 
     if x is None:
       self.a = tbyte
@@ -220,22 +220,22 @@ class MPU:
       self.memory[addr]=tbyte
 
   def opBCL(self, x):
-    if self.flags & x: 
+    if self.p & x: 
       self.pc += 1
     else:
       self.BranchRelAddr()
 
   def opBST(self, x):
-    if self.flags & x:
+    if self.p & x:
       self.BranchRelAddr()
     else:
       self.pc += 1
 
   def opCLR(self, x):
-    self.flags &=~x
+    self.p &=~x
 
   def opSET(self, x):
-    self.flags |= x
+    self.p |= x
 
   def opAND(self, x):
     self.a &= self.ByteAt(x())
@@ -243,10 +243,10 @@ class MPU:
 
   def opBIT(self, x):
     tbyte = self.ByteAt(x())
-    self.flags &=~(self.ZERO+self.NEGATIVE+self.OVERFLOW)
+    self.p &=~(self.ZERO+self.NEGATIVE+self.OVERFLOW)
     if (self.a & tbyte) == 0:
-      self.flags |= self.ZERO
-    self.flags |= tbyte&(128+64)
+      self.p |= self.ZERO
+    self.p |= tbyte&(128+64)
 
   def opROL(self, x):
     if x is None:
@@ -255,15 +255,15 @@ class MPU:
       addr = x()
       tbyte = self.ByteAt(addr)
 
-    if self.flags & self.CARRY:
+    if self.p & self.CARRY:
       if tbyte & 128:
         pass
       else:
-        self.flags &= ~self.CARRY
+        self.p &= ~self.CARRY
       tbyte = (tbyte << 1) | 1
     else:
       if tbyte & 128:
-        self.flags |= self.CARRY
+        self.p |= self.CARRY
       tbyte = tbyte << 1     
     tbyte &= 0xFF
     self.FlagsNZ(tbyte)
@@ -280,39 +280,39 @@ class MPU:
   def opADC(self, x):
     data = self.ByteAt(x())
       
-    if self.flags & self.DECIMAL:
-      if self.flags & self.CARRY:
+    if self.p & self.DECIMAL:
+      if self.p & self.CARRY:
         tmp = 1
       else:
         tmp = 0
       data = convert_to_bin(data) + convert_to_bin(self.a) + tmp
-      self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
+      self.p &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
       if data > 99:
-        self.flags |= self.CARRY + self.OVERFLOW
+        self.p |= self.CARRY + self.OVERFLOW
         data -= 100
 
       if data == 0:
-        self.flags |= self.ZERO
+        self.p |= self.ZERO
       else:
-        self.flags |= data & 128
+        self.p |= data & 128
       self.a = convert_to_bcd(data)
     else:
-      if self.flags & self.CARRY:
+      if self.p & self.CARRY:
         tmp = 1
       else:
         tmp = 0
       result = data + self.a + tmp
-      self.flags &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
+      self.p &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
       if ( ~(self.a ^ data) & (self.a ^ result) ) & 0x80:
-        self.flags |= self.OVERFLOW
+        self.p |= self.OVERFLOW
       data = result
       if data > 255:
-        self.flags |= self.CARRY
+        self.p |= self.CARRY
         data &=255
       if data == 0:
-        self.flags |= self.ZERO
+        self.p |= self.ZERO
       else:
-        self.flags |= data & 128
+        self.p |= data & 128
       self.a = data
 
   def opROR(self, x):
@@ -322,15 +322,15 @@ class MPU:
       addr=x()
       tbyte = self.ByteAt(addr)
 
-    if self.flags & self.CARRY:
+    if self.p & self.CARRY:
       if tbyte & 1:
         pass # {}
       else:
-        self.flags &=~ self.CARRY
+        self.p &=~ self.CARRY
       tbyte=(tbyte>>1)|128
     else:
       if tbyte & 1:
-        self.flags |= self.CARRY
+        self.p |= self.CARRY
       tbyte=tbyte>>1
     self.FlagsNZ(tbyte)
 
@@ -350,48 +350,48 @@ class MPU:
 
   def opCMPR(self, get_address, register_value):
     tbyte = self.ByteAt(get_address())
-    self.flags &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
+    self.p &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
     if register_value == tbyte:
-      self.flags |= self.CARRY + self.ZERO
+      self.p |= self.CARRY + self.ZERO
     elif register_value > tbyte:
-      self.flags |= self.CARRY
-    self.flags |= (register_value - tbyte) & self.NEGATIVE
+      self.p |= self.CARRY
+    self.p |= (register_value - tbyte) & self.NEGATIVE
 
   def opSBC(self, x):
     data = self.ByteAt(x())
       
-    if self.flags & self.DECIMAL:
-      if self.flags & self.CARRY:
+    if self.p & self.DECIMAL:
+      if self.p & self.CARRY:
         borrow = 0
       else:
         borrow = 1
     
       data = convert_to_bin(self.a) - convert_to_bin(data) - borrow
-      self.flags &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
+      self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
       if data == 0:
-        self.flags |= self.ZERO + self.CARRY
+        self.p |= self.ZERO + self.CARRY
       elif data > 0:
-        self.flags |= self.CARRY
+        self.p |= self.CARRY
       else:
-        self.flags |= self.NEGATIVE
+        self.p |= self.NEGATIVE
         data +=100
       self.a = convert_to_bcd(data)
     else:
-      if self.flags & self.CARRY:
+      if self.p & self.CARRY:
         borrow = 0
       else:
         borrow = 1
 
       result = self.a - data - borrow
-      self.flags &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
+      self.p &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
       if ( (self.a ^ data) & (self.a ^ result) ) & 0x80:
-        self.flags |= self.OVERFLOW
+        self.p |= self.OVERFLOW
       data = result
       if data == 0:
-        self.flags |= self.ZERO + self.CARRY
+        self.p |= self.ZERO + self.CARRY
       elif data > 0:
-        self.flags |= self.CARRY
-      self.flags |= data & self.NEGATIVE
+        self.p |= self.CARRY
+      self.p |= data & self.NEGATIVE
       self.a = data & 0xFF
 
   def opDECR(self, x):
@@ -401,12 +401,12 @@ class MPU:
       addr = x()
       tbyte = self.ByteAt(addr)
 
-    self.flags &= ~(self.ZERO + self.NEGATIVE)
+    self.p &= ~(self.ZERO + self.NEGATIVE)
     tbyte = (tbyte - 1) & 0xFF
     if tbyte:
-      self.flags |= tbyte & self.NEGATIVE
+      self.p |= tbyte & self.NEGATIVE
     else:
-      self.flags |= self.ZERO
+      self.p |= self.ZERO
 
     if x is None:
       self.a = tbyte
@@ -420,12 +420,12 @@ class MPU:
       addr = x()
       tbyte = self.ByteAt(addr)
 
-    self.flags &= ~(self.ZERO + self.NEGATIVE)
+    self.p &= ~(self.ZERO + self.NEGATIVE)
     tbyte = (tbyte + 1) & 0xFF
     if tbyte:
-      self.flags |= tbyte & self.NEGATIVE
+      self.p |= tbyte & self.NEGATIVE
     else:
-      self.flags |= self.ZERO
+      self.p |= self.ZERO
 
     if x is None:
       self.a = tbyte
@@ -464,10 +464,10 @@ class MPU:
     pc = (self.pc + 1) & 0xFFFF # The pc has already been increased one
     self.stPushWord(pc)
 
-    self.flags |= self.BREAK
-    self.stPush(self.flags)
+    self.p |= self.BREAK
+    self.stPush(self.p)
 
-    self.flags |= self.INTERRUPT
+    self.p |= self.INTERRUPT
     self.pc = self.WordAt(self.IrqTo)
 
   @instruction(name="ORA", mode="inx", cycles=6)
@@ -487,7 +487,7 @@ class MPU:
   
   @instruction(name="PHP", mode="imp", cycles=3)
   def inst_0x08(self):
-    self.stPush(self.flags)
+    self.stPush(self.p)
   
   @instruction(name="ORA", mode="imm", cycles=2)
   def inst_0x09(self):
@@ -573,7 +573,7 @@ class MPU:
 
   @instruction(name="PLP", mode="imp", cycles=4)
   def inst_0x28(self):
-    self.flags = self.stPop()
+    self.p = self.stPop()
   
   @instruction(name="AND", mode="imm", cycles=2)
   def inst_0x29(self):
@@ -639,7 +639,7 @@ class MPU:
 
   @instruction(name="RTI", mode="imp", cycles=6)
   def inst_0x40(self):
-    self.flags = self.stPop()
+    self.p = self.stPop()
     self.pc = self.stPopWord()
 
   @instruction(name="EOR", mode="inx", cycles=6)

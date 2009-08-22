@@ -47,19 +47,19 @@ class MPU(mpu6502.MPU):
     def opTSB(self, x):
         address = x()
         m = self.memory[address] 
-        self.flags &= ~self.ZERO
+        self.p &= ~self.ZERO
         z = m & self.a
         if z != 0:
-            self.flags |= self.ZERO
+            self.p |= self.ZERO
         self.memory[address] = m | self.a
 
     def opTRB(self, x):
         address = x()
         m = self.memory[address] 
-        self.flags &= ~self.ZERO
+        self.p &= ~self.ZERO
         z = m & self.a
         if z != 0:
-            self.flags |= self.ZERO
+            self.p |= self.ZERO
         self.memory[address] = m & ~self.a
 
     # instructions
