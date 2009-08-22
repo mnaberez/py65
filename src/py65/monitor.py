@@ -68,28 +68,30 @@ class Monitor(cmd.Cmd):
                            'z':   'step'}
 
     def _preprocess_line(self, line):
-        # ignore leading dots
-        line = line.lstrip('.')
+        # line comments
+        quoted = False
+        for pos, char in enumerate(line):
+            if char in ('"', "'"):
+                quoted = not quoted
+            if (not quoted) and (char == ';'):
+                line = line[:pos]
+                break
+
+        # whitepsace & leading dots
+        line = line.strip(' \t').lstrip('.')
       
         # command shortcuts
         for shortcut, command in self._shortcuts.iteritems():
+            if line == shortcut:
+                line = command
+                break
+
             pattern = '^%s\s+' % re.escape(shortcut)
             matches = re.match(pattern, line)
             if matches:
                 start, end = matches.span()
                 line = "%s %s" % (command, line[end:])
-
-        # line comments
-        quoted = False
-        for pos in range(0, len(line)):
-            if line[pos] in ('"', "'"):
-                quoted = not quoted
-            if (not quoted) and (line[pos] == ';'):
-                line = line[:pos]
                 break
-        
-        if line == 'a':
-          line = 'assemble'
 
         return line
 

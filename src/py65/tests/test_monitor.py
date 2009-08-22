@@ -9,13 +9,35 @@ class MonitorTests(unittest.TestCase):
 
     # line processing
     
-    def test_preprocess_line_removes_leading_dots(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.onecmd('...help')        
-        
-        out = stdout.getvalue()
-        self.assert_('Documented commands' in out)
+    def test__preprocess_line_removes_leading_dots_after_whitespace(self):
+        mon = Monitor()
+        self.assertEqual('help', mon._preprocess_line('  ...help'))
+
+    def test__preprocess_line_removes_leading_and_trailing_whitespace(self):
+        mon = Monitor()
+        self.assertEqual('help', mon._preprocess_line(' \t help \t '))
+    
+    def test__preprocess_line_rewrites_shortcut_when_alone_on_line(self):
+        mon = Monitor()
+        self.assertEqual('assemble', mon._preprocess_line(' a'))
+
+    def test__preprocess_line_rewrites_shortcut_with_arguments_on_line(self):
+        mon = Monitor()
+        self.assertEqual('assemble c000', mon._preprocess_line('a c000'))
+
+    def test__preprocess_line_removes_semicolon_comments(self):
+        mon = Monitor()
+        self.assertEqual('assemble', mon._preprocess_line('a ;comment'))
+
+    def test__preprocess_line_does_not_remove_semicolons_in_quotes(self):
+        mon = Monitor()
+        self.assertEqual('assemble lda #$";"', 
+                         mon._preprocess_line('a lda #$";" ;comment'))
+
+    def test__preprocess_line_does_not_remove_semicolons_in_apostrophes(self):
+        mon = Monitor()
+        self.assertEqual("assemble lda #$';'", 
+                         mon._preprocess_line("assemble lda #$';' ;comment"))
 
     # assemble
     
