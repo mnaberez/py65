@@ -62,6 +62,7 @@ class Monitor(cmd.Cmd):
                            'r':   'registers',
                            'ret': 'return',
                            'rad': 'radix',
+                           's':   'save',
                            'shl': 'show_labels',
                            'x':   'quit',
                            'z':   'step'}
@@ -410,6 +411,34 @@ class Monitor(cmd.Cmd):
             return
 
         self._fill(start, start, map(ord, bytes))
+
+    def do_save(self, args):
+        split = shlex.split(args)
+        if len(split) != 3:
+            self._output("Syntax error: %s" % args)
+            return
+        
+        filename = split[0]
+        start = self._address_parser.number(split[1])
+        end   = self._address_parser.number(split[2])
+        
+        bytes = self._mpu.memory[start:end+1]
+        try:
+            f = open(filename, 'wb')
+            for byte in bytes:
+                f.write(chr(byte))
+            f.close()
+        except (OSError, IOError), why:
+            msg = "Cannot save file: [%d] %s" % (why[0], why[1])
+            self._output(msg)
+            return
+        
+        self._output("Saved +%d bytes to %s" % (len(bytes), filename))    
+
+    def help_save(self):
+        self._output("save \"filename\" <start> <end>")
+        self._output("Save the specified memory range to disk as a binary file.")
+        self._output("Commodore-style load address bytes are not written.")
     
     def help_fill(self):
         self._output("fill <address_range> <data_list>")

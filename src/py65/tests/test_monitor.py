@@ -2,6 +2,7 @@ import unittest
 import sys
 import re
 import os
+import tempfile
 from py65.monitor import Monitor
 from StringIO import StringIO
 
@@ -246,6 +247,34 @@ class MonitorTests(unittest.TestCase):
         mon.help_reset()
         out = stdout.getvalue()
         self.assertTrue(out.startswith("reset\t"))        
+
+    def test_save_with_less_than_three_args_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_save('filename start')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Syntax error'))  
+        
+    def test_save(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0:3] = [0xAA, 0xBB, 0xCC]
+
+        f = tempfile.NamedTemporaryFile()
+        mon.do_save("'%s' 0 2" % f.name)
+        f.seek(0)
+        self.assertEqual(chr(0xAA) + chr(0xBB) + chr(0xCC),
+                         f.read())
+        self.assertEqual('Saved +3 bytes to %s\n' % f.name, 
+                         stdout.getvalue())
+        f.close()                     
+
+    def test_help_save(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_save()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('save'))        
 
     # tilde
 
