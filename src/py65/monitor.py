@@ -57,7 +57,6 @@ class Monitor(cmd.Cmd):
                            'f':   'fill',
                            'g':   'goto',
                            'l':   'load',
-                           'll':  'load_labels',
                            'm':   'mem',
                            'r':   'registers',
                            'ret': 'return',
@@ -267,6 +266,7 @@ class Monitor(cmd.Cmd):
         self._output("Disassemble instructions in the address range.")
 
     def help_step(self):
+        self._output("step")
         self._output("Single-step through instructions.")
 
     def do_step(self, args):
@@ -274,6 +274,7 @@ class Monitor(cmd.Cmd):
         self.do_disassemble('%04x' % self._mpu.pc)
     
     def help_return(self):
+        self._output("return")
         self._output("Continues execution and returns to the monitor just")
         self._output("before the next RTS or RTI is executed.")
     

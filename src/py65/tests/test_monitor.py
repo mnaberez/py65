@@ -40,7 +40,46 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual("assemble lda #$';'", 
                          mon._preprocess_line("assemble lda #$';' ;comment"))
 
+    # add_label
+
+    def test_shortcut_for_add_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('al')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('add_label'))
+
+    def test_do_add_label_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('should be label space value')
+        out = stdout.getvalue()
+        self.assertEqual("Syntax error: should be label space value\n", out)         
+
+    def test_do_add_label_adds_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('$c000 foo')
+        address_parser = mon._address_parser
+        self.assertEqual(0xC000, address_parser.number('foo'))
+
+    def test_help_add_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_add_label()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("add_label"))        
+
     # assemble
+
+    def test_shortcut_for_assemble(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('a')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('assemble'))
     
     def test_do_assemble_assembles_valid_statement(self):
         stdout = StringIO()
@@ -100,6 +139,69 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("assemble <address>"))
 
+    # delete_label
+
+    def test_shortcut_for_delete_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('dl')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('delete_label'))
+
+    def test_do_delete_label_no_args_displays_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_delete_label('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('delete_label'))
+
+    def test_do_delete_label_with_bad_label_fails_silently(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_delete_label('non-existant-label')
+        out = stdout.getvalue()
+        self.assertEqual('', out)
+
+    def test_do_delete_label_with_delete_label(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._address_parser.labels['foo'] = 0xc000
+        mon.do_delete_label('foo') 
+        self.assertFalse(mon._address_parser.labels.has_key('foo'))
+        out = stdout.getvalue()
+        self.assertEqual('', out)
+
+    # disassemble
+    
+    def test_shortcut_for_disassemble(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('d')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('disassemble'))
+
+    # fill
+
+    def test_shortcut_for_fill(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('f')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('fill'))
+
+    # goto
+
+    def test_shortcut_for_goto(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('g')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('goto'))
+
     # help
     
     def test_help_accepts_command_shortcuts(self):
@@ -116,6 +218,14 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(help_for_command, help_for_shortcut)
 
     # load
+
+    def test_shortcut_for_load(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('l')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('load'))
     
     def test_load_with_more_than_two_args_syntax_error(self):
         stdout = StringIO()
@@ -144,6 +254,16 @@ class MonitorTests(unittest.TestCase):
         mon.help_load()
         out = stdout.getvalue()
         self.assertTrue(out.startswith('load'))        
+
+    # mem
+    
+    def test_shortcut_for_mem(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('m')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('mem'))
     
     # mpu
 
@@ -198,25 +318,15 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual("mpu <type>\tSelect a new microprocessor.",
                          lines[1]) 
 
-    # pwd
-
-    def test_pwd_shows_os_getcwd(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_pwd()
-
-        out = stdout.getvalue()
-        self.assertEqual("%s\n" % os.getcwd(), out)
-        
-
-    def test_help_pwd(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.help_pwd()
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith("Show the current working"))
-        
     # quit
+
+    def test_shortcut_for_quit(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('x')
+
+        out = stdout.getvalue() 
+        self.assertTrue(out.startswith('To quit'))
 
     def test_do_EOF(self):
         stdout = StringIO()
@@ -243,103 +353,44 @@ class MonitorTests(unittest.TestCase):
         mon.help_EOF()
         out = stdout.getvalue()
         self.assertTrue(out.startswith("To quit,"))
-   
-    # version
-    
-    def test_do_version(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_version('')
-        out = stdout.getvalue()       
-        self.assertTrue(out.startswith("\nPy65"))
 
-    def test_help_version(self):
+    # pwd
+
+    def test_pwd_shows_os_getcwd(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.help_version()
+        mon.do_pwd()
+
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("version\t"))
-
-    # reset
-    
-    def test_do_reset(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        old_mpu = mon._mpu
-        old_name = mon._mpu.name
-        mon.do_reset('')
-        self.assertNotEqual(old_mpu, mon._mpu)
-        self.assertEqual(old_name, mon._mpu.name)
-
-    def test_help_reset(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.help_reset()
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith("reset\t"))        
-
-    def test_save_with_less_than_three_args_syntax_error(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_save('filename start')
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith('Syntax error'))  
+        self.assertEqual("%s\n" % os.getcwd(), out)
         
-    def test_save(self):
+
+    def test_help_pwd(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon._mpu.memory[0:3] = [0xAA, 0xBB, 0xCC]
-
-        f = tempfile.NamedTemporaryFile()
-        mon.do_save("'%s' 0 2" % f.name)
-        f.seek(0)
-        self.assertEqual(chr(0xAA) + chr(0xBB) + chr(0xCC),
-                         f.read())
-        self.assertEqual('Saved +3 bytes to %s\n' % f.name, 
-                         stdout.getvalue())
-        f.close()                     
-
-    def test_help_save(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.help_save()
+        mon.help_pwd()
         out = stdout.getvalue()
-        self.assertTrue(out.startswith('save'))        
+        self.assertTrue(out.startswith("Show the current working"))
 
-    # tilde
+    # radix
 
-    def test_tilde_shortcut_with_space(self):
+    def test_shortcut_for_radix(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.onecmd('~ $10')
-        out = stdout.getvalue()  
-        expected = "+16\n$10\n0020\n00010000\n"
-        self.assertEqual(expected, out)
+        mon.do_help('rad')
 
-    def test_tilde_shortcut_without_space_for_vice_compatibility(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.onecmd('~$10')
-        out = stdout.getvalue()  
-        expected = "+16\n$10\n0020\n00010000\n"
-        self.assertEqual(expected, out)
-   
-    def test_do_tilde(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_tilde('$10')
-        out = stdout.getvalue()  
-        expected = "+16\n$10\n0020\n00010000\n"
-        self.assertEqual(expected, out)
-
-    def test_help_tilde(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.help_tilde()
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("~ <number>"))         
+        self.assertTrue(out.startswith('radix'))
 
     # registers
+
+    def test_shortcut_for_registers(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('r')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('registers'))
    
     def test_registers_display_returns_to_prompt(self):
         stdout = StringIO()
@@ -397,49 +448,124 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("registers[<reg_name>"))         
 
-    def test_do_add_label_syntax_error(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_add_label('should be label space value')
-        out = stdout.getvalue()
-        self.assertEqual("Syntax error: should be label space value\n", out)         
+    # return
 
-    def test_do_add_label_adds_label(self):
+    def test_shortcut_for_return(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_add_label('$c000 foo')
-        address_parser = mon._address_parser
-        self.assertEqual(0xC000, address_parser.number('foo'))
+        mon.do_help('ret')
 
-    def test_help_add_label(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.help_add_label()
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("add_label"))        
+        self.assertTrue(out.startswith('return'))
 
-    def test_do_delete_label_no_args_displays_help(self):
+    # reset
+    
+    def test_do_reset(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_delete_label('')
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith('delete_label'))
+        old_mpu = mon._mpu
+        old_name = mon._mpu.name
+        mon.do_reset('')
+        self.assertNotEqual(old_mpu, mon._mpu)
+        self.assertEqual(old_name, mon._mpu.name)
 
-    def test_do_delete_label_with_bad_label_fails_silently(self):
+    def test_help_reset(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_delete_label('non-existant-label')
+        mon.help_reset()
         out = stdout.getvalue()
-        self.assertEqual('', out)
+        self.assertTrue(out.startswith("reset\t"))        
 
-    def test_do_delete_label_with_delete_label(self):
+    # save
+
+    def test_shortcut_for_save(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon._address_parser.labels['foo'] = 0xc000
-        mon.do_delete_label('foo') 
-        self.assertFalse(mon._address_parser.labels.has_key('foo'))
+        mon.do_help('s')
+
         out = stdout.getvalue()
-        self.assertEqual('', out)
+        self.assertTrue(out.startswith('save'))
+
+    def test_save_with_less_than_three_args_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_save('filename start')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Syntax error'))  
+        
+    def test_save(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0:3] = [0xAA, 0xBB, 0xCC]
+
+        f = tempfile.NamedTemporaryFile()
+        mon.do_save("'%s' 0 2" % f.name)
+        f.seek(0)
+        self.assertEqual(chr(0xAA) + chr(0xBB) + chr(0xCC),
+                         f.read())
+        self.assertEqual('Saved +3 bytes to %s\n' % f.name, 
+                         stdout.getvalue())
+        f.close()                     
+
+    def test_help_save(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_save()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('save'))        
+
+    # step
+
+    def test_shortcut_for_step(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('z')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('step'))
+
+    # tilde
+
+    def test_tilde_shortcut_with_space(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('~ $10')
+        out = stdout.getvalue()  
+        expected = "+16\n$10\n0020\n00010000\n"
+        self.assertEqual(expected, out)
+
+    def test_tilde_shortcut_without_space_for_vice_compatibility(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('~$10')
+        out = stdout.getvalue()  
+        expected = "+16\n$10\n0020\n00010000\n"
+        self.assertEqual(expected, out)
+   
+    def test_do_tilde(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_tilde('$10')
+        out = stdout.getvalue()  
+        expected = "+16\n$10\n0020\n00010000\n"
+        self.assertEqual(expected, out)
+
+    def test_help_tilde(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_tilde()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("~ <number>"))         
+    
+    # show_labels
+
+    def test_shortcut_for_show_labels(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('shl')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('show_labels'))
 
     def test_show_labels_displays_labels(self):
         stdout = StringIO()
@@ -456,6 +582,23 @@ class MonitorTests(unittest.TestCase):
         mon.do_show_labels('')
         out = stdout.getvalue()
         self.assertEqual("ffc4: chrin\nffd2: chrout\n", out)        
+
+    # version
+    
+    def test_do_version(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_version('')
+        out = stdout.getvalue()       
+        self.assertTrue(out.startswith("\nPy65"))
+
+    def test_help_version(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_version()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("version\t"))
+
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
