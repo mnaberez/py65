@@ -115,6 +115,36 @@ class MonitorTests(unittest.TestCase):
 
         self.assertEqual(help_for_command, help_for_shortcut)
 
+    # load
+    
+    def test_load_with_more_than_two_args_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_load('one two three')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Syntax error'))  
+        
+    def test_load(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+
+        f = tempfile.NamedTemporaryFile()
+        f.write(chr(0xAA) + chr(0xBB) + chr(0xCC)) 
+        f.flush()
+        
+        mon.do_load("'%s' a600" % f.name)
+        self.assertEqual([0xAA, 0xBB, 0xCC], mon._mpu.memory[0xA600:0xA603])
+        self.assertEqual('Wrote +3 bytes from $a600 to $a602\n',
+                         stdout.getvalue())
+        f.close()                     
+
+    def test_help_load(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_load()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('load'))        
+    
     # mpu
 
     def test_mpu_with_no_args_prints_current_lists_available_mpus(self):
