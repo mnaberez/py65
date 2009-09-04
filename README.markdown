@@ -1,8 +1,7 @@
 # Py65
 
-The Py65 project provides software building blocks for simulating hardware
-systems based on the 6502 microprocessor and its derivatives.  It has the 
-following goals:
+Py65 provides tools for simulating hardware based on 6502-like
+microprocessors.  It has the following goals:
 
  - Focus on ease of use and modularity rather than performance.  Py65 is
    written in the Python programming language for productivity, while
@@ -33,7 +32,7 @@ package, use the following command to install Py65:
 
 The following devices are simulated at this time:
 
- - `mpu6502` simulates the orignal NMOS 6502 microprocessor from MOS
+ - `mpu6502` simulates the original NMOS 6502 microprocessor from MOS
     Technology, later known as Commodore Semiconductor Group (CSG). At this
     time, all of the documented opcodes are supported.  Support for the
     illegal opcodes is planned for the future.
@@ -74,4 +73,4 @@ These people are responsible for Py65:
    module and contributed greatly to its implementation. 
 
  - [Ed Spittles](http://github.com/biged) helped with testing and provided 
-   many useful issue reports and small patches.
+   many useful issue reports and patches.
