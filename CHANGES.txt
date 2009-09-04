@@ -29,6 +29,11 @@ Next Release
     Overflow (V) flag.  This fixes a failure in Rob Finch's test suite.
     Closes #6.
 
+  - Applied patch from Ed Spittles so that SBC now properly sets the
+    Carry (C) and Zero (Z) flags.  This fixes failures caught by Ed's
+    own tests (see http://forum.6502.org/viewtopic.php?p=8854#8854).
+    Closes #15.
+
   - A new "save" command has been added to the monitor that will save
     a range of memory to a binary file.
 

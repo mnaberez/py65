@@ -382,17 +382,17 @@ class MPU:
       else:
         borrow = 1
 
-      result = self.a - data - borrow
+      result = self.a + (~data & 0xFF) + (self.p & self.CARRY)
       self.p &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
       if ( (self.a ^ data) & (self.a ^ result) ) & 0x80:
         self.p |= self.OVERFLOW
-      data = result
+      data = result & 0xFF
       if data == 0:
-        self.p |= self.ZERO + self.CARRY
-      elif data > 0:
+        self.p |= self.ZERO
+      if result & 0x100:
         self.p |= self.CARRY
       self.p |= data & self.NEGATIVE
-      self.a = data & 0xFF
+      self.a = data
 
   def opDECR(self, x):
     if x is None:
