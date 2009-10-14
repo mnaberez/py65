@@ -27,55 +27,55 @@ class HexdumpLoaderTests(unittest.TestCase):
         try:
             Loader(text)
             self.fail()
-        except ValueError, e:
+        except ValueError, why:
             msg = 'Start address was not found in data'
-            self.assert_(e.message.startswith('Start address'))
+            self.assert_(why[0].startswith('Start address'))
 
     def test_raises_when_start_address_is_invalid(self):
         text = 'oops: aa bb cc'
         try:
             Loader(text)
             self.fail()
-        except ValueError, e:                   
+        except ValueError, why:                   
             msg = 'Could not parse address: oops'
-            self.assertEqual(msg, e.message)
+            self.assertEqual(msg, why[0])
 
     def test_raises_when_start_address_is_too_short(self):
         text = '01: aa bb cc'
         try:
             Loader(text)
             self.fail()
-        except ValueError, e:                   
+        except ValueError, why:                   
             msg = 'Expected address to be 2 bytes, got 1'
-            self.assertEqual(msg, e.message)
+            self.assertEqual(msg, why[0])
 
     def test_raises_when_start_address_is_too_long(self):
         text = '010304: aa bb cc'
         try:
             Loader(text)
             self.fail()
-        except ValueError, e:                   
+        except ValueError, why:                   
             msg = 'Expected address to be 2 bytes, got 3'
-            self.assertEqual(msg, e.message)
+            self.assertEqual(msg, why[0])
 
     def test_raises_when_next_address_is_unexpected(self):
         text = "c000: aa\nc002: cc"
         try:
             Loader(text)
             self.fail()
-        except ValueError, e:
+        except ValueError, why:
             msg = 'Non-contigous block detected.  Expected next ' \
                   'address to be $c001, label was $c002'
-            self.assertEqual(msg, e.message)
+            self.assertEqual(msg, why[0])
     
     def test_raises_when_data_is_invalid(self):
         text = 'c000: foo'
         try:
             Loader(text)
             self.fail()
-        except ValueError, e:
+        except ValueError, why:
             msg = 'Could not parse data: foo'
-            self.assertEqual(msg, e.message) 
+            self.assertEqual(msg, why[0]) 
 
     def test_loads_data_without_dollar_signs(self):
         text = 'c000: aa bb'
