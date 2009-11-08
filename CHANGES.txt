@@ -2,6 +2,8 @@
 
   - Fixed deprecation warnings on Python 2.6
 
+  - We no longer bundle ez_setup to bootstrap setuptools installation.
+
 0.7 (2009-09-03)
 
   - When using the monitor, the nonblocking character input at
