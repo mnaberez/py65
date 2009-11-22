@@ -15,7 +15,7 @@ class Common6502Tests:
     self.assertEquals(0, mpu.a)
     self.assertEquals(0, mpu.x)
     self.assertEquals(0, mpu.y)
-    self.assertEquals(0, mpu.p)
+    self.assertEquals(mpu.BREAK | mpu.UNUSED, mpu.p)
 
   # ADC Absolute
   
@@ -1676,19 +1676,19 @@ class Common6502Tests:
   
   def test_brk_pushes_pc_plus_2_and_status_then_sets_pc_to_irq_vector(self):
     mpu = self._make_mpu()
-    mpu.p = 0x00
+    mpu.p = mpu.BREAK | mpu.UNUSED
     self._write(mpu.memory, 0xFFFE, (0xCD, 0xAB))
     mpu.memory[0xC000]        = 0x00 #=> BRK
     mpu.pc = 0xC000
     mpu.step()
     self.assertEquals(0xABCD, mpu.pc)
 
-    self.assertEquals(0xC0,      mpu.memory[0x1FF]) # PCH
-    self.assertEquals(0x02,      mpu.memory[0x1FE]) # PCL
-    self.assertEquals(mpu.BREAK, mpu.memory[0x1FD]) # Status (P)
-    self.assertEquals(0xFC,      mpu.sp)
+    self.assertEquals(0xC0, mpu.memory[0x1FF]) # PCH
+    self.assertEquals(0x02, mpu.memory[0x1FE]) # PCL
+    self.assertEquals(mpu.BREAK | mpu.UNUSED, mpu.memory[0x1FD]) # Status (P)
+    self.assertEquals(0xFC, mpu.sp)
 
-    self.assertEquals(mpu.BREAK | mpu.INTERRUPT, mpu.p)
+    self.assertEquals(mpu.BREAK | mpu.UNUSED | mpu.INTERRUPT, mpu.p)
 
   # BVC
   
@@ -3281,14 +3281,14 @@ class Common6502Tests:
   # PHP
   
   def test_php_pushes_processor_status_and_updates_sp(self):
-    mpu = self._make_mpu()
-    flags = (mpu.NEGATIVE | mpu.OVERFLOW | mpu.DECIMAL | mpu.ZERO | mpu.CARRY)
-    mpu.p = flags
-    mpu.memory[0x0000] = 0x08 #=> PHP
-    mpu.step()
-    self.assertEquals(0x0001, mpu.pc)
-    self.assertEquals(flags,  mpu.memory[0x1FF])
-    self.assertEquals(0xFE,   mpu.sp)
+    for flags in range(0x100):
+      mpu = self._make_mpu()
+      mpu.p = flags | mpu.BREAK | mpu.UNUSED
+      mpu.memory[0x0000] = 0x08 #=> PHP
+      mpu.step()
+      self.assertEquals(0x0001, mpu.pc)
+      self.assertEquals((flags | mpu.BREAK | mpu.UNUSED),  mpu.memory[0x1FF])
+      self.assertEquals(0xFE,   mpu.sp)
 
   # PLA
   
@@ -3307,11 +3307,11 @@ class Common6502Tests:
   def test_plp_pulls_top_byte_from_stack_into_flags_and_updates_sp(self):
     mpu = self._make_mpu()
     mpu.memory[0x0000] = 0x28 #=> PLP
-    mpu.memory[0x01FF] = 0xAB
+    mpu.memory[0x01FF] = 0xBA # must have BREAK and UNUSED set
     mpu.sp = 0xFE
     mpu.step()
     self.assertEquals(0x0001, mpu.pc)
-    self.assertEquals(0xAB,   mpu.p)
+    self.assertEquals(0xBA,   mpu.p)
     self.assertEquals(0xFF,   mpu.sp)
 
   # ROL Accumulator
@@ -3896,13 +3896,23 @@ class Common6502Tests:
   def test_rti_restores_status_register_and_program_counter_and_updates_sp(self):
     mpu = self._make_mpu()
     mpu.memory[0x0000] = 0x40 #=> RTI
-    self._write(mpu.memory, 0x01FD, (0xAB, 0x03, 0xC0)) # Status (P), PCL, PCH
+    self._write(mpu.memory, 0x01FD, (0xFC, 0x03, 0xC0)) # Status (P), PCL, PCH
     mpu.sp = 0xFC
 
     mpu.step()
     self.assertEquals(0xC003, mpu.pc)
-    self.assertEquals(0xAB,   mpu.p)
+    self.assertEquals(0xFC,   mpu.p)
     self.assertEquals(0xFF,   mpu.sp)
+
+  def test_rti_forces_break_and_unused_flags_high(self):
+    mpu = self._make_mpu()
+    mpu.memory[0x0000] = 0x40 #=> RTI
+    self._write(mpu.memory, 0x01FD, (0x00, 0x03, 0xC0)) # Status (P), PCL, PCH
+    mpu.sp = 0xFC
+
+    mpu.step()
+    self.assertEquals(mpu.BREAK, mpu.p & mpu.BREAK)
+    self.assertEquals(mpu.UNUSED, mpu.p & mpu.UNUSED)
 
   # RTS
   

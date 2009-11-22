@@ -11,7 +11,7 @@ class MPU:
   NEGATIVE  = 128
   OVERFLOW  = 64
   UNUSED    = 32
-  BREAK     = 16
+  BREAK     = 16 # there is no BREAK flag, but this position indicates BREAK
   DECIMAL   = 8
   INTERRUPT = 4
   ZERO      = 2
@@ -62,7 +62,7 @@ class MPU:
     self.a = 0
     self.x = 0
     self.y = 0
-    self.p = 0
+    self.p = self.p = self.BREAK | self.UNUSED
     self.processorCycles = 0
 
   # Helpers for addressing modes
@@ -465,7 +465,7 @@ class MPU:
     self.stPushWord(pc)
 
     self.p |= self.BREAK
-    self.stPush(self.p)
+    self.stPush(self.p | self.BREAK | self.UNUSED)
 
     self.p |= self.INTERRUPT
     self.pc = self.WordAt(self.IrqTo)
@@ -487,7 +487,7 @@ class MPU:
   
   @instruction(name="PHP", mode="imp", cycles=3)
   def inst_0x08(self):
-    self.stPush(self.p)
+    self.stPush(self.p | self.BREAK | self.UNUSED)
   
   @instruction(name="ORA", mode="imm", cycles=2)
   def inst_0x09(self):
@@ -573,7 +573,7 @@ class MPU:
 
   @instruction(name="PLP", mode="imp", cycles=4)
   def inst_0x28(self):
-    self.p = self.stPop()
+    self.p = (self.stPop() | self.BREAK | self.UNUSED)
   
   @instruction(name="AND", mode="imm", cycles=2)
   def inst_0x29(self):
@@ -639,7 +639,7 @@ class MPU:
 
   @instruction(name="RTI", mode="imp", cycles=6)
   def inst_0x40(self):
-    self.p = self.stPop()
+    self.p = (self.stPop() | self.BREAK | self.UNUSED)
     self.pc = self.stPopWord()
 
   @instruction(name="EOR", mode="inx", cycles=6)
