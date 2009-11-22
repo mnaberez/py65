@@ -8,9 +8,9 @@
     set the BREAK and UNUSED flags to be high.  Thanks to Ed Spittles
     for reporting this.
 
-  - The BREAK and UNUSED bits in the processor status register are
-    now always high.  Patch by Ed Spittles.
-
+  - Applied patch by Ed Spittles that fixes the behavior of the BREAK
+    and UNUSED flags in the processor status register.  Closes #16.
+  
 0.7 (2009-09-03)
 
   - When using the monitor, the nonblocking character input at
