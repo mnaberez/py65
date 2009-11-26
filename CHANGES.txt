@@ -10,6 +10,9 @@
 
   - Applied patch by Ed Spittles that fixes the behavior of the BREAK
     and UNUSED flags in the processor status register.  Closes #16.
+
+  - Added ">" as a monitor shortcut for the fill command for 
+    consistency with VICE.
   
 0.7 (2009-09-03)
 

@@ -184,10 +184,18 @@ class MonitorTests(unittest.TestCase):
 
     # fill
 
-    def test_shortcut_for_fill(self):
+    def test_shortcut_f_for_fill(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon.do_help('f')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('fill'))
+
+    def test_shortcut_gt_for_fill(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('>')
 
         out = stdout.getvalue()
         self.assertTrue(out.startswith('fill'))

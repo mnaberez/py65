@@ -55,6 +55,7 @@ class Monitor(cmd.Cmd):
                            'd':   'disassemble',
                            'dl':  'delete_label',
                            'f':   'fill',
+                           '>':   'fill',
                            'g':   'goto',
                            'l':   'load',
                            'm':   'mem',
