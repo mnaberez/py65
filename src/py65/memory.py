@@ -1,4 +1,3 @@
-from collections import defaultdict
 
 class ObservableMemory:
     def __init__(self, subject=None):
@@ -6,11 +5,11 @@ class ObservableMemory:
             subject = 0x10000 * [0x00]
         self._subject = subject
 
-        self._read_subscribers  = defaultdict(list)
-        self._write_subscribers = defaultdict(list)        
+        self._read_subscribers  = {}
+        self._write_subscribers = {}        
 
     def __setitem__(self, address, value):
-        callbacks = self._write_subscribers[address]
+        callbacks = self._write_subscribers.setdefault(address, [])
 
         for callback in callbacks:
             result = callback(address, value)
@@ -20,7 +19,7 @@ class ObservableMemory:
         self._subject[address] = value
         
     def __getitem__(self, address):
-        callbacks = self._read_subscribers[address]
+        callbacks = self._read_subscribers.setdefault(address, [])
         final_result = None
 
         for callback in callbacks:
@@ -38,13 +37,15 @@ class ObservableMemory:
 
     def subscribe_to_write(self, address_range, callback):
         for address in address_range:
-            if not callback in self._write_subscribers[address]:
-                self._write_subscribers[address].append(callback)
+            callbacks = self._write_subscribers.setdefault(address, [])
+            if callback not in callbacks:
+                callbacks.append(callback)
 
     def subscribe_to_read(self, address_range, callback): 
         for address in address_range:
-            if not callback in self._read_subscribers[address]:
-                self._read_subscribers[address].append(callback)
+            callbacks = self._read_subscribers.setdefault(address, [])
+            if callback not in callbacks:
+                callbacks.append(callback)
 
     def write(self, start_address, bytes):
         self._subject[start_address:start_address+len(bytes)] = bytes

@@ -1,5 +1,6 @@
 0.9-dev *Next Release*
 
+  - Removed use of defaultdict to fix compatibility with Python 2.4.
 
 0.8 (2010-03-08)
 
