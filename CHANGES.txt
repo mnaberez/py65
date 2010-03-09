@@ -1,4 +1,4 @@
-* Next Release *
+0.8 (2010-03-08)
 
   - Fixed deprecation warnings on Python 2.6
 
