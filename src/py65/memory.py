@@ -9,7 +9,7 @@ class ObservableMemory:
         self._write_subscribers = {}        
 
     def __setitem__(self, address, value):
-        callbacks = self._write_subscribers.setdefault(address, [])
+        callbacks = self._write_subscribers.get(address, [])
 
         for callback in callbacks:
             result = callback(address, value)
@@ -19,7 +19,7 @@ class ObservableMemory:
         self._subject[address] = value
         
     def __getitem__(self, address):
-        callbacks = self._read_subscribers.setdefault(address, [])
+        callbacks = self._read_subscribers.get(address, [])
         final_result = None
 
         for callback in callbacks:
