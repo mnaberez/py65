@@ -1,5 +1,8 @@
 0.9-dev *Next Release*
 
+  - Fixed two monitor tests that were broken under Windows.  Thanks 
+    to Oscar Lindberg for reporting this.
+
   - Removed use of defaultdict to fix compatibility with Python 2.4.
 
 0.8 (2010-03-08)

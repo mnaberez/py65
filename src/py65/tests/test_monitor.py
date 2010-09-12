@@ -246,15 +246,18 @@ class MonitorTests(unittest.TestCase):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
 
-        f = tempfile.NamedTemporaryFile()
-        f.write(chr(0xAA) + chr(0xBB) + chr(0xCC)) 
-        f.flush()
-        
-        mon.do_load("'%s' a600" % f.name)
-        self.assertEqual([0xAA, 0xBB, 0xCC], mon._mpu.memory[0xA600:0xA603])
-        self.assertEqual('Wrote +3 bytes from $a600 to $a602\n',
-                         stdout.getvalue())
-        f.close()                     
+        filename = tempfile.mktemp()
+        try:
+            f = open(filename, 'wb')
+            f.write(chr(0xAA) + chr(0xBB) + chr(0xCC)) 
+            f.close()                     
+
+            mon.do_load("'%s' a600" % filename)
+            self.assertEqual('Wrote +3 bytes from $a600 to $a602\n',
+                             stdout.getvalue())
+            self.assertEqual([0xAA, 0xBB, 0xCC], mon._mpu.memory[0xA600:0xA603])
+        finally:
+            os.unlink(filename)
 
     def test_help_load(self):
         stdout = StringIO()
@@ -506,14 +509,19 @@ class MonitorTests(unittest.TestCase):
         mon = Monitor(stdout=stdout)
         mon._mpu.memory[0:3] = [0xAA, 0xBB, 0xCC]
 
-        f = tempfile.NamedTemporaryFile()
-        mon.do_save("'%s' 0 2" % f.name)
-        f.seek(0)
-        self.assertEqual(chr(0xAA) + chr(0xBB) + chr(0xCC),
-                         f.read())
-        self.assertEqual('Saved +3 bytes to %s\n' % f.name, 
-                         stdout.getvalue())
-        f.close()                     
+        filename = tempfile.mktemp()
+        try:
+            mon.do_save("'%s' 0 2" % filename)
+            self.assertEqual('Saved +3 bytes to %s\n' % filename, 
+                             stdout.getvalue())
+
+            f = open(filename, 'rb')
+            contents = f.read()
+            f.close()
+            self.assertEqual(chr(0xAA) + chr(0xBB) + chr(0xCC),
+                             contents)
+        finally:
+            os.unlink(filename)
 
     def test_help_save(self):
         stdout = StringIO()
