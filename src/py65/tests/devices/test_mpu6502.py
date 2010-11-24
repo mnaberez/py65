@@ -1454,7 +1454,7 @@ class Common6502Tests:
 
   def test_bit_abs_copies_bit_7_of_memory_to_n_flag_when_1(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.NEGATIVE
+    mpu.p |= mpu.NEGATIVE
     self._write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0xFF
@@ -1472,7 +1472,7 @@ class Common6502Tests:
 
   def test_bit_abs_copies_bit_6_of_memory_to_v_flag_when_1(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.OVERFLOW
+    mpu.p |= mpu.OVERFLOW
     self._write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0xFF
@@ -1481,7 +1481,7 @@ class Common6502Tests:
 
   def test_bit_abs_stores_result_of_and_in_z_while_preserving_a_when_1(self):
     mpu = self._make_mpu()   
-    mpu.p &= mpu.ZERO
+    mpu.p &= ~mpu.ZERO
     self._write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x00
     mpu.a = 0x01
@@ -1492,7 +1492,7 @@ class Common6502Tests:
 
   def test_bit_abs_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
     mpu = self._make_mpu()   
-    mpu.p &= mpu.ZERO
+    mpu.p |= mpu.ZERO
     self._write(mpu.memory, 0x0000, (0x2C, 0xED, 0xFE)) #=> BIT $FEED
     mpu.memory[0xFEED] = 0x01
     mpu.a = 0x01
@@ -1527,7 +1527,7 @@ class Common6502Tests:
 
   def test_bit_zp_copies_bit_7_of_memory_to_n_flag_when_1(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.NEGATIVE
+    mpu.p |= mpu.NEGATIVE
     self._write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0xFF
@@ -1549,7 +1549,7 @@ class Common6502Tests:
 
   def test_bit_zp_copies_bit_6_of_memory_to_v_flag_when_1(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.OVERFLOW
+    mpu.p |= mpu.OVERFLOW
     self._write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0xFF
@@ -1560,7 +1560,7 @@ class Common6502Tests:
 
   def test_bit_zp_stores_result_of_and_in_z_while_preserving_a_when_1(self):
     mpu = self._make_mpu()   
-    mpu.p &= mpu.ZERO
+    mpu.p &= ~mpu.ZERO
     self._write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x00
     mpu.a = 0x01
@@ -1573,7 +1573,7 @@ class Common6502Tests:
 
   def test_bit_zp_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
     mpu = self._make_mpu()   
-    mpu.p &= mpu.ZERO
+    mpu.p |= mpu.ZERO
     self._write(mpu.memory, 0x0000, (0x24, 0x10)) #=> BIT $0010
     mpu.memory[0x0010] = 0x01
     mpu.a = 0x01
@@ -2855,7 +2855,7 @@ class Common6502Tests:
 
   def test_lsr_accumulator_rotates_in_zero_not_carry(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     mpu.memory[0x0000] = (0x4A) #=> LSR A
     mpu.a = 0x00
     mpu.step()
@@ -2867,7 +2867,7 @@ class Common6502Tests:
 
   def test_lsr_accumulator_sets_carry_and_zero_flags_after_rotation(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p &= ~mpu.CARRY
     mpu.memory[0x0000] = (0x4A) #=> LSR A
     mpu.a = 0x01
     mpu.step()
@@ -2879,7 +2879,7 @@ class Common6502Tests:
     
   def test_lsr_accumulator_rotates_bits_right(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     mpu.memory[0x0000] = (0x4A) #=> LSR A
     mpu.a = 0x04
     mpu.step()    
@@ -2893,7 +2893,7 @@ class Common6502Tests:
 
   def test_lsr_absolute_rotates_in_zero_not_carry(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x4E, 0xCD, 0xAB)) #=> LSR $ABCD
     mpu.memory[0xABCD] = 0x00
     mpu.step()
@@ -2905,7 +2905,7 @@ class Common6502Tests:
 
   def test_lsr_absolute_sets_carry_and_zero_flags_after_rotation(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p &= ~mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x4E, 0xCD, 0xAB)) #=> LSR $ABCD
     mpu.memory[0xABCD] = 0x01
     mpu.step()
@@ -2917,7 +2917,7 @@ class Common6502Tests:
     
   def test_lsr_absolute_rotates_bits_right(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x4E, 0xCD, 0xAB)) #=> LSR $ABCD
     mpu.memory[0xABCD] = 0x04
     mpu.step()    
@@ -2931,7 +2931,7 @@ class Common6502Tests:
 
   def test_lsr_zp_rotates_in_zero_not_carry(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x46, 0x10)) #=> LSR $0010
     mpu.memory[0x0010] = 0x00
     mpu.step()
@@ -2943,7 +2943,7 @@ class Common6502Tests:
 
   def test_lsr_zp_sets_carry_and_zero_flags_after_rotation(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p &= ~mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x46, 0x10)) #=> LSR $0010
     mpu.memory[0x0010] = 0x01
     mpu.step()
@@ -2955,7 +2955,7 @@ class Common6502Tests:
     
   def test_lsr_zp_rotates_bits_right(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x46, 0x10)) #=> LSR $0010
     mpu.memory[0x0010] = 0x04
     mpu.step()    
@@ -2969,7 +2969,7 @@ class Common6502Tests:
 
   def test_lsr_absolute_x_indexed_rotates_in_zero_not_carry(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0x5E, 0xCD, 0xAB)) #=> LSR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x00
@@ -2982,7 +2982,7 @@ class Common6502Tests:
 
   def test_lsr_absolute_x_indexed_sets_carry_and_zero_flags_after_rotation(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p &= ~mpu.CARRY
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0x5E, 0xCD, 0xAB)) #=> LSR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x01
@@ -2995,7 +2995,7 @@ class Common6502Tests:
     
   def test_lsr_absolute_x_indexed_rotates_bits_right(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     self._write(mpu.memory, 0x0000, (0x5E, 0xCD, 0xAB)) #=> LSR $ABCD,X
     mpu.memory[0xABCD + mpu.x] = 0x04
     mpu.step()    
@@ -3009,7 +3009,7 @@ class Common6502Tests:
 
   def test_lsr_zp_x_indexed_rotates_in_zero_not_carry(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0x56, 0x10)) #=> LSR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x00
@@ -3022,7 +3022,7 @@ class Common6502Tests:
 
   def test_lsr_zp_x_indexed_sets_carry_and_zero_flags_after_rotation(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p &= ~mpu.CARRY
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0x56, 0x10)) #=> LSR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x01
@@ -3035,7 +3035,7 @@ class Common6502Tests:
     
   def test_lsr_zp_x_indexed_rotates_bits_right(self):
     mpu = self._make_mpu()
-    mpu.p &= mpu.CARRY
+    mpu.p |= mpu.CARRY
     mpu.x = 0x03
     self._write(mpu.memory, 0x0000, (0x56, 0x10)) #=> LSR $0010,X
     mpu.memory[0x0010 + mpu.x] = 0x04
