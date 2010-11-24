@@ -175,7 +175,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_abs_x_copies_bit_7_of_memory_to_n_flag_when_1(self):
         mpu = self._make_mpu()
-        mpu.p &= mpu.NEGATIVE
+        mpu.p |= mpu.NEGATIVE
         mpu.x = 0x02                                      
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
@@ -199,7 +199,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_abs_x_copies_bit_6_of_memory_to_v_flag_when_1(self):
         mpu = self._make_mpu()
-        mpu.p &= mpu.OVERFLOW
+        mpu.p |= mpu.OVERFLOW
         mpu.x = 0x02                                      
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
@@ -211,7 +211,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_abs_x_stores_result_of_and_in_z_while_preserving_a_when_1(self):
         mpu = self._make_mpu()   
-        mpu.p &= mpu.ZERO
+        mpu.p &= ~mpu.ZERO
         mpu.x = 0x02                                      
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
@@ -225,7 +225,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_abs_x_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
         mpu = self._make_mpu()   
-        mpu.p &= mpu.ZERO
+        mpu.p |= mpu.ZERO
         mpu.x = 0x02                                      
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x01
@@ -267,7 +267,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_zp_x_copies_bit_7_of_memory_to_n_flag_when_1(self):
         mpu = self._make_mpu()
-        mpu.p &= mpu.NEGATIVE
+        mpu.p |= mpu.NEGATIVE
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x00
         mpu.x = 0x03
@@ -291,7 +291,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_zp_x_copies_bit_6_of_memory_to_v_flag_when_1(self):
         mpu = self._make_mpu()
-        mpu.p &= mpu.OVERFLOW
+        mpu.p |= mpu.OVERFLOW
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x00
         mpu.x = 0x03
@@ -303,7 +303,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_zp_x_stores_result_of_and_in_z_while_preserving_a_when_1(self):
         mpu = self._make_mpu()   
-        mpu.p &= mpu.ZERO
+        mpu.p &= ~mpu.ZERO
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x00
         mpu.x = 0x03
@@ -317,7 +317,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
   
     def test_bit_zp_x_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
         mpu = self._make_mpu()   
-        mpu.p &= mpu.ZERO
+        mpu.p |= mpu.ZERO
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x01
         mpu.x = 0x03
