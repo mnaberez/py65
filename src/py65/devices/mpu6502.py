@@ -375,7 +375,7 @@ class MPU:
       else:
         self.p |= self.NEGATIVE
         data +=100
-      self.a = convert_to_bcd(data)
+      self.a = convert_to_bcd(data) # throws exception if result is over 99 decimal
     else:
       if self.p & self.CARRY:
         borrow = 0
