@@ -373,21 +373,39 @@ class MPU:
     data = self.ByteAt(x())
       
     if self.p & self.DECIMAL:
-      if self.p & self.CARRY:
-        borrow = 0
-      else:
-        borrow = 1
-    
-      data = convert_to_bin(self.a) - convert_to_bin(data) - borrow
+      halfcarry = 1
+      decimalcarry = 0
+      adjust0 = 0
+      adjust1 = 0
+
+      nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
+      if nibble0 <= 0xf:
+        halfcarry = 0
+        adjust0 = 10
+      nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
+      if nibble1 <= 0xf:
+        adjust1 = 10 << 4
+
+      # the ALU outputs are not decimally adjusted
+      aluresult = self.a + (~data & 0xFF) + (self.p & self.CARRY)
+      if aluresult > 0xff:
+        decimalcarry = 1
+      aluresult &= 0xff
+
+      # but the final result will be adjusted
+      nibble0 = (aluresult + adjust0) & 0xf
+      nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+
       self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
-      if data == 0:
-        self.p |= self.ZERO + self.CARRY
-      elif data > 0:
-        self.p |= self.CARRY
+      if aluresult == 0:
+        self.p |= self.ZERO
       else:
-        self.p |= self.NEGATIVE
-        data +=100
-      self.a = convert_to_bcd(data) # throws exception if result is over 99 decimal
+        self.p |= aluresult & self.NEGATIVE
+      if decimalcarry == 1:
+        self.p |= self.CARRY
+      if ( ~(self.a ^ data) & (self.a ^ aluresult) ) & 0x80:
+        self.p |= self.OVERFLOW
+      self.a = (nibble1 << 4) + nibble0
     else:
       if self.p & self.CARRY:
         borrow = 0
