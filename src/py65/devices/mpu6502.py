@@ -281,21 +281,33 @@ class MPU:
     data = self.ByteAt(x())
       
     if self.p & self.DECIMAL:
-      if self.p & self.CARRY:
-        tmp = 1
-      else:
-        tmp = 0
-      data = convert_to_bin(data) + convert_to_bin(self.a) + tmp
+      halfcarry = 0
+      decimalcarry = 0
+      adjust0 = 0
+      adjust1 = 0
+      nibble0 = (data & 0xf) + (self.a & 0xf) + (self.p & self.CARRY)
+      if nibble0 > 9:
+        adjust0 = 6
+        halfcarry = 1
+      nibble1 = ((data >> 4) & 0xf) + ((self.a >> 4) & 0xf) + halfcarry
+      if nibble1 > 9:
+        adjust1 = 6
+        decimalcarry = 1  # may be a little more complicated than this
+      # the ALU outputs are not decimally adjusted
+      aluresult = (nibble1 << 4) + nibble0
+      # the final A contents will be decimally adjusted
+      nibble0 = (nibble0 + adjust0) & 0xf
+      nibble1 = (nibble1 + adjust1) & 0xf
       self.p &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-      if data > 99:
-        self.p |= self.CARRY + self.OVERFLOW
-        data -= 100
-
-      if data == 0:
+      if aluresult == 0:
         self.p |= self.ZERO
       else:
-        self.p |= data & 128
-      self.a = convert_to_bcd(data)
+        self.p |= aluresult & self.NEGATIVE
+      if decimalcarry == 1:
+        self.p |= self.CARRY
+      if ( ~(self.a ^ data) & (self.a ^ aluresult) ) & 0x80:
+        self.p |= self.OVERFLOW
+      self.a = (nibble1 << 4) + nibble0
     else:
       if self.p & self.CARRY:
         tmp = 1
@@ -312,7 +324,7 @@ class MPU:
       if data == 0:
         self.p |= self.ZERO
       else:
-        self.p |= data & 128
+        self.p |= data & self.NEGATIVE
       self.a = data
 
   def opROR(self, x):
