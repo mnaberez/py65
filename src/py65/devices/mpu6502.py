@@ -292,9 +292,13 @@ class MPU:
       nibble1 = ((data >> 4) & 0xf) + ((self.a >> 4) & 0xf) + halfcarry
       if nibble1 > 9:
         adjust1 = 6
-        decimalcarry = 1  # may be a little more complicated than this
+        decimalcarry = 1
+
       # the ALU outputs are not decimally adjusted
+      nibble0 = nibble0 & 0xf
+      nibble1 = nibble1 & 0xf
       aluresult = (nibble1 << 4) + nibble0
+
       # the final A contents will be decimally adjusted
       nibble0 = (nibble0 + adjust0) & 0xf
       nibble1 = (nibble1 + adjust1) & 0xf
@@ -403,7 +407,7 @@ class MPU:
         self.p |= aluresult & self.NEGATIVE
       if decimalcarry == 1:
         self.p |= self.CARRY
-      if ( ~(self.a ^ data) & (self.a ^ aluresult) ) & 0x80:
+      if ( (self.a ^ data) & (self.a ^ aluresult) ) & 0x80:
         self.p |= self.OVERFLOW
       self.a = (nibble1 << 4) + nibble0
     else:
