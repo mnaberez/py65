@@ -59,8 +59,7 @@ simulations that you build.  Its features include:
 ## Documentation
 
 Py65 documentation is written using [Sphinx](http://sphinx.pocoo.org/) and is
-periodically published to 
-[http://6502.org/projects/py65/](http://6502.org/projects/py65/).
+published to [http://py65.readthedocs.org/](http://py65.readthedocs.org/)
 
 ## Contributors
 
