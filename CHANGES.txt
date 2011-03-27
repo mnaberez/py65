@@ -1,9 +1,13 @@
-0.9-dev *Next Release*
+0.9 (2011-03-27)
 
   - Fixed two monitor tests that were broken under Windows.  Thanks 
     to Oscar Lindberg for reporting this.
 
   - Removed use of defaultdict to fix compatibility with Python 2.4.
+
+  - Decimal mode bugs have been fixed.  Thanks to Ed Spittles who
+    ported Bruce Clark's tests to find failures and then rewrote
+    the decimal handling code.
 
 0.8 (2010-03-08)
 
