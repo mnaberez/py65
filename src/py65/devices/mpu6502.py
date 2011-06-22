@@ -73,6 +73,10 @@ class MPU:
   def WordAt(self, addr):
     return self.ByteAt(addr) + (self.ByteAt(addr + 1) << 8)
 
+  def WrapAt(self, addr):
+    wrap = lambda x: (x & 0xff00) + ((x + 1) & 0xff)
+    return self.ByteAt(addr) + (self.ByteAt(wrap(addr)) << 8)
+
   def ProgramCounter(self):
     return self.pc
 
@@ -91,17 +95,17 @@ class MPU:
     return 255 & (self.y + self.ByteAt(self.pc))
 
   def IndirectXAddr(self):
-    return self.WordAt( 255 & (self.ByteAt(self.pc) + self.x))
+    return self.WrapAt( 255 & (self.ByteAt(self.pc) + self.x))
 
   def IndirectYAddr(self):
     if self.addcycles:
-      a1 = self.WordAt(self.ByteAt(self.pc))
+      a1 = self.WrapAt(self.ByteAt(self.pc))
       a2 = (a1+self.y) & 0xffff
       if (a1 & 0xff00) != (a2 & 0xff00):
         self.excycles += 1
       return a2
     else:
-      return (self.WordAt(self.ByteAt(self.pc))+self.y)&0xffff
+      return (self.WrapAt(self.ByteAt(self.pc))+self.y)&0xffff
 
   def AbsoluteAddr(self):
     return self.WordAt(self.pc)
@@ -793,7 +797,7 @@ class MPU:
   @instruction(name="JMP", mode="ind", cycles=5)
   def inst_0x6c(self):
     ta = self.WordAt(self.pc)
-    self.pc = self.WordAt(ta)
+    self.pc = self.WrapAt(ta)
 
   @instruction(name="ADC", mode="abs", cycles=4)
   def inst_0x6d(self):
