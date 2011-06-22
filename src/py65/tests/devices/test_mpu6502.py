@@ -5088,51 +5088,49 @@ class Common6502Tests:
     self.assertEqual(0x03, mpu.a)
     self.assertEqual(0x0008, mpu.pc)
 
-  # page wrapping test
+  # Test page wrapping
 
   def test_zeropage_indexed_indirect_wrap(self):
     mpu = self._make_mpu()
     mpu.y = 0
-    self._write(mpu.memory, 0xb100, (0x31, ))
-    self._write(mpu.memory, 0xff, (0, ))
+    mpu.memory[0xb100] = 0x31
+    mpu.memory[0x00ff] = 0
     self._write(mpu.memory, 0, (0xb1, 0xff)) # LDA ($FF),Y
     mpu.step()
-    self.assertEqual(mpu.a, 0x31)
+    self.assertEqual(0x31, mpu.a)
 
   def test_zeropage_indexed_wrap(self):
     mpu = self._make_mpu()
     mpu.x = 1
     self._write(mpu.memory, 0, (0xb5, 0xff)) # LDA $FF,X
     mpu.step()
-    self.assertEqual(mpu.a, 0xb5)
+    self.assertEqual(0xb5, mpu.a)
 
   def test_zeropage_indirect_indexed_wrap(self):
     mpu = self._make_mpu()
     mpu.x = 0
-    self._write(mpu.memory, 0xa100, (0x31, ))
-    self._write(mpu.memory, 0xff, (0, ))
+    mpu.memory[0xa100] = 0x31
+    mpu.memory[0xff] = 0
     self._write(mpu.memory, 0, (0xa1, 0xff)) # LDA ($FF,X)
     mpu.step()
-    self.assertEqual(mpu.a, 0x31)
+    self.assertEqual(0x31, mpu.a)
 
   def test_zeropage_indirect_indexed_indexwrap(self):
     mpu = self._make_mpu()
     mpu.x = 0xff
-    self._write(mpu.memory, 0xa100, (0x31, ))
-    self._write(mpu.memory, 0xff, (0, ))
+    mpu.memory[0xa100] = 0x31
+    mpu.memory[0x00ff] = 0
     self._write(mpu.memory, 0, (0xa1, 0)) # LDA ($00,X)
     mpu.step()
-    self.assertEqual(mpu.a, 0x31)
+    self.assertEqual(0x31, mpu.a)
 
   def test_indirect_wrap(self):
     mpu = self._make_mpu()
     mpu.x = 0xff
-    self._write(mpu.memory, 0xff, (0, ))
+    mpu.memory[0x00ff] = 0
     self._write(mpu.memory, 0, (0x6c, 0xff, 0x00)) # LDA ($00,X)
     mpu.step()
-    self.assertEqual(mpu.pc, 0x6c00)
-
-# decimal flag chaos
+    self.assertEqual(0x6c00, mpu.pc)
 
   # Test Helpers
 
