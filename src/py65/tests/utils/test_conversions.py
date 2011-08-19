@@ -1,3 +1,4 @@
+import sys
 import unittest
 from py65.utils.conversions import itoa
 
