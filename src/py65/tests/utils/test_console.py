@@ -1,3 +1,4 @@
+import sys
 import unittest
 from py65.utils.console import getch
 
