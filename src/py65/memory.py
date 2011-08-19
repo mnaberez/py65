@@ -1,8 +1,21 @@
+# this sparse array module only needed for large-memory CPU models
+try:
+    from blist import *
+except ImportError:
+    pass
 
 class ObservableMemory:
-    def __init__(self, subject=None):
+    def __init__(self, subject=None, addrWidth=16):
         if subject is None:
-            subject = 0x10000 * [0x00]
+            if addrWidth <= 16:
+                subject = 0x10000 * [0x00]
+            else:
+                try:
+                    subject = blist([0]) * (1 << addrWidth)
+                except:
+                    print "Fatal: failed to initialise large memory for this CPU"
+                    exit (1)
+
         self._subject = subject
 
         self._read_subscribers  = {}

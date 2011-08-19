@@ -8,6 +8,7 @@ import sys
 from asyncore import compact_traceback
 from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.devices.mpu65c02 import MPU as CMOS65C02
+from py65.devices.mpu65Org16 import MPU as V65Org16
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
@@ -112,7 +113,7 @@ class Monitor(cmd.Cmd):
                 byte = 0
             return byte
 
-        m = ObservableMemory()
+        m = ObservableMemory(addrWidth=self._mpu.addrWidth)
         m.subscribe_to_write([0xF001], putc)
         m.subscribe_to_read([0xF004], getc)
         
@@ -147,7 +148,7 @@ class Monitor(cmd.Cmd):
         self._reset(mpu_type=klass)
 
     def do_mpu(self, args):                                         
-        mpus = {'6502': NMOS6502, '65C02': CMOS65C02}
+        mpus = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
         
         def available_mpus():
             mpu_list = ', '.join(mpus.keys())
@@ -157,7 +158,7 @@ class Monitor(cmd.Cmd):
             self._output("Current MPU is %s" % self._mpu.name)
             available_mpus()
         else:
-            requested = args.upper()
+            requested = args
             new_mpu = mpus.get(requested, None)
             if new_mpu is None:
                 self._output("Unknown MPU: %s" % args)
