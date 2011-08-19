@@ -151,3 +151,5 @@ class ObservableMemoryTests(unittest.TestCase):
         subject = 0x10000 * [0x00] 
         return subject
 
+if __name__ == '__main__':
+    unittest.main()
