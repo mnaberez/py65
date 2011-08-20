@@ -57,9 +57,8 @@ class Assembler:
                     # relative branch
                     absolute = int(''.join(operands), 16)
                     relative = (absolute - pc) - 2
-                    if (relative < 1): 
-                        relative = (relative ^ 0xFF) + 1
-                    operands = [ ('%02x' % relative) ]
+                    relative = relative & 0xFF
+                    operands = [ ("%02x" % relative) ]
 
                 elif len(operands) == 2:
                     # swap bytes
