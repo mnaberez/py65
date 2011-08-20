@@ -236,7 +236,7 @@ class Monitor(cmd.Cmd):
             return
 
           # assemble into memory
-          bytes = self._assembler.assemble(line)
+          bytes = self._assembler.assemble(line, pc=start)
           if bytes is None:
               self.stdout.write("\r$" + (self.addrFmt % start) + "  ???\n")
               continue

@@ -87,8 +87,7 @@ class Assembler:
                     # relative branch
                     absolute = int(''.join(operands), 16)
                     relative = (absolute - pc) - 2
-                    if (relative < 1): 
-                        relative = (relative ^ self.byteMask) + 1
+                    relative = relative & self.byteMask
                     operands = [ (self.byteFmt % relative) ]
 
                 elif len(operands) == 2:

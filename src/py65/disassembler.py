@@ -80,7 +80,7 @@ class Disassembler:
         elif addressing == 'rel':
             opv = self._mpu.ByteAt(pc + 1)
             targ = pc + 2
-            if opv & (1<<self.byteWidth):
+            if opv & (1<<(self.byteWidth-1)):
                 targ -= (opv ^ self.byteMask) + 1
             else:
                 targ += opv
