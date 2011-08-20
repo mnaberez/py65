@@ -17,7 +17,7 @@ class MPU:
   ZERO      = 2
   CARRY     = 1
 
-  def __init__(self, memory=None, pc=0x0000, debug=False, byteWidth=8, addrWidth=16):
+  def __init__(self, memory=None, pc=0x0000, debug=False, byteWidth=8, addrWidth=16, addrFmt="%04x", byteFmt="%02x"):
     # config
     self.debug = debug
     self.name = '6502'
@@ -26,6 +26,8 @@ class MPU:
     self.addrWidth = addrWidth
     self.addrMask = ((1<<addrWidth)-1)
     self.addrHighMask = (self.byteMask<<byteWidth)
+    self.addrFmt=addrFmt
+    self.byteFmt=byteFmt
     self.spBase = 1<<byteWidth
 
     # vm status

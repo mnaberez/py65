@@ -43,6 +43,12 @@ class Monitor(cmd.Cmd):
 
     def _reset(self, mpu_type):
         self._mpu = mpu_type()
+        self.addrWidth = self._mpu.addrWidth
+        self.byteWidth = self._mpu.byteWidth
+        self.addrFmt = self._mpu.addrFmt
+        self.byteFmt = self._mpu.byteFmt
+        self.addrMask = self._mpu.addrMask
+        self.byteMask = self._mpu.byteMask
         self._install_mpu_observers()
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
@@ -113,7 +119,7 @@ class Monitor(cmd.Cmd):
                 byte = 0
             return byte
 
-        m = ObservableMemory(addrWidth=self._mpu.addrWidth)
+        m = ObservableMemory(addrWidth=self.addrWidth)
         m.subscribe_to_write([0xF001], putc)
         m.subscribe_to_read([0xF004], getc)
         
@@ -202,7 +208,7 @@ class Monitor(cmd.Cmd):
         else:
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
-            self.do_disassemble('%04x:%04x' % (start, end))
+            self.do_disassemble((self.addrFmt+":"+self.addrFmt) % (start, end))
 
     def help_assemble(self):
         self._output("assemble <address> <statement>")
@@ -221,7 +227,7 @@ class Monitor(cmd.Cmd):
         assembling = True
 
         while assembling:
-          prompt = "\r$%04x            " % (start)
+          prompt = "\r$" + ( self.addrFmt % start ) + "   " + (" " * (1 + self.byteWidth/4) * 3)
           line = console.line_input(prompt, 
                     stdin=self.stdin, stdout=self.stdout)
 
@@ -232,7 +238,7 @@ class Monitor(cmd.Cmd):
           # assemble into memory
           bytes = self._assembler.assemble(line)
           if bytes is None:
-              self.stdout.write("\r$%04x  ???\n" % start)
+              self.stdout.write("\r$" + (self.addrFmt % start) + "  ???\n")
               continue
           end = start + len(bytes)
           self._mpu.memory[start:end] = bytes  
@@ -259,9 +265,11 @@ class Monitor(cmd.Cmd):
     def _format_disassembly(self, address, bytes, disasm):
         mem = ''
         for byte in self._mpu.memory[address:address+bytes]:
-            mem += '%02x ' % byte
+            mem += self.byteFmt % byte + " "
         
-        return "$%04x  %-10s%s" % (address, mem, disasm)
+        fieldwidth = 1 + (1 + self.byteWidth/4) * 3
+        fieldfmt = "%%-%ds" % fieldwidth
+        return "$" + self.addrFmt % address + "  " + fieldfmt % mem + disasm
 
     def help_disassemble(self):
         self._output("disassemble <address_range>")
@@ -273,7 +281,7 @@ class Monitor(cmd.Cmd):
 
     def do_step(self, args):
         self._mpu.step()
-        self.do_disassemble('%04x' % self._mpu.pc)
+        self.do_disassemble(self.addrFmt % self._mpu.pc)
     
     def help_return(self):
         self._output("return")
@@ -339,7 +347,7 @@ class Monitor(cmd.Cmd):
             return
 
         self._output("+%u" % num)
-        self._output("$%02x" % num)
+        self._output("$" + self.byteFmt % num)
         self._output("%04o" % num)
         self._output(itoa(num, 2).zfill(8))
     
@@ -361,9 +369,9 @@ class Monitor(cmd.Cmd):
                 self._output("Invalid register: %s" % register)
             else:
                 try:
-                    intval = self._address_parser.number(value) & 0xFFFF
+                    intval = self._address_parser.number(value) & self.addrMask
                     if len(register) == 1:
-                        intval &= 0xFF
+                        intval &= self.byteMask
                     setattr(self._mpu, register, intval)
                 except KeyError, why:
                     self._output(why[0])
@@ -466,19 +474,20 @@ class Monitor(cmd.Cmd):
 
         if start == end:
             end = start + length - 1
-            if (end > 0xFFFF):
-                end = 0xFFFF
+            if (end > self.addrMask):
+                end = self.addrMask
 
         while address <= end:
-            address &= 0xFFFF
-            self._mpu.memory[address] = (filler[index] & 0xFF)
+            address &= self.addrMask
+            self._mpu.memory[address] = (filler[index] & self.byteMask)
             index += 1
             if index == length:
                 index = 0
             address += 1
 
         fmt = (end - start + 1, start, end)
-        self._output("Wrote +%d bytes from $%04x to $%04x" % fmt)
+        starttoend = "$" + self.addrFmt + " to $" + self.addrFmt
+        self._output(("Wrote +%d bytes from " + starttoend) % fmt)
     
     def help_mem(self):
         self._output("mem <address_range>")
@@ -487,15 +496,15 @@ class Monitor(cmd.Cmd):
     def do_mem(self, args):
         start, end = self._address_parser.range(args)
 
-        line = "%04x:" % start
+        line = self.addrFmt % start + ":"
         for address in range(start, end+1):
             byte = self._mpu.memory[address]
-            more = "  %02x" % byte                       
+            more = "  " + self.byteFmt % byte                       
             
             exceeded = len(line) + len(more) > self._width
             if exceeded:
                 self._output(line)
-                line = "%04x:" % address
+                line = self.addrFmt % address + ":"
             line += more
         self._output(line)
 
@@ -525,7 +534,7 @@ class Monitor(cmd.Cmd):
         byaddress = zip(values, keys)
         byaddress.sort()
         for address, label in byaddress:
-            self._output("%04x: %s" % (address, label))
+            self._output(self.addrFmt % address + ": " + label)
 
     def help_delete_label(self):
         self._output("delete_label <label>")

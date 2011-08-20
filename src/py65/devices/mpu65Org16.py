@@ -3,8 +3,8 @@ from py65.utils.devices import make_instruction_decorator
 
 class MPU(mpu6502.MPU):
 
-    def __init__(self, byteWidth=16, addrWidth=32, *args, **kwargs):
-        mpu6502.MPU.__init__(self, byteWidth=byteWidth, addrWidth=addrWidth, *args, **kwargs)
+    def __init__(self, byteWidth=16, addrWidth=32, addrFmt="%08x", byteFmt="%04x", *args, **kwargs):
+        mpu6502.MPU.__init__(self, byteWidth=byteWidth, addrWidth=addrWidth, addrFmt=addrFmt, byteFmt=byteFmt, *args, **kwargs)
         self.name = '65Org16'
         self.waiting = False
         self.IrqTo   = (1<<self.addrWidth)-2
