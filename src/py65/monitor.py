@@ -421,7 +421,12 @@ class Monitor(cmd.Cmd):
             self._output(msg)
             return
 
-        self._fill(start, start, map(ord, bytes))
+        if self.byteWidth==8:
+            bytes=map(ord, bytes)
+        elif self.byteWidth==16:
+            bytes=map(lambda msb,lsb: (ord(msb)<<8)+ord(lsb),bytes[1::2],bytes[0::2])
+
+        self._fill(start, start, bytes)
 
     def do_save(self, args):
         split = shlex.split(args)
@@ -437,7 +442,9 @@ class Monitor(cmd.Cmd):
         try:
             f = open(filename, 'wb')
             for byte in bytes:
-                f.write(chr(byte))
+                for char in range (0,self.byteWidth,8):
+                    f.write(chr(byte & 0xff))
+                    byte = byte >> 8
             f.close()
         except (OSError, IOError), why:
             msg = "Cannot save file: [%d] %s" % (why[0], why[1])
