@@ -1,5 +1,7 @@
 0.10-dev *Next release*
 
+  - Fixed long-standing bugs in relative branch calculations in the
+    assembler and disassembler.  Based on a patch by Ed Spittles.
 
 0.9 (2011-03-27)
 
