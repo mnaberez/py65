@@ -318,6 +318,12 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual('Reset with new MPU 65C02', lines[0])
         self.assertEqual('65C02', mon._mpu.name)
 
+    def test_mpu_select_is_not_case_sensitive(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mpu('65c02')
+        self.assertEqual('65C02', mon._mpu.name)
+
     def test_help_mpu(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
