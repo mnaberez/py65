@@ -1205,10 +1205,15 @@ class DisassemblerTests(unittest.TestCase):
         self.assertEqual(1, length)
         self.assertEqual('???', disasm)  
                                 
-    def test_disassembles_f0(self):
+    def test_disassembles_f0_forward(self):
         length, disasm = self.disassemble([0xf0, 0x44])
         self.assertEqual(2, length)
         self.assertEqual('BEQ $0046', disasm)  
+
+    def test_disassembled_f0_backward(self):
+        length, disasm = self.disassemble([0xf0, 0xfc], pc=0xc000)
+        self.assertEqual(2, length)
+        self.assertEqual('BEQ $bffe', disasm)
                                 
     def test_disassembles_f1(self):
         length, disasm = self.disassemble([0xf1, 0x44])
@@ -1287,12 +1292,12 @@ class DisassemblerTests(unittest.TestCase):
                                                                                                                                                                                         
     # Test Helpers
     
-    def disassemble(self, bytes):
+    def disassemble(self, bytes, pc=0):
         mpu = MPU()
         address_parser = AddressParser()
         disasm = Disassembler(mpu, address_parser)
-        mpu.memory[0:len(bytes)-1] = bytes
-        return disasm.instruction_at(0)
+        mpu.memory[pc:len(bytes)-1] = bytes
+        return disasm.instruction_at(pc)
   
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])

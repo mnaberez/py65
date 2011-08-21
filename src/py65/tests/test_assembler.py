@@ -867,9 +867,13 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_ef(self):
         pass
 
-    def test_assembles_f0(self):
+    def test_assembles_f0_forward(self):
         self.assertEqual([0xf0, 0x44],
                          self.assemble('BEQ $0046'))
+
+    def test_assembles_f0_backward(self):
+        self.assertEqual([0xf0, 0xfc], 
+                         self.assemble('BEQ $BFFE', pc=0xc000))
 
     def test_assembles_f1(self):
         self.assertEqual([0xf1, 0x44],
