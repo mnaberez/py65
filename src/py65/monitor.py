@@ -17,13 +17,30 @@ from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
-
-    def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None, stdout=None):
-        self._reset(mpu_type)
+    mpulist = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
+    
+    def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None, stdout=None, argv=None):
+        self.mpu_type=mpu_type
+        if argv is None:
+            argv = sys.argv
+        self.parseArgs(argv)
+        self._reset(self.mpu_type)
         self._width = 78
         self._update_prompt()
         self._add_shortcuts()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
+
+    def parseArgs(self, argv):
+        import getopt
+        options, args = getopt.getopt(argv[1:], 'm:',
+                                          ['mpu='])
+        for opt, value in options:
+            if opt in ('-m','--mpu'):
+                try:
+                    self.mpu_type=self.mpulist[value]
+                except:
+                    print "Fatal: no such mpu. Available MPUs:", ', '.join(self.mpulist.keys())
+                    exit(1)
 
     def onecmd(self, line):
         line = self._preprocess_line(line)
@@ -154,10 +171,8 @@ class Monitor(cmd.Cmd):
         self._reset(mpu_type=klass)
 
     def do_mpu(self, args):                                         
-        mpus = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
-        
         def available_mpus():
-            mpu_list = ', '.join(mpus.keys())
+            mpu_list = ', '.join(self.mpulist.keys())
             self._output("Available MPUs: %s" % mpu_list)            
         
         if args == '':                      
@@ -165,7 +180,7 @@ class Monitor(cmd.Cmd):
             available_mpus()
         else:
             requested = args
-            new_mpu = mpus.get(requested, None)
+            new_mpu = self.mpulist.get(requested, None)
             if new_mpu is None:
                 self._output("Unknown MPU: %s" % args)
                 available_mpus()
