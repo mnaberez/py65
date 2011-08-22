@@ -437,7 +437,7 @@ class MPU:
       data = result & self.byteMask
       if data == 0:
         self.p |= self.ZERO
-      if result & 0x100:
+      if result > self.byteMask:
         self.p |= self.CARRY
       self.p |= data & self.NEGATIVE
       self.a = data
