@@ -439,7 +439,7 @@ class Monitor(cmd.Cmd):
         if self.byteWidth==8:
             bytes=map(ord, bytes)
         elif self.byteWidth==16:
-            bytes=map(lambda msb,lsb: (ord(msb)<<8)+ord(lsb),bytes[1::2],bytes[0::2])
+            bytes=map(lambda msb,lsb: (ord(msb)<<8)+ord(lsb),bytes[0::2],bytes[1::2])
 
         self._fill(start, start, bytes)
 
@@ -457,9 +457,9 @@ class Monitor(cmd.Cmd):
         try:
             f = open(filename, 'wb')
             for byte in bytes:
-                for char in range (0,self.byteWidth,8):
-                    f.write(chr(byte & 0xff))
-                    byte = byte >> 8
+                # output each octect from msb first
+                for shift in range (self.byteWidth-8,-1,-8):
+                    f.write(chr((byte>>shift) & 0xff))
             f.close()
         except (OSError, IOError), why:
             msg = "Cannot save file: [%d] %s" % (why[0], why[1])
