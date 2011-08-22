@@ -136,9 +136,13 @@ class Monitor(cmd.Cmd):
                 byte = 0
             return byte
 
+        def blocking_getc(address):
+            return ord(console.getch(self.stdin))
+
         m = ObservableMemory(addrWidth=self.addrWidth)
         m.subscribe_to_write([0xF001], putc)
         m.subscribe_to_read([0xF004], getc)
+        m.subscribe_to_read([0xF005], blocking_getc)
         
         self._mpu.memory = m
 
