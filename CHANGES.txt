@@ -1,4 +1,4 @@
-0.10-dev *Next release*
+0.10 (2011-08-27)
 
   - Fixed long-standing bugs in relative branch calculations in the
     assembler and disassembler.  Based on a patch by Ed Spittles.
