@@ -23,24 +23,54 @@ class Monitor(cmd.Cmd):
         self.mpu_type=mpu_type
         if argv is None:
             argv = sys.argv
-        self.parseArgs(argv)
         self._reset(self.mpu_type)
         self._width = 78
         self._update_prompt()
         self._add_shortcuts()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
+        self.parseArgs(argv)
 
     def parseArgs(self, argv):
         import getopt
-        options, args = getopt.getopt(argv[1:], 'm:',
-                                          ['mpu='])
+        try:
+            options, args = getopt.getopt(argv[1:], 'hm:l:r:g:',
+                                          ['help', 'mpu=', 'load=', 'rom=', 'goto='])
+        except getopt.GetoptError, err:
+            print str(err) 
+            self.usage()
+            sys.exit(1)
+
         for opt, value in options:
+            if opt in ('-l','--load'):
+                self.do_load(value)
+            if opt in ('-r','--rom'):
+                # load a ROM and run from the reset vector
+                self.do_load("%s %d" % (value, -1))
+                physMask = self._mpu.memory.physMask
+                ResetTo = self._mpu.ResetTo & physMask
+                ResetDestination = self._mpu.memory[ResetTo] + (self._mpu.memory[ResetTo+1] << self.byteWidth)
+                self.do_goto("%08x" % ResetDestination)
+            if opt in ('-g','--goto'):
+                self.do_goto(value)
             if opt in ('-m','--mpu'):
-                try:
-                    self.mpu_type=self.mpulist[value]
-                except:
+                if not self.mpulist.get(value, None):
                     print "Fatal: no such mpu. Available MPUs:", ', '.join(self.mpulist.keys())
-                    exit(1)
+                    sys.exit(1)
+                self.do_mpu(value)
+            elif opt in ("-h", "--help"):
+                self.usage()
+                sys.exit()
+
+    def usage(self):
+        print """\
+           \rUsage: monitor.py [options]
+           \rOptions:
+                -h, --help           : Show this message
+                -m, --mpu <device>   : Choose which MPU to emulate (default is 6502)
+                -l, --load <file>    : Load a file at address 0
+                -r, --rom <file>     : Load a rom at the top of address space and reset into it
+                -g, --goto <address> : Perform a goto command after loading any files
+        """
 
     def onecmd(self, line):
         line = self._preprocess_line(line)
@@ -427,6 +457,7 @@ class Monitor(cmd.Cmd):
 
         filename = split[0]
         if len(split) == 2:
+            # if the start address is -1, we will adjust it later
             start = self._address_parser.number(split[1])
         else:
             start = self._mpu.pc
@@ -439,6 +470,10 @@ class Monitor(cmd.Cmd):
             msg = "Cannot load file: [%d] %s" % (why[0], why[1])
             self._output(msg)
             return
+
+        # if the start address was -1, we load to top of memory
+        if start == -1:
+            start = self.addrMask - len(bytes)/(self.byteWidth/8) + 1
 
         if self.byteWidth==8:
             bytes=map(ord, bytes)
