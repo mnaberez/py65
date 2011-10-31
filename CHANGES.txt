@@ -5,7 +5,7 @@
 
 0.9 (2011-03-27)
 
-  - Fixed two monitor tests that were broken under Windows.  Thanks 
+  - Fixed two monitor tests that were broken under Windows.  Thanks
     to Oscar Lindberg for reporting this.
 
   - Removed use of defaultdict to fix compatibility with Python 2.4.
@@ -27,29 +27,29 @@
   - Applied patch by Ed Spittles that fixes the behavior of the BREAK
     and UNUSED flags in the processor status register.  Closes #16.
 
-  - Added ">" as a monitor shortcut for the fill command for 
+  - Added ">" as a monitor shortcut for the fill command for
     consistency with VICE.
-  
+
 0.7 (2009-09-03)
 
   - When using the monitor, the nonblocking character input at
     $F004 should now work on the Microsoft Windows platform.
 
-  - Fixed that relative branch calculations would not use the correct 
+  - Fixed that relative branch calculations would not use the correct
     start address when assembling in the monitor.  Closes #10.
 
-  - The processor status register ("p" or "flags") can now be changed 
+  - The processor status register ("p" or "flags") can now be changed
     in the monitor using the "registers" command with an argument of
     "p", such as "registers p=00".
 
-  - MPU objects now return a two-line string as their __repr__ with 
-    the processor status register displayed as binary for readability.  
+  - MPU objects now return a two-line string as their __repr__ with
+    the processor status register displayed as binary for readability.
 
   - The processor status register is now initialized to 0 on reset.
     Previously, its unused bit (bit 5) was set to 1 on reset.
 
   - Applied patch from Ed Spittles to change the CMP algorithm so that
-    it no longer fails Rob Finch's test suite.  Closes #8. 
+    it no longer fails Rob Finch's test suite.  Closes #8.
 
   - Added a new interactive assembly mode to the monitor.  Entering the
     the assemble command with a statement such as "a c000 lda #0" works
@@ -77,8 +77,8 @@
 
   - Fixed that ADC would not properly set the Overflow (V) flag.  The
     overflow calculation that is now used originated from XGS: Apple
-    IIGS Emulator (cputable.h).  Originally written and Copyright 
-    (C)1996 by Joshua M. Thompson.  Copyright (C) 2006 by Samuel A. 
+    IIGS Emulator (cputable.h).  Originally written and Copyright
+    (C)1996 by Joshua M. Thompson.  Copyright (C) 2006 by Samuel A.
     Falvo II.  http://bitbucket.org/kc5tja/lib65816/src/tip/src/cputable.h
     Closes #3.
 
@@ -106,7 +106,7 @@
 
   - Added a new 65C02 MPU simulation started by Oscar Lindberg.  It is
     now mostly complete.
-    
+
   - Added a new "mpu" command to the monitor.  It will switch between the
     NMOS 6502 and CMOS 65C02 simulations.
 
@@ -128,19 +128,19 @@
     any range of memory ("disassemble c000:c010").  If labels have been
     defined, the disassembly will show them in the operands.
 
-  - Added a new "assemble" command to the monitor.  It can assemble a 
-    single instruction at an address ("assemble c000 jsr $ffd2").  
+  - Added a new "assemble" command to the monitor.  It can assemble a
+    single instruction at an address ("assemble c000 jsr $ffd2").
     Labels in the operands are also supported ("assemble c000 jsr charout").
 
   - Moved the character I/O area from $E000 to $F000 for compatibility with
-    the EhBASIC binary saved from Michal Kowalski's Windows-based simulator.  
+    the EhBASIC binary saved from Michal Kowalski's Windows-based simulator.
     In a future version of Py65, the I/O area will be configurable.
 
   - When running a program in the monitor, a read to $F004 will now do a
     non-blocking read from STDIN.  If no character is available, a null
     byte ($00) will be returned.
 
-  - Fixed a bug where a CMP instruction could crash the simulator due to 
+  - Fixed a bug where a CMP instruction could crash the simulator due to
     an undefined variable.
 
   - EhBASIC 2.09 now runs in the simulator!

@@ -7,23 +7,23 @@ microprocessors.  It has the following goals:
    written in the Python programming language for productivity, while
    similar programs are written in C for performance.
 
- - Enable simulations to be created for systems where it might have 
-   otherwise not been practical, such as homebuilt computers. 
+ - Enable simulations to be created for systems where it might have
+   otherwise not been practical, such as homebuilt computers.
 
  - Rigorously unit test all of the components.  While the tools provided
-   by Py65 may not always be perfect, their behavior is verified through 
+   by Py65 may not always be perfect, their behavior is verified through
    tests so unexpected results are minimized.
-   
+
 ## Installation
-                          
-Py65 packages are [available](http://pypi.python.org/pypi/py65) on the 
-Python Package Index (PyPI).  You download them from there or you can 
+
+Py65 packages are [available](http://pypi.python.org/pypi/py65) on the
+Python Package Index (PyPI).  You download them from there or you can
 use `easy_install` to automatically install or upgrade Py65:
 
     $ easy_install -U py65
 
-Alternatively, you can [download](http://github.com/mnaberez/py65/downloads) 
-a package from GitHub in `.tar.gz` or `.zip` format.  After extracting the 
+Alternatively, you can [download](http://github.com/mnaberez/py65/downloads)
+a package from GitHub in `.tar.gz` or `.zip` format.  After extracting the
 package, use the following command to install Py65:
 
     $ python setup.py install
@@ -53,7 +53,7 @@ simulations that you build.  Its features include:
 
  - Ability to load, dump, and fill memory.
 
- - Simple assemble and disassemble capability, including support for labels 
+ - Simple assemble and disassemble capability, including support for labels
    and labels with offsets.
 
 ## Documentation
@@ -65,11 +65,11 @@ published to [http://py65.readthedocs.org/](http://py65.readthedocs.org/)
 
 These people are responsible for Py65:
 
- - [Mike Naberezny](http://github.com/mnaberez) is the original author of 
+ - [Mike Naberezny](http://github.com/mnaberez) is the original author of
    Py65 and is the primary maintainer.
- 
- - [Oscar Lindberg](http://github.com/offe) started the 65C02 simulation 
-   module and contributed greatly to its implementation. 
 
- - [Ed Spittles](http://github.com/biged) helped with testing and provided 
+ - [Oscar Lindberg](http://github.com/offe) started the 65C02 simulation
+   module and contributed greatly to its implementation.
+
+ - [Ed Spittles](http://github.com/biged) helped with testing and provided
    many useful issue reports and patches.
