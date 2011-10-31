@@ -34,18 +34,18 @@ Once the monitor has started, it will display a register dump and the
 dot prompt.  You can then enter commands for the monitor at this prompt.
 
 Py65Mon uses commands that are very similar to those used by the monitor
-included with the `VICE emulator <http://viceteam.org>`_ for Commodore 
-computers.  You can get a list of available commands with ``help`` or 
+included with the `VICE emulator <http://viceteam.org>`_ for Commodore
+computers.  You can get a list of available commands with ``help`` or
 help on a specific command with ``help command``.
 
 Number Systems
 --------------
 
 When working with Py65Mon, you will frequently need to enter numbers, addresses,
-and ranges of addresses.  Almost all Py65 command support entering numbers in 
+and ranges of addresses.  Almost all Py65 command support entering numbers in
 binary, decimal, and hexadecimal.
 
-Numbers can be entered with a prefix to specify the radix, e.g. ``$c000`` 
+Numbers can be entered with a prefix to specify the radix, e.g. ``$c000``
 instructs Py65Mon that the number ``c000`` is hexadecimal.  The following
 prefixes are supported:
 
@@ -70,7 +70,7 @@ Some commands accept a range of memory addresses::
   $ff84  a0 1c     LDY #$1c
 
 The syntax for a range is ``start:end``.  Each of the two parts may have
-a prefix to indicate the radix, or no prefix to use the default radix.  
+a prefix to indicate the radix, or no prefix to use the default radix.
 
 Sometimes it is useful to have the starting and ending address in a range
 be the same, such as when you want to inspect a single byte of memory.  In
@@ -81,7 +81,7 @@ Assigning Labels
 
 Large assembly language programs may have hundreds of procedures. It is
 difficult to remember the memory address of each procedure and the addresses
-may change if the program is reassembled. 
+may change if the program is reassembled.
 
 You can add a label for any memory address using the ``add_label`` command.
 This label can then be used anywhere the address could be used::
@@ -117,12 +117,12 @@ Command Reference
   overwritten.
 
 .. describe:: assemble <address> <statement>
-  
+
   Assemble a statement at the address::
 
     .assemble c000 lda $a0,x
     $c000  b5 a0     LDA $a0,X
-  
+
   The assembler supports all legal NMOS 6502 opcodes and addressing modes.  If
   you have defined labels with ``add_label``, you may use those labels in the
   address and the operand.
@@ -130,10 +130,10 @@ Command Reference
 .. describe:: cd <path>
 
   Change the current working directory to the path specified::
-  
+
     .cd /path/to/my/files
     /path/to/my/files
-    
+
   After changing the directory, the new working directory will be displayed.
   The default working directory is the directory from which the monitor was
   started.
@@ -142,16 +142,16 @@ Command Reference
 
   Display the number of cycles that the microprocessor has run
   since it was last reset::
-  
+
     .cycles
-    12  
+    12
 
 .. describe:: delete_label <label>
 
   Delete a label that was previously defined with ``add_label``::
-  
+
     .delete_label foo
-  
+
   If the label does not exist, the command will fail silently.
 
 .. describe:: disassemble <address_range>
@@ -184,18 +184,18 @@ Command Reference
 .. describe:: goto <address>
 
   Set the program counter to an address and resume execution::
-  
+
     .goto c000
 
 .. describe:: help [<command>]
 
   Display help for all commands or a single command.  If no command is
   given, a list of commands will be displayed::
-  
+
     .help
-  
+
   If a command is given, help for that comand is displayed::
-  
+
     .help disassemble
     disassemble <address_range>
     Disassemble instructions in the address range.
@@ -203,7 +203,7 @@ Command Reference
 .. describe:: load <filename> <address>
 
   Load a binary file into memory starting at the address specified::
-  
+
     .load hello.bin c000
     Wrote +29 bytes from $c000 to $c01c
 
@@ -214,8 +214,8 @@ Command Reference
     .load "say hello.bin" c000
     Wrote +29 bytes from $c000 to $c01c
 
-  .. note:: 
-  
+  .. note::
+
     Unlike the VICE monitor, Py65Mon's ``load`` command does not expect
     the first two bytes to be a Commodore-style load address.  It will start
     reading the file at byte 0, not byte 2.
@@ -228,39 +228,39 @@ Command Reference
     ff80:  d8  a2  ff  9a  a0  1c  b9  bb  ff  99  04  02  88  d0  f7  b9  d8  ff
     ff92:  f0  06  20  a6  e0  c8  d0  f5  20  a3  e0  90  fb  29  df
 
-  The contents will be wrapped to the terminal width specified by the 
+  The contents will be wrapped to the terminal width specified by the
   ``width`` command.
 
 .. describe:: pwd
 
   Display the current working directory::
-  
+
     .pwd
     /home/mnaberez
 
 .. describe:: quit
 
   Quit the monitor::
-  
+
     .quit
 
 .. describe:: radix [<H|D|O|B>]
-  
-  Display or set the default radix that is assumed for numbers that have no prefix.  
+
+  Display or set the default radix that is assumed for numbers that have no prefix.
   If no argument is given, the default radix is displayed::
-  
+
     .radix
     Default radix is Hexadecimal
-  
+
   If an argument is given, the default radix will be changed::
-  
+
     .radix d
     Default radix is Decimal
-  
-  The default radix may be changed to Hexadecimal, Decimal, Octal, or Binary.  
+
+  The default radix may be changed to Hexadecimal, Decimal, Octal, or Binary.
 
 .. describe:: registers [<name=value>, <name=value>, ...>]
-  
+
   Display or change the registers of the microprocessor.  If no arguments are
   given, the registers are displayed::
 
@@ -270,7 +270,7 @@ Command Reference
 
   Registers can changed giving ``name=value``, separated by commas if
   multiple registers are to be changed::
-  
+
     .registers a=02, x=04
 
     <6502: A=02, X=04, Y=00, Flags=20, SP=ff, PC=0000>
@@ -279,25 +279,25 @@ Command Reference
 
   Reset the microprocessor to its default state.  All memory will
   also be cleared::
-  
+
     .reset
 
 .. describe:: return
 
-  Continue execution and return to the monitor just before the next 
+  Continue execution and return to the monitor just before the next
   RTS or RTI is executed::
 
-    .return  
+    .return
 
 .. describe:: show_labels
-  
+
   Display labels that have been defined with ``add_label``::
 
     .show_labels
     ffd2: charout
 
 .. describe:: step
-  
+
   Execute a single instruction at the program counter.  After the instruction
   executes, the next instruction is disassembled and printed::
 
@@ -310,11 +310,11 @@ Command Reference
 
     <6502: A=00, X=00, Y=00, Flags=34, SP=fc, PC=c000>
     .
-    
-  In the example above, the instruction at ``$C000`` executes and the monitor
-  prompt returns.  
 
-  .. note:: 
+  In the example above, the instruction at ``$C000`` executes and the monitor
+  prompt returns.
+
+  .. note::
 
     After the instruction executes, the disassembly of the **next** instruction
     is printed.  This allows you to see what will be executed on the next step.
@@ -322,14 +322,14 @@ Command Reference
 .. describe:: tilde
 
   Display a number in the supported number systems::
-  
+
     .~ c000
     +49152
     $c000
     140000
     1100000000000000
 
-  The number will be displayed in this order: decimal, hexadecimal, octal, 
+  The number will be displayed in this order: decimal, hexadecimal, octal,
   and then binary.
 
 .. describe:: version
@@ -345,7 +345,7 @@ Command Reference
   Display or set the terminal width.  The width is used to wrap the output
   of some commands like ``mem``.  With no argument, the current width is
   displayed::
-  
+
     .width
     Terminal width is 78
 
