@@ -17,7 +17,8 @@ from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
-    mpulist = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
+
+    Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
 
     def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None, stdout=None, argv=None):
         self.mpu_type=mpu_type
@@ -53,8 +54,8 @@ class Monitor(cmd.Cmd):
             if opt in ('-g','--goto'):
                 self.do_goto(value)
             if opt in ('-m','--mpu'):
-                if not self.mpulist.get(value, None):
-                    print "Fatal: no such mpu. Available MPUs:", ', '.join(self.mpulist.keys())
+                if self._get_mpu(value) is None:
+                    print "Fatal: no such mpu. Available MPUs:", ', '.join(self.Microprocessors.keys())
                     sys.exit(1)
                 self.do_mpu(value)
             elif opt in ("-h", "--help"):
@@ -153,6 +154,15 @@ class Monitor(cmd.Cmd):
 
         return line
 
+    def _get_mpu(self, name):
+        requested = name.lower()
+        mpu = None
+        for key, klass in self.Microprocessors.items():
+            if key.lower() == requested:
+                mpu = klass
+                break
+        return mpu
+
     def _install_mpu_observers(self):
         def putc(address, value):
             self.stdout.write(chr(value))
@@ -206,20 +216,14 @@ class Monitor(cmd.Cmd):
 
     def do_mpu(self, args):
         def available_mpus():
-            mpu_list = ', '.join(self.mpulist.keys())
+            mpu_list = ', '.join(self.Microprocessors.keys())
             self._output("Available MPUs: %s" % mpu_list)
 
         if args == '':
             self._output("Current MPU is %s" % self._mpu.name)
             available_mpus()
         else:
-            requested = args.lower()
-            new_mpu = None
-            for name, klass in self.mpulist.items():
-                if name.lower() == requested:
-                    new_mpu = klass
-                    break
-
+            new_mpu = self._get_mpu(args)
             if new_mpu is None:
                 self._output("Unknown MPU: %s" % args)
                 available_mpus()
