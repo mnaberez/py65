@@ -1,5 +1,17 @@
 #!/usr/bin/env python -u
 
+"""py65mon -- interact with a simulated 6502-based system
+
+Usage: %s [options]
+
+Options:
+-h, --help           : Show this message
+-m, --mpu <device>   : Choose which MPU device (default is 6502)
+-l, --load <file>    : Load a file at address 0
+-r, --rom <file>     : Load a rom at the top of address space and reset into it
+-g, --goto <address> : Perform a goto command after loading any files
+"""
+
 import cmd
 import os
 import re
@@ -63,15 +75,8 @@ class Monitor(cmd.Cmd):
                 sys.exit()
 
     def usage(self):
-        print """\
-           \rUsage: monitor.py [options]
-           \rOptions:
-                -h, --help           : Show this message
-                -m, --mpu <device>   : Choose which MPU to emulate (default is 6502)
-                -l, --load <file>    : Load a file at address 0
-                -r, --rom <file>     : Load a rom at the top of address space and reset into it
-                -g, --goto <address> : Perform a goto command after loading any files
-        """
+        usage = __doc__ % sys.argv[0]
+        self._output(usage)
 
     def onecmd(self, line):
         line = self._preprocess_line(line)
