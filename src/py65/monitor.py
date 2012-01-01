@@ -18,7 +18,7 @@ from py65.memory import ObservableMemory
 
 class Monitor(cmd.Cmd):
     mpulist = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
-    
+
     def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None, stdout=None, argv=None):
         self.mpu_type=mpu_type
         if argv is None:
@@ -36,7 +36,7 @@ class Monitor(cmd.Cmd):
             options, args = getopt.getopt(argv[1:], 'hm:l:r:g:',
                                           ['help', 'mpu=', 'load=', 'rom=', 'goto='])
         except getopt.GetoptError, err:
-            print str(err) 
+            print str(err)
             self.usage()
             sys.exit(1)
 
@@ -74,7 +74,7 @@ class Monitor(cmd.Cmd):
 
     def onecmd(self, line):
         line = self._preprocess_line(line)
-        
+
         result = None
         try:
             result = cmd.Cmd.onecmd(self, line)
@@ -137,7 +137,7 @@ class Monitor(cmd.Cmd):
         # special case for vice compatibility
         if line.startswith('~'):
           line = self._shortcuts['~'] + ' ' + line[1:]
-      
+
         # command shortcuts
         for shortcut, command in self._shortcuts.iteritems():
             if line == shortcut:
@@ -173,12 +173,12 @@ class Monitor(cmd.Cmd):
         m.subscribe_to_write([0xF001], putc)
         m.subscribe_to_read([0xF004], getc)
         m.subscribe_to_read([0xF005], blocking_getc)
-        
+
         self._mpu.memory = m
 
     def _update_prompt(self):
         self.prompt = "\n%s\n." % repr(self._mpu)
-        
+
     def _output(self, stuff):
         if stuff is not None:
             self.stdout.write(stuff + "\n")
@@ -204,17 +204,22 @@ class Monitor(cmd.Cmd):
         klass = self._mpu.__class__
         self._reset(mpu_type=klass)
 
-    def do_mpu(self, args):                                         
+    def do_mpu(self, args):
         def available_mpus():
             mpu_list = ', '.join(self.mpulist.keys())
-            self._output("Available MPUs: %s" % mpu_list)            
-        
-        if args == '':                      
+            self._output("Available MPUs: %s" % mpu_list)
+
+        if args == '':
             self._output("Current MPU is %s" % self._mpu.name)
             available_mpus()
         else:
-            requested = args
-            new_mpu = self.mpulist.get(requested, None)
+            requested = args.lower()
+            new_mpu = None
+            for name, klass in self.mpulist.items():
+                if name.lower() == requested:
+                    new_mpu = klass
+                    break
+
             if new_mpu is None:
                 self._output("Unknown MPU: %s" % args)
                 available_mpus()
@@ -225,7 +230,7 @@ class Monitor(cmd.Cmd):
     def help_mpu(self):
         self._output("mpu\t\tPrint available microprocessors.")
         self._output("mpu <type>\tSelect a new microprocessor.")
-        
+
     def do_EOF(self, args):
         self._output('')
         return 1
@@ -235,7 +240,7 @@ class Monitor(cmd.Cmd):
 
     def do_quit(self, args):
         return self.do_EOF(args)
-    
+
     def help_quit(self):
         return self.help_EOF()
 
@@ -243,7 +248,7 @@ class Monitor(cmd.Cmd):
         split = args.split(None, 1)
         if len(split) != 2:
             return self._interactive_assemble(args)
-        
+
         start, statement = split
         try:
             start = self._address_parser.number(start)
@@ -272,12 +277,12 @@ class Monitor(cmd.Cmd):
           except KeyError:
               self._output("Bad label: %s" % start)
               return
-          
+
         assembling = True
 
         while assembling:
           prompt = "\r$" + ( self.addrFmt % start ) + "   " + (" " * (1 + self.byteWidth/4) * 3)
-          line = console.line_input(prompt, 
+          line = console.line_input(prompt,
                     stdin=self.stdin, stdout=self.stdout)
 
           if not line:
@@ -290,7 +295,7 @@ class Monitor(cmd.Cmd):
               self.stdout.write("\r$" + (self.addrFmt % start) + "  ???\n")
               continue
           end = start + len(bytes)
-          self._mpu.memory[start:end] = bytes  
+          self._mpu.memory[start:end] = bytes
 
           # print disassembly
           bytes, disasm = self._disassembler.instruction_at(start)
@@ -304,18 +309,18 @@ class Monitor(cmd.Cmd):
         start, end = self._address_parser.range(args)
         if start == end:
             end += 1
-        
+
         address = start
         while address < end:
             bytes, disasm = self._disassembler.instruction_at(address)
-            self._output(self._format_disassembly(address, bytes, disasm))                
+            self._output(self._format_disassembly(address, bytes, disasm))
             address += bytes
-    
+
     def _format_disassembly(self, address, bytes, disasm):
         mem = ''
         for byte in self._mpu.memory[address:address+bytes]:
             mem += self.byteFmt % byte + " "
-        
+
         fieldwidth = 1 + (1 + self.byteWidth/4) * 3
         fieldfmt = "%%-%ds" % fieldwidth
         return "$" + self.addrFmt % address + "  " + fieldfmt % mem + disasm
@@ -331,12 +336,12 @@ class Monitor(cmd.Cmd):
     def do_step(self, args):
         self._mpu.step()
         self.do_disassemble(self.addrFmt % self._mpu.pc)
-    
+
     def help_return(self):
         self._output("return")
         self._output("Continues execution and returns to the monitor just")
         self._output("before the next RTS or RTI is executed.")
-    
+
     def do_return(self, args):
         returns = [0x60, 0x40] # RTS, RTI
         self._run(stopcodes=returns)
@@ -349,24 +354,24 @@ class Monitor(cmd.Cmd):
         self._mpu.pc = self._address_parser.number(args)
         brks = [0x00] # BRK
         self._run(stopcodes=brks)
-    
+
     def _run(self, stopcodes=[]):
         last_instruct = None
         while last_instruct not in stopcodes:
             self._mpu.step()
             last_instruct = self._mpu.memory[self._mpu.pc]
-    
+
     def help_radix(self):
         self._output("radix [H|D|O|B]")
         self._output("Set the default radix to hex, decimal, octal, or binary.")
         self._output("With no argument, the current radix is printed.")
-    
+
     def help_cycles(self):
         self._output("Display the total number of cycles executed.")
-    
+
     def do_cycles(self, args):
         self._output(str(self._mpu.processorCycles))
-    
+
     def do_radix(self, args):
         radixes = {'Hexadecimal': 16, 'Decimal': 10, 'Octal': 8, 'Binary': 2}
 
@@ -387,8 +392,8 @@ class Monitor(cmd.Cmd):
     def help_tilde(self):
         self._output("~ <number>")
         self._output("Display the specified number in decimal, hex, octal, and binary.")
-    
-    def do_tilde(self, args):   
+
+    def do_tilde(self, args):
         try:
             num = self._address_parser.number(args)
         except ValueError:
@@ -399,16 +404,16 @@ class Monitor(cmd.Cmd):
         self._output("$" + self.byteFmt % num)
         self._output("%04o" % num)
         self._output(itoa(num, 2).zfill(8))
-    
+
     def help_registers(self):
         self._output("registers[<reg_name> = <number> [, <reg_name> = <number>]*]")
         self._output("Assign respective registers.  With no parameters,")
         self._output("display register values.")
-    
+
     def do_registers(self, args):
         if args == '':
             return
-        
+
         pairs = re.findall('([^=,\s]*)=([^=,\s]*)', args)
         if pairs == []:
             return self._output("Syntax error: %s" % args)
@@ -424,11 +429,11 @@ class Monitor(cmd.Cmd):
                     setattr(self._mpu, register, intval)
                 except KeyError, why:
                     self._output(why[0])
-    
+
     def help_cd(self, args):
         self._output("cd <directory>")
         self._output("Change the working directory.")
-    
+
     def do_cd(self, args):
         try:
             os.chdir(args)
@@ -439,7 +444,7 @@ class Monitor(cmd.Cmd):
 
     def help_pwd(self):
         self._output("Show the current working directory.")
-        
+
     def do_pwd(self, args=None):
         cwd = os.getcwd()
         self._output(cwd)
@@ -487,11 +492,11 @@ class Monitor(cmd.Cmd):
         if len(split) != 3:
             self._output("Syntax error: %s" % args)
             return
-        
+
         filename = split[0]
         start = self._address_parser.number(split[1])
         end   = self._address_parser.number(split[2])
-        
+
         bytes = self._mpu.memory[start:end+1]
         try:
             f = open(filename, 'wb')
@@ -504,20 +509,20 @@ class Monitor(cmd.Cmd):
             msg = "Cannot save file: [%d] %s" % (why[0], why[1])
             self._output(msg)
             return
-        
-        self._output("Saved +%d bytes to %s" % (len(bytes), filename))    
+
+        self._output("Saved +%d bytes to %s" % (len(bytes), filename))
 
     def help_save(self):
         self._output("save \"filename\" <start> <end>")
         self._output("Save the specified memory range to disk as a binary file.")
         self._output("Commodore-style load address bytes are not written.")
-    
+
     def help_fill(self):
         self._output("fill <address_range> <data_list>")
         self._output("Fill memory in the specified address range with the data in")
         self._output("<data_list>.  If the size of the address range is greater")
         self._output("than the size of the data_list, the data_list is repeated.")
-    
+
     def do_fill(self, args):
         split = shlex.split(args)
         if len(split) < 2:
@@ -526,7 +531,7 @@ class Monitor(cmd.Cmd):
 
         start, end = self._address_parser.range(split[0])
         filler = map(self._address_parser.number, split[1:])
-        
+
         self._fill(start, end, filler)
 
     def _fill(self, start, end, filler):
@@ -549,19 +554,19 @@ class Monitor(cmd.Cmd):
         fmt = (end - start + 1, start, end)
         starttoend = "$" + self.addrFmt + " to $" + self.addrFmt
         self._output(("Wrote +%d bytes from " + starttoend) % fmt)
-    
+
     def help_mem(self):
         self._output("mem <address_range>")
         self._output("Display the contents of memory.")
-    
+
     def do_mem(self, args):
         start, end = self._address_parser.range(args)
 
         line = self.addrFmt % start + ":"
         for address in range(start, end+1):
             byte = self._mpu.memory[address]
-            more = "  " + self.byteFmt % byte                       
-            
+            more = "  " + self.byteFmt % byte
+
             exceeded = len(line) + len(more) > self._width
             if exceeded:
                 self._output(line)
@@ -578,8 +583,8 @@ class Monitor(cmd.Cmd):
         if len(split) != 2:
             self._output("Syntax error: %s" % args)
             return
-        
-        address = self._address_parser.number(split[0])    
+
+        address = self._address_parser.number(split[0])
         label   = split[1]
 
         self._address_parser.labels[label] = address
@@ -591,7 +596,7 @@ class Monitor(cmd.Cmd):
     def do_show_labels(self, args):
         values = self._address_parser.labels.values()
         keys = self._address_parser.labels.keys()
-      
+
         byaddress = zip(values, keys)
         byaddress.sort()
         for address, label in byaddress:
@@ -604,7 +609,7 @@ class Monitor(cmd.Cmd):
     def do_delete_label(self, args):
         if args == '':
             return self.help_delete_label()
-        
+
         try:
             del self._address_parser.labels[args]
         except KeyError:
