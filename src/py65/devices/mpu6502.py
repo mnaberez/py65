@@ -43,7 +43,7 @@ class MPU:
     # init
     self.reset()
 
-  def reprformat(self):         
+  def reprformat(self):
         return ("%s PC  AC XR YR SP NV-BDIZC\n" + \
                 "%s: %04x %02x %02x %02x %02x %s"
                )
@@ -52,18 +52,16 @@ class MPU:
     flags  = itoa(self.p, 2).rjust(self.byteWidth, '0')
     indent = ' ' * (len(self.name) + 2)
 
-    return self.reprformat() % (indent, self.name, 
+    return self.reprformat() % (indent, self.name,
                   self.pc, self.a, self.x, self.y, self.sp, flags)
 
   def step(self):
     instructCode = self.ImmediateByte()
-    self.pc +=1
-    self.pc &=self.addrMask
+    self.pc = (self.pc + 1) & self.addrMask
     self.excycles = 0
     self.addcycles = self.extracycles[instructCode]
     self.instruct[instructCode](self)
     self.processorCycles += self.cycletime[instructCode]+self.excycles
-    self.pc &= self.addrMask
     return self
 
   def reset(self):
@@ -170,7 +168,7 @@ class MPU:
   def stPushWord(self, z):
     self.stPush((z>>self.byteWidth)&self.byteMask)
     self.stPush(z&self.byteMask)
-  
+
   def stPopWord(self):
     z = self.stPop()
     z += self.stPop()<<self.byteWidth
@@ -206,7 +204,7 @@ class MPU:
       self.p |= tbyte & self.NEGATIVE
     else:
       self.p |= self.ZERO
-    
+
     if x is None:
       self.a = tbyte
     else:
@@ -234,7 +232,7 @@ class MPU:
       self.memory[addr]=tbyte
 
   def opBCL(self, x):
-    if self.p & x: 
+    if self.p & x:
       self.pc += 1
     else:
       self.BranchRelAddr()
@@ -278,7 +276,7 @@ class MPU:
     else:
       if tbyte & self.NEGATIVE:
         self.p |= self.CARRY
-      tbyte = tbyte << 1     
+      tbyte = tbyte << 1
     tbyte &= self.byteMask
     self.FlagsNZ(tbyte)
 
@@ -293,7 +291,7 @@ class MPU:
 
   def opADC(self, x):
     data = self.ByteAt(x())
-      
+
     if self.p & self.DECIMAL:
       halfcarry = 0
       decimalcarry = 0
@@ -389,7 +387,7 @@ class MPU:
 
   def opSBC(self, x):
     data = self.ByteAt(x())
-      
+
     if self.p & self.DECIMAL:
       halfcarry = 1
       decimalcarry = 0
@@ -504,7 +502,7 @@ class MPU:
   extracycles = [0] * 256
   disassemble = [('???', 'imp')] * 256
 
-  instruction = make_instruction_decorator(instruct, disassemble, 
+  instruction = make_instruction_decorator(instruct, disassemble,
                                            cycletime, extracycles)
 
   @instruction(name="BRK", mode="imp", cycles=7)
@@ -532,16 +530,16 @@ class MPU:
   def inst_0x06(self):
     self.opASL(self.ZeroPageAddr)
     self.pc += 1
-  
+
   @instruction(name="PHP", mode="imp", cycles=3)
   def inst_0x08(self):
     self.stPush(self.p | self.BREAK | self.UNUSED)
-  
+
   @instruction(name="ORA", mode="imm", cycles=2)
   def inst_0x09(self):
     self.opORA(self.ProgramCounter)
     self.pc += 1
-  
+
   @instruction(name="ASL", mode="acc", cycles=2)
   def inst_0x0a(self):
     self.opASL(None)
@@ -550,40 +548,40 @@ class MPU:
   def inst_0x0d(self):
     self.opORA(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="ASL", mode="abs", cycles=6)
   def inst_0x0e(self):
     self.opASL(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="BPL", mode="rel", cycles=2, extracycles=2)
   def inst_0x10(self):
     self.opBCL(self.NEGATIVE)
-  
+
   @instruction(name="ORA", mode="iny", cycles=5, extracycles=1)
   def inst_0x11(self):
     self.opORA(self.IndirectYAddr)
     self.pc += 1
-  
+
   @instruction(name="ORA", mode="zpx", cycles=4)
   def inst_0x15(self):
     self.opORA(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="ASL", mode="zpx", cycles=6)
   def inst_0x16(self):
     self.opASL(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="CLC", mode="imp", cycles=2)
   def inst_0x18(self):
     self.opCLR(self.CARRY)
-  
+
   @instruction(name="ORA", mode="aby", cycles=4, extracycles=1)
   def inst_0x19(self):
     self.opORA(self.AbsoluteYAddr)
-    self.pc += 2 
-  
+    self.pc += 2
+
   @instruction(name="ORA", mode="abx", cycles=4, extracycles=1)
   def inst_0x1d(self):
     self.opORA(self.AbsoluteXAddr)
@@ -595,25 +593,25 @@ class MPU:
     self.pc += 2
 
   @instruction(name="JSR", mode="abs", cycles=6)
-  def inst_0x20(self): 
+  def inst_0x20(self):
     self.stPushWord((self.pc+1)&self.addrMask)
     self.pc=self.WordAt(self.pc)
-  
+
   @instruction(name="AND", mode="inx", cycles=6)
   def inst_0x21(self):
     self.opAND(self.IndirectXAddr)
     self.pc += 1
-  
+
   @instruction(name="BIT", mode="zpg", cycles=3)
   def inst_0x24(self):
     self.opBIT(self.ZeroPageAddr)
     self.pc += 1
-  
+
   @instruction(name="AND", mode="zpg", cycles=3)
   def inst_0x25(self):
     self.opAND(self.ZeroPageAddr)
     self.pc += 1
-  
+
   @instruction(name="ROL", mode="zpg", cycles=5)
   def inst_0x26(self):
     self.opROL(self.ZeroPageAddr)
@@ -622,7 +620,7 @@ class MPU:
   @instruction(name="PLP", mode="imp", cycles=4)
   def inst_0x28(self):
     self.p = (self.stPop() | self.BREAK | self.UNUSED)
-  
+
   @instruction(name="AND", mode="imm", cycles=2)
   def inst_0x29(self):
     self.opAND(self.ProgramCounter)
@@ -678,7 +676,7 @@ class MPU:
   @instruction(name="AND", mode="abx", cycles=4, extracycles=1)
   def inst_0x3d(self):
     self.opAND(self.AbsoluteXAddr)
-    self.pc += 2 
+    self.pc += 2
 
   @instruction(name="ROL", mode="abx", cycles=7)
   def inst_0x3e(self):
@@ -726,7 +724,7 @@ class MPU:
   def inst_0x4d(self):
     self.opEOR(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="LSR", mode="abs", cycles=6)
   def inst_0x4e(self):
     self.opLSR(self.AbsoluteAddr)
@@ -812,13 +810,13 @@ class MPU:
   @instruction(name="ADC", mode="abs", cycles=4)
   def inst_0x6d(self):
     self.opADC(self.AbsoluteAddr)
-    self.pc +=2 
+    self.pc +=2
 
   @instruction(name="ROR", mode="abs", cycles=6)
   def inst_0x6e(self):
     self.opROR(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="BVS", mode="rel", cycles=2, extracycles=2)
   def inst_0x70(self):
     self.opBST(self.OVERFLOW)
@@ -832,12 +830,12 @@ class MPU:
   def inst_0x75(self):
     self.opADC(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="ROR", mode="zpx", cycles=6)
   def inst_0x76(self):
     self.opROR(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="SEI", mode="imp", cycles=2)
   def inst_0x78(self):
     self.opSET(self.INTERRUPT)
@@ -851,7 +849,7 @@ class MPU:
   def inst_0x7d(self):
     self.opADC(self.AbsoluteXAddr)
     self.pc += 2
-  
+
   @instruction(name="ROR", mode="abx", cycles=7)
   def inst_0x7e(self):
     self.opROR(self.AbsoluteXAddr)
@@ -882,17 +880,17 @@ class MPU:
     self.y -= 1
     self.y&=self.byteMask
     self.FlagsNZ(self.y)
-  
+
   @instruction(name="TXA", mode="imp", cycles=2)
   def inst_0x8a(self):
     self.a=self.x
     self.FlagsNZ(self.a)
-  
+
   @instruction(name="STY", mode="abs", cycles=4)
   def inst_0x8c(self):
     self.opSTY(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="STA", mode="abs", cycles=4)
   def inst_0x8d(self):
     self.opSTA(self.AbsoluteAddr)
@@ -902,36 +900,36 @@ class MPU:
   def inst_0x8e(self):
     self.opSTX(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="BCC", mode="rel", cycles=2, extracycles=2)
   def inst_0x90(self):
     self.opBCL(self.CARRY)
-  
+
   @instruction(name="STA", mode="iny", cycles=6)
   def inst_0x91(self):
     self.opSTA(self.IndirectYAddr)
     self.pc += 1
-  
+
   @instruction(name="STY", mode="zpx", cycles=4)
   def inst_0x94(self):
     self.opSTY(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="STA", mode="zpx", cycles=4)
   def inst_0x95(self):
     self.opSTA(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="STX", mode="zpy", cycles=4)
   def inst_0x96(self):
     self.opSTX(self.ZeroPageYAddr)
     self.pc += 1
-  
+
   @instruction(name="TYA", mode="imp", cycles=2)
   def inst_0x98(self):
     self.a = self.y
     self.FlagsNZ(self.a)
-  
+
   @instruction(name="STA", mode="aby", cycles=5)
   def inst_0x99(self):
     self.opSTA(self.AbsoluteYAddr)
@@ -947,7 +945,7 @@ class MPU:
     self.pc += 2
 
   @instruction(name="LDY", mode="imm", cycles=2)
-  def inst_0xa0(self):               
+  def inst_0xa0(self):
     self.opLDY(self.ProgramCounter)
     self.pc += 1
 
@@ -975,14 +973,14 @@ class MPU:
   def inst_0xa6(self):
     self.opLDX(self.ZeroPageAddr)
     self.pc += 1
-  
+
   @instruction(name="TAY", mode="imp", cycles=2)
   def inst_0xa8(self):
     self.y = self.a
     self.FlagsNZ(self.y)
 
   @instruction(name="LDA", mode="imm", cycles=2)
-  def inst_0xa9(self):              
+  def inst_0xa9(self):
     self.opLDA(self.ProgramCounter)
     self.pc += 1
 
@@ -1005,11 +1003,11 @@ class MPU:
   def inst_0xae(self):
     self.opLDX(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="BCS", mode="rel", cycles=2, extracycles=2)
   def inst_0xb0(self):
     self.opBST(self.CARRY)
-  
+
   @instruction(name="LDA", mode="iny", cycles=5, extracycles=1)
   def inst_0xb1(self):
     self.opLDA(self.IndirectYAddr)
@@ -1043,7 +1041,7 @@ class MPU:
   def inst_0xba(self):
     self.x = self.sp
     self.FlagsNZ(self.x)
-    
+
   @instruction(name="LDY", mode="abx", cycles=4, extracycles=1)
   def inst_0xbc(self):
     self.opLDY(self.AbsoluteXAddr)
@@ -1091,7 +1089,7 @@ class MPU:
     self.FlagsNZ(self.y)
 
   @instruction(name="CMP", mode="imm", cycles=2)
-  def inst_0xc9(self):              
+  def inst_0xc9(self):
     self.opCMPR(self.ProgramCounter, self.a)
     self.pc +=1
 
@@ -1115,7 +1113,7 @@ class MPU:
   def inst_0xce(self):
     self.opDECR(self.AbsoluteAddr)
     self.pc += 2
-  
+
   @instruction(name="BNE", mode="rel", cycles=2, extracycles=2)
   def inst_0xd0(self):
     self.opBCL(self.ZERO)
@@ -1124,7 +1122,7 @@ class MPU:
   def inst_0xd1(self):
     self.opCMPR(self.IndirectYAddr, self.a)
     self.pc += 1
-  
+
   @instruction(name="CMP", mode="zpx", cycles=4)
   def inst_0xd5(self):
     self.opCMPR(self.ZeroPageXAddr, self.a)
@@ -1163,12 +1161,12 @@ class MPU:
   def inst_0xe1(self):
     self.opSBC(self.IndirectXAddr)
     self.pc += 1
-  
+
   @instruction(name="CPX", mode="zpg", cycles=3)
   def inst_0xe4(self):
     self.opCMPR(self.ZeroPageAddr, self.x)
     self.pc += 1
-  
+
   @instruction(name="SBC", mode="zpg", cycles=3)
   def inst_0xe5(self):
     self.opSBC(self.ZeroPageAddr)
@@ -1178,13 +1176,13 @@ class MPU:
   def inst_0xe6(self):
     self.opINCR(self.ZeroPageAddr)
     self.pc += 1
-  
+
   @instruction(name="INX", mode="imp", cycles=2)
   def inst_0xe8(self):
     self.x+=1
-    self.x&=self.byteMask 
+    self.x&=self.byteMask
     self.FlagsNZ(self.x)
-  
+
   @instruction(name="SBC", mode="imm", cycles=2)
   def inst_0xe9(self):
     self.opSBC(self.ProgramCounter)
@@ -1198,7 +1196,7 @@ class MPU:
   def inst_0xec(self):
     self.opCMPR(self.AbsoluteAddr, self.x)
     self.pc += 2
-  
+
   @instruction(name="SBC", mode="abs", cycles=4)
   def inst_0xed(self):
     self.opSBC(self.AbsoluteAddr)
@@ -1227,11 +1225,11 @@ class MPU:
   def inst_0xf6(self):
     self.opINCR(self.ZeroPageXAddr)
     self.pc += 1
-  
+
   @instruction(name="SED", mode="imp", cycles=2)
   def inst_0xf8(self):
     self.opSET(self.DECIMAL)
-  
+
   @instruction(name="SBC", mode="aby", cycles=4, extracycles=1)
   def inst_0xf9(self):
     self.opSBC(self.AbsoluteYAddr)
@@ -1242,7 +1240,7 @@ class MPU:
     self.opSBC(self.AbsoluteXAddr)
     self.pc += 2
 
-  @instruction(name="INC", mode="abx", cycles=7)  
+  @instruction(name="INC", mode="abx", cycles=7)
   def inst_0xfe(self):
     self.opINCR(self.AbsoluteXAddr)
     self.pc += 2
