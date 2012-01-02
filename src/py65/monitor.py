@@ -13,6 +13,7 @@ Options:
 """
 
 import cmd
+import getopt
 import os
 import re
 import shlex
@@ -44,7 +45,6 @@ class Monitor(cmd.Cmd):
         self.parseArgs(argv)
 
     def parseArgs(self, argv):
-        import getopt
         try:
             options, args = getopt.getopt(argv[1:], 'hm:l:r:g:',
                                           ['help', 'mpu=', 'load=', 'rom=', 'goto='])
