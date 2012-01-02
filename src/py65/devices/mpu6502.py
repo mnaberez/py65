@@ -56,7 +56,7 @@ class MPU:
                   self.pc, self.a, self.x, self.y, self.sp, flags)
 
   def step(self):
-    instructCode = self.ImmediateByte()
+    instructCode = self.memory[self.pc]
     self.pc = (self.pc + 1) & self.addrMask
     self.excycles = 0
     self.addcycles = self.extracycles[instructCode]
