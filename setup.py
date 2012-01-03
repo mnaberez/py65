@@ -3,8 +3,8 @@ __version__ = '0.11-dev'
 import os
 import sys
 
-if sys.version_info[:2] < (2, 4):
-    msg = ("Py65 requires Python 2.4 or better, you are attempting to "
+if sys.version_info[:2] < (2, 6):
+    msg = ("Py65 requires Python 2.6 or later, you are attempting to "
            "install it using version %s.  Please install with a "
            "supported version" % sys.version)
     sys.stderr.write(msg)
