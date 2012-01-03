@@ -18,6 +18,7 @@ import os
 import re
 import shlex
 import sys
+import urllib2
 from asyncore import compact_traceback
 from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.devices.mpu65c02 import MPU as CMOS65C02
@@ -476,14 +477,24 @@ class Monitor(cmd.Cmd):
         else:
             start = self._mpu.pc
 
-        try:
-            f = open(filename, 'rb')
-            bytes = f.read()
-            f.close()
-        except (OSError, IOError), why:
-            msg = "Cannot load file: [%d] %s" % (why[0], why[1])
-            self._output(msg)
-            return
+        if "://" in filename:
+            try:
+                f = urllib2.urlopen(filename)
+                bytes = f.read()
+                f.close()
+            except (urllib2.URLError, urllib2.HTTPError), why:
+                msg = "Cannot fetch remote file: %s" % str(why)
+                self._output(msg)
+                return
+        else:
+            try:
+                f = open(filename, 'rb')
+                bytes = f.read()
+                f.close()
+            except (OSError, IOError), why:
+                msg = "Cannot load file: [%d] %s" % (why[0], why[1])
+                self._output(msg)
+                return
 
         # if the start address was -1, we load to top of memory
         if start == -1:
