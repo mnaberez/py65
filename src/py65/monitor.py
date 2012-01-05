@@ -52,7 +52,7 @@ class Monitor(cmd.Cmd):
         except getopt.GetoptError, err:
             self._output(str(err))
             self.usage()
-            sys.exit(1)
+            self._exit()
 
         for opt, value in options:
             if opt in ('-l','--load'):
@@ -75,7 +75,7 @@ class Monitor(cmd.Cmd):
                 self.do_mpu(value)
             elif opt in ("-h", "--help"):
                 self.usage()
-                sys.exit()
+                self._exit()
 
     def usage(self):
         usage = __doc__ % sys.argv[0]
@@ -200,6 +200,9 @@ class Monitor(cmd.Cmd):
     def _output(self, stuff):
         if stuff is not None:
             self.stdout.write(stuff + "\n")
+
+    def _exit(self, exitcode=0):
+        sys.exit(exitcode)
 
     def do_help(self, args):
         args = self._shortcuts.get(args.strip(), args)
