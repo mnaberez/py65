@@ -51,8 +51,8 @@ class Monitor(cmd.Cmd):
                                           ['help', 'mpu=', 'load=', 'rom=', 'goto='])
         except getopt.GetoptError, err:
             self._output(str(err))
-            self.usage()
-            self._exit()
+            self._usage()
+            self._exit(1)
 
         for opt, value in options:
             if opt in ('-l','--load'):
@@ -74,10 +74,10 @@ class Monitor(cmd.Cmd):
                     sys.exit(1)
                 self.do_mpu(value)
             elif opt in ("-h", "--help"):
-                self.usage()
-                self._exit()
+                self._usage()
+                self._exit(1)
 
-    def usage(self):
+    def _usage(self):
         usage = __doc__ % sys.argv[0]
         self._output(usage)
 
