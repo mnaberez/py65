@@ -50,7 +50,7 @@ class Monitor(cmd.Cmd):
             options, args = getopt.getopt(argv[1:], 'hm:l:r:g:',
                                           ['help', 'mpu=', 'load=', 'rom=', 'goto='])
         except getopt.GetoptError, err:
-            print str(err)
+            self._output(str(err))
             self.usage()
             sys.exit(1)
 
@@ -68,7 +68,9 @@ class Monitor(cmd.Cmd):
                 self.do_goto(value)
             if opt in ('-m','--mpu'):
                 if self._get_mpu(value) is None:
-                    print "Fatal: no such mpu. Available MPUs:", ', '.join(self.Microprocessors.keys())
+                    mpus = ', '.join(self.Microprocessors.keys())
+                    msg = "Fatal: no such MPU. Available MPUs: " + mpus
+                    self._output(msg)
                     sys.exit(1)
                 self.do_mpu(value)
             elif opt in ("-h", "--help"):
