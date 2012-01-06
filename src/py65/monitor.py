@@ -635,10 +635,8 @@ class Monitor(cmd.Cmd):
         if args == '':
             return self.help_delete_label()
 
-        try:
+        if args in self._address_parser.labels:
             del self._address_parser.labels[args]
-        except KeyError:
-            pass
 
     def do_width(self, args):
         if args != '':
