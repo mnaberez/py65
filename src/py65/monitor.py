@@ -43,9 +43,9 @@ class Monitor(cmd.Cmd):
         self._update_prompt()
         self._add_shortcuts()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
-        self.parseArgs(argv)
+        self._parse_args(argv)
 
-    def parseArgs(self, argv):
+    def _parse_args(self, argv):
         try:
             options, args = getopt.getopt(argv[1:], 'hm:l:r:g:',
                                           ['help', 'mpu=', 'load=', 'rom=', 'goto='])
