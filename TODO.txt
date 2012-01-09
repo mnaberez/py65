@@ -4,3 +4,5 @@ Instructions needing unit tests:
   cpy
 
 Better error messages when assembling fails.
+
+Add tests for 65Org16 module.
