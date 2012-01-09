@@ -46,14 +46,6 @@ setup(
     maintainer_email = "mike@naberezny.com",
     package_dir = {'':'src'},
     packages = find_packages(os.path.join(here, 'src')),
-    # put data files in egg 'doc' dir
-    data_files=[ ('doc', [
-        'CHANGES.txt',
-        'LICENSE.txt',
-        'README.markdown',
-        'TODO.txt',
-        ]
-    )],
     install_requires = [],
     extras_require = {},
     tests_require = [],
