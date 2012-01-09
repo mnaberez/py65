@@ -1,20 +1,22 @@
+from collections import defaultdict
+
 class ObservableMemory:
     def __init__(self, subject=None, addrWidth=16):
         self.physMask = 0xffff
         if addrWidth > 16:
             # even with 32-bit address space, model only 256k memory
             self.physMask = 0x3ffff
+
         if subject is None:
             subject = (self.physMask+1) * [0x00]
-
         self._subject = subject
 
-        self._read_subscribers  = {}
-        self._write_subscribers = {}        
+        self._read_subscribers  = defaultdict(list)
+        self._write_subscribers = defaultdict(list)
 
     def __setitem__(self, address, value):
         address &= self.physMask
-        callbacks = self._write_subscribers.get(address, [])
+        callbacks = self._write_subscribers[address]
 
         for callback in callbacks:
             result = callback(address, value)
@@ -22,10 +24,10 @@ class ObservableMemory:
                 value = result
 
         self._subject[address] = value
-        
+
     def __getitem__(self, address):
         address &= self.physMask
-        callbacks = self._read_subscribers.get(address, [])
+        callbacks = self._read_subscribers[address]
         final_result = None
 
         for callback in callbacks:
@@ -37,7 +39,7 @@ class ObservableMemory:
             return self._subject[address]
         else:
             return final_result
-    
+
     def __getattr__(self, attribute):
         return getattr(self._subject, attribute)
 
@@ -48,7 +50,7 @@ class ObservableMemory:
             if callback not in callbacks:
                 callbacks.append(callback)
 
-    def subscribe_to_read(self, address_range, callback): 
+    def subscribe_to_read(self, address_range, callback):
         for address in address_range:
             address &= self.physMask
             callbacks = self._read_subscribers.setdefault(address, [])
