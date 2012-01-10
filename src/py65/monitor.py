@@ -127,6 +127,7 @@ class Monitor(cmd.Cmd):
                            'g':   'goto',
                            'l':   'load',
                            'm':   'mem',
+                           'q':   'quit',
                            'r':   'registers',
                            'ret': 'return',
                            'rad': 'radix',
