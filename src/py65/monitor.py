@@ -56,23 +56,28 @@ class Monitor(cmd.Cmd):
 
         for opt, value in options:
             if opt in ('-l','--load'):
-                self.do_load(value)
+                cmd = "load %s" % value
+                self.onecmd(cmd)
             if opt in ('-r','--rom'):
                 # load a ROM and run from the reset vector
-                self.do_load("%s %d" % (value, -1))
+                cmd = "load %s %d" % (value, -1)
+                self.onecmd(cmd)
                 physMask = self._mpu.memory.physMask
-                ResetTo = self._mpu.ResetTo & physMask
-                ResetDestination = self._mpu.memory[ResetTo] + (self._mpu.memory[ResetTo+1] << self.byteWidth)
-                self.do_goto("%08x" % ResetDestination)
+                reset = self._mpu.ResetTo & physMask
+                dest = self._mpu.memory[reset] + (self._mpu.memory[reset+1] << self.byteWidth)
+                cmd = "goto %08x" % dest
+                self.onecmd(cmd)
             if opt in ('-g','--goto'):
-                self.do_goto(value)
+                cmd = "goto %s" % value
+                self.onecmd(cmd)
             if opt in ('-m','--mpu'):
                 if self._get_mpu(value) is None:
                     mpus = ', '.join(self.Microprocessors.keys())
                     msg = "Fatal: no such MPU. Available MPUs: " + mpus
                     self._output(msg)
                     sys.exit(1)
-                self.do_mpu(value)
+                cmd = "mpu %s" % value
+                self.onecmd(cmd)
             elif opt in ("-h", "--help"):
                 self._usage()
                 self._exit(1)
