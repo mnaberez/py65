@@ -22,12 +22,6 @@ use `easy_install` to automatically install or upgrade Py65:
 
     $ easy_install -U py65
 
-Alternatively, you can [download](http://github.com/mnaberez/py65/downloads)
-a package from GitHub in `.tar.gz` or `.zip` format.  After extracting the
-package, use the following command to install Py65:
-
-    $ python setup.py install
-
 ## Devices
 
 The following devices are simulated at this time:
