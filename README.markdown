@@ -36,7 +36,7 @@ The following devices are simulated at this time:
     than others. This simulation is based on the W65C02S from the Western
     Design Center (WDC).
 
- - `mpu65Org16` simulates the 65Org16, a 6502-like microprocessor with a 16-bit
+ - `mpu65org16` simulates the 65Org16, a 6502-like microprocessor with a 16-bit
    data bus and 32-bit address bus.  This microprocessor is a project of the
    [6502.org community](http://forum.6502.org/viewtopic.php?t=1824) and a
    [Verilog core](https://github.com/BigEd/verilog-6502/wiki) for it has been

@@ -22,7 +22,7 @@ import urllib2
 from asyncore import compact_traceback
 from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.devices.mpu65c02 import MPU as CMOS65C02
-from py65.devices.mpu65Org16 import MPU as V65Org16
+from py65.devices.mpu65org16 import MPU as V65Org16
 from py65.disassembler import Disassembler
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
