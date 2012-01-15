@@ -226,7 +226,7 @@ Command Reference
 
     Unlike the VICE monitor, Py65Mon's ``load`` command does not expect
     the first two bytes to be a Commodore-style load address.  It will start
-    reading the file at byte 0, not byte 2.
+    reading the data at byte 0, not byte 2.
 
   If the filename is a URL, it will be retrieved::
 
@@ -318,6 +318,26 @@ Command Reference
   RTS or RTI is executed::
 
     .return
+
+.. describe:: save <filename> <start_address> <end_address>
+
+  Save the specified memory range to disk as a binary file::
+
+    .save hello.bin c000 c01c
+    Wrote +29 bytes from $c000 to $c01c
+
+  The file will be saved relative to the current working directory.  You
+  may also specify an absolute path.  If the filename contains spaces, use
+  quotes around it::
+
+    .save "say hello.bin" c000 c01c
+    Wrote +29 bytes from $c000 to $c01c
+
+  .. note::
+
+    Unlike the VICE monitor, Py65Mon's ``save`` command does not write
+    the first two bytes as a Commodore-style load address.  It will start
+    writing the data at byte 0, not byte 2.
 
 .. describe:: show_labels
 
