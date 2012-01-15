@@ -72,9 +72,9 @@ class Monitor(cmd.Cmd):
                 self.onecmd(cmd)
             if opt in ('-m','--mpu'):
                 if self._get_mpu(value) is None:
-                    mpus = ', '.join(self.Microprocessors.keys())
-                    msg = "Fatal: no such MPU. Available MPUs: " + mpus
-                    self._output(msg)
+                    mpus = self.Microprocessors.keys()
+                    mpus.sort()
+                    self._output("Fatal: no such MPU. Available MPUs: %s" % ', '.join(mpus))
                     sys.exit(1)
                 cmd = "mpu %s" % value
                 self.onecmd(cmd)
@@ -233,8 +233,9 @@ class Monitor(cmd.Cmd):
 
     def do_mpu(self, args):
         def available_mpus():
-            mpu_list = ', '.join(self.Microprocessors.keys())
-            self._output("Available MPUs: %s" % mpu_list)
+            mpus = self.Microprocessors.keys()
+            mpus.sort()
+            self._output("Available MPUs: %s" % ', '.join(mpus))
 
         if args == '':
             self._output("Current MPU is %s" % self._mpu.name)
