@@ -228,6 +228,11 @@ Command Reference
     the first two bytes to be a Commodore-style load address.  It will start
     reading the file at byte 0, not byte 2.
 
+  If the filename is a URL, it will be retrieved::
+
+    .load https://github.com/mnaberez/py65/raw/0.11/examples/ehbasic.bin 0000
+    Wrote +65536 bytes from $0000 to $ffff
+
 .. describe:: mem <address_range>
 
   Display the contents of memory an address range::
