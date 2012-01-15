@@ -7,8 +7,7 @@ Py65 - 6502 Microprocessor Simulation in Python
 
 .. topic:: Overview
 
-  Py65 is a simulation of the original NMOS 6502 microprocessor from MOS
-  Technology, written in Python.
+  Simulate 6502-based microcomputer systems in Python.
 
 Using the Monitor
 =================
@@ -239,6 +238,23 @@ Command Reference
 
   The contents will be wrapped to the terminal width specified by the
   ``width`` command.
+
+.. describe:: mpu [<mpu_name>]
+
+  Display or set the current microprocessor.  If no argument is given, the
+  current microprocessor will be displayed::
+
+    .mpu
+    Current MPU is 6502
+    Available MPUs: 6502, 65C02, 65Org16
+
+  If an argument is given, the microprocessor will be changed::
+
+    .mpu 65C02
+    Reset with new MPU 65C02
+
+  The default microprocessor is ``6502``, the original NMOS 6502 from
+  MOS Technology.
 
 .. describe:: pwd
 
