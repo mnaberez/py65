@@ -27,21 +27,21 @@ class Disassembler:
             disasm += ' A'
             length = 1
 
-        elif addressing ==  'abs':
+        elif addressing == 'abs':
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(address,
                 '$' + self.addrFmt % address)
             disasm += ' ' + address_or_label
             length = 3
 
-        elif addressing ==  'abx':
+        elif addressing == 'abx':
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(address,
                 '$' + self.addrFmt % address)
             disasm += ' %s,X' % address_or_label
             length = 3
 
-        elif addressing ==  'aby':
+        elif addressing == 'aby':
             address = self._mpu.WordAt(pc + 1)
             address_or_label = self._address_parser.label_for(address,
                 '$' + self.addrFmt % address)
@@ -105,14 +105,14 @@ class Disassembler:
             disasm += ' %s' % address_or_label
             length = 2
 
-        elif addressing ==  'zpx':
+        elif addressing == 'zpx':
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(zp_address,
                 '$' + self.byteFmt % zp_address)
             disasm += ' %s,X' % address_or_label
             length = 2
 
-        elif addressing ==  'zpy':
+        elif addressing == 'zpy':
             zp_address = self._mpu.ByteAt(pc + 1)
             address_or_label = self._address_parser.label_for(zp_address,
                 '$' + self.byteFmt % zp_address)
