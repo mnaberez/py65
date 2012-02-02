@@ -65,11 +65,14 @@ published to [http://py65.readthedocs.org/](http://py65.readthedocs.org/)
 
 These people are responsible for Py65:
 
- - [Mike Naberezny](http://github.com/mnaberez) is the original author of
+ - [Mike Naberezny](https://github.com/mnaberez) is the original author of
    Py65 and is the primary maintainer.
 
- - [Oscar Lindberg](http://github.com/offe) started the 65C02 simulation
+ - [Oscar Lindberg](https://github.com/offe) started the 65C02 simulation
    module and contributed greatly to its implementation.
 
- - [Ed Spittles](http://github.com/biged) wrote the 65Org16 simulation module
+ - [Ed Spittles](https://github.com/biged) wrote the 65Org16 simulation module
    and provided many useful issue reports and patches.
+
+ - [David Beazley](https://github.com/dabeaz) did the initial port of Py65 to
+   Python 3.
