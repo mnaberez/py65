@@ -1,5 +1,8 @@
 0.12-dev *Next Release*
 
+  - Fixed a bug that caused ``help cd`` to raise an exception
+    in the monitor.
+
 0.11 (2012-01-07)
 
   - Added a new 65Org16 MPU simulation written by Ed Spittles.

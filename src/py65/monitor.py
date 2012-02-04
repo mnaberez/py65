@@ -452,7 +452,7 @@ class Monitor(cmd.Cmd):
                 except KeyError, why:
                     self._output(why[0])
 
-    def help_cd(self, args):
+    def help_cd(self):
         self._output("cd <directory>")
         self._output("Change the working directory.")
 

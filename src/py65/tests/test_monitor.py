@@ -139,6 +139,16 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("assemble <address>"))
 
+    # cd
+
+    def test_help_cd(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_cd()
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("cd <directory>"))
+
     # delete_label
 
     def test_shortcut_for_delete_label(self):
