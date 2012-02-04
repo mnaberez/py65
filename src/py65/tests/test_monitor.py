@@ -157,6 +157,24 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("cd <directory>"))
 
+    def test_do_cd_changes_cwd(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        here = os.path.abspath(os.path.dirname(__file__))
+        mon.do_cd(here)
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith(here))
+        self.assertEqual(here, os.getcwd())
+
+    def test_do_cd_with_bad_dir_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_cd("/path/to/a/nonexistant/directory")
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Cannot change directory"))
+
     # delete_label
 
     def test_shortcut_for_delete_label(self):
