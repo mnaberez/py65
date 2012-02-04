@@ -149,6 +149,14 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("cd <directory>"))
 
+    def test_do_cd_with_no_dir_shows_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_cd("")
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("cd <directory>"))
+
     # delete_label
 
     def test_shortcut_for_delete_label(self):

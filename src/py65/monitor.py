@@ -457,6 +457,9 @@ class Monitor(cmd.Cmd):
         self._output("Change the working directory.")
 
     def do_cd(self, args):
+        if args == '':
+            return self.help_cd()
+
         try:
             os.chdir(args)
         except OSError, why:
