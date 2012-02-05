@@ -260,6 +260,29 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('disassemble <address_range>'))
 
+    def test_disassemble_will_disassemble_one_address(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xc000] = 0xEA #=> NOP
+        mon._mpu.step()
+        mon.do_disassemble("c000")
+
+        out = stdout.getvalue()
+        disasm = "$c000  ea        NOP\n"
+        self.assertEqual(out, disasm)
+
+    def test_disassemble_will_disassemble_an_address_range(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xc000] = 0xEA #=> NOP
+        mon._mpu.memory[0xc001] = 0xEA #=> NOP
+        mon._mpu.step()
+        mon.do_disassemble("c000:c002")
+
+        out = stdout.getvalue()
+        disasm = "$c000  ea        NOP\n$c001  ea        NOP\n"
+        self.assertEqual(out, disasm)
+
     # fill
 
     def test_shortcut_f_for_fill(self):
