@@ -246,6 +246,20 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('disassemble'))
 
+    def test_help_disassemble(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_disassemble()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('disassemble <address_range>'))
+
+    def test_disassemble_shows_help_when_given_extra_args(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_disassemble("c000 c001")
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('disassemble <address_range>'))
+
     # fill
 
     def test_shortcut_f_for_fill(self):

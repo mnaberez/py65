@@ -328,7 +328,11 @@ class Monitor(cmd.Cmd):
           start += bytes
 
     def do_disassemble(self, args):
-        start, end = self._address_parser.range(args)
+        split = shlex.split(args)
+        if len(split) != 1:
+            return self.help_disassemble()
+
+        start, end = self._address_parser.range(split[0])
         if start == end:
             end += 1
 
@@ -350,6 +354,7 @@ class Monitor(cmd.Cmd):
     def help_disassemble(self):
         self._output("disassemble <address_range>")
         self._output("Disassemble instructions in the address range.")
+        self._output('Range is specified like "<start>:<end+1>".')
 
     def help_step(self):
         self._output("step")
