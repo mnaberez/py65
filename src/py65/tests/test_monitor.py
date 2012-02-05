@@ -175,6 +175,34 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("Cannot change directory"))
 
+    # cycles
+
+    def test_help_cycles(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_cycles()
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Display the total number of cycles"))
+
+    def test_do_cycles_shows_zero_initially(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_cycles("")
+
+        out = stdout.getvalue()
+        self.assertEqual(out, "0\n")
+
+    def test_do_cycles_shows_count_after_step(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0x0000] = 0xEA #=> NOP (2 cycles)
+        mon._mpu.step()
+        mon.do_cycles("")
+
+        out = stdout.getvalue()
+        self.assertEqual(out, "2\n")
+
     # delete_label
 
     def test_shortcut_for_delete_label(self):
