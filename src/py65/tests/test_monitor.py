@@ -317,6 +317,55 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('fill <address_range>'))
 
+    def test_do_fill_will_fill_one_address(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xc000] = 0x00
+        mon.do_fill('c000 aa')
+
+        self.assertEqual(0xAA, mon._mpu.memory[0xc000])
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Wrote +1 bytes from $c000 to $c000'))
+
+    def test_do_fill_will_fill_one_address(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xc000] = 0x00
+        mon.do_fill('c000 aa')
+
+        self.assertEqual(0xAA, mon._mpu.memory[0xc000])
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Wrote +1 bytes from $c000 to $c000'))
+
+    def test_do_fill_will_fill_an_address_range_with_a_single_byte(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xc000] = 0x00
+        mon._mpu.memory[0xc001] = 0x00
+        mon._mpu.memory[0xc002] = 0x00
+        mon.do_fill('c000:c001 aa')
+
+        self.assertEqual(0xAA, mon._mpu.memory[0xc000])
+        self.assertEqual(0xAA, mon._mpu.memory[0xc001])
+        self.assertEqual(0x00, mon._mpu.memory[0xc002])
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Wrote +2 bytes from $c000 to $c001'))
+
+    def test_do_fill_will_fill_an_address_range_with_byte_sequence(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xc000] = 0x00
+        mon._mpu.memory[0xc001] = 0x00
+        mon._mpu.memory[0xc002] = 0x00
+        mon._mpu.memory[0xc003] = 0x00
+        mon.do_fill('c000:c003 aa bb')
+
+        self.assertEqual(0xAA, mon._mpu.memory[0xc000])
+        self.assertEqual(0xBB, mon._mpu.memory[0xc001])
+        self.assertEqual(0xAA, mon._mpu.memory[0xc002])
+        self.assertEqual(0xBB, mon._mpu.memory[0xc003])
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Wrote +4 bytes from $c000 to $c003'))
 
     # goto
 
