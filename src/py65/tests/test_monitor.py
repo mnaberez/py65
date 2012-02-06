@@ -291,7 +291,7 @@ class MonitorTests(unittest.TestCase):
         mon.do_help('f')
 
         out = stdout.getvalue()
-        self.assertTrue(out.startswith('fill'))
+        self.assertTrue(out.startswith('fill <address_range>'))
 
     def test_shortcut_gt_for_fill(self):
         stdout = StringIO()
@@ -299,7 +299,24 @@ class MonitorTests(unittest.TestCase):
         mon.do_help('>')
 
         out = stdout.getvalue()
-        self.assertTrue(out.startswith('fill'))
+        self.assertTrue(out.startswith('fill <address_range>'))
+
+    def test_help_fill(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_fill()
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('fill <address_range>'))
+
+    def test_do_fill_with_no_args_shows_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_fill('')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('fill <address_range>'))
+
 
     # goto
 

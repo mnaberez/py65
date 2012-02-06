@@ -566,8 +566,7 @@ class Monitor(cmd.Cmd):
     def do_fill(self, args):
         split = shlex.split(args)
         if len(split) < 2:
-            self._output("Syntax error: %s" % args)
-            return
+            return self.help_fill()
 
         start, end = self._address_parser.range(split[0])
         filler = map(self._address_parser.number, split[1:])
