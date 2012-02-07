@@ -441,7 +441,23 @@ class MonitorTests(unittest.TestCase):
         mon.do_help('m')
 
         out = stdout.getvalue()
-        self.assertTrue(out.startswith('mem'))
+        self.assertTrue(out.startswith('mem <address_range>'))
+
+    def test_do_mem_shows_help_when_given_no_args(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mem('')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('mem <address_range>'))
+
+    def test_do_mem_shows_help_when_given_extra_args(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_mem('c000 c001')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('mem <address_range>'))
 
     # mpu
 

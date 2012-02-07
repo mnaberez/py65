@@ -597,9 +597,14 @@ class Monitor(cmd.Cmd):
     def help_mem(self):
         self._output("mem <address_range>")
         self._output("Display the contents of memory.")
+        self._output('Range is specified like "<start:end>".')
 
     def do_mem(self, args):
-        start, end = self._address_parser.range(args)
+        split = shlex.split(args)
+        if len(split) != 1:
+            return self.help_mem()
+
+        start, end = self._address_parser.range(split[0])
 
         line = self.addrFmt % start + ":"
         for address in range(start, end+1):
