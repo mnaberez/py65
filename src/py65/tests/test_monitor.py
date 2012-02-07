@@ -459,6 +459,26 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('mem <address_range>'))
 
+    def test_do_mem_shows_memory_for_a_single_address(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xC000] = 0xAA
+        mon.do_mem('c000')
+
+        out = stdout.getvalue()
+        self.assertEqual('c000:  aa\n', out)
+
+    def test_do_mem_shows_memory_for_an_address_range(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xC000] = 0xAA
+        mon._mpu.memory[0xC001] = 0xBB
+        mon._mpu.memory[0xC002] = 0xCC
+        mon.do_mem('c000:c002')
+
+        out = stdout.getvalue()
+        self.assertEqual('c000:  aa  bb  cc\n', out)
+
     # mpu
 
     def test_mpu_with_no_args_prints_current_lists_available_mpus(self):
