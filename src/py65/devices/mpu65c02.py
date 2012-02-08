@@ -258,7 +258,7 @@ class MPU(mpu6502.MPU):
     def inst_0xCB(self):
         self.waiting = True
 
-    @instruction(name="CMP", mode='zpi', cycles=6) # Don't know cycles
+    @instruction(name="CMP", mode='zpi', cycles=5)
     def inst_0xD2(self):
         self.opCPY(self.ZeroPageIndirectAddr)
         self.pc += 1
