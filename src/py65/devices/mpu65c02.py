@@ -1,4 +1,4 @@
-from py65.devices import mpu6502 
+from py65.devices import mpu6502
 from py65.utils.devices import make_instruction_decorator
 
 class MPU(mpu6502.MPU):
@@ -20,7 +20,7 @@ class MPU(mpu6502.MPU):
     extracycles = mpu6502.MPU.extracycles[:]
     disassemble = mpu6502.MPU.disassemble[:]
 
-    instruction = make_instruction_decorator(instruct, disassemble, 
+    instruction = make_instruction_decorator(instruct, disassemble,
                                                 cycletime, extracycles)
 
     # addressing modes
@@ -46,7 +46,7 @@ class MPU(mpu6502.MPU):
 
     def opTSB(self, x):
         address = x()
-        m = self.memory[address] 
+        m = self.memory[address]
         self.p &= ~self.ZERO
         z = m & self.a
         if z != 0:
@@ -55,7 +55,7 @@ class MPU(mpu6502.MPU):
 
     def opTRB(self, x):
         address = x()
-        m = self.memory[address] 
+        m = self.memory[address]
         self.p &= ~self.ZERO
         z = m & self.a
         if z != 0:
@@ -68,7 +68,7 @@ class MPU(mpu6502.MPU):
     def inst_0x07(self):
         self.opRMB(self.ZeroPageAddr, 0xFE)
         self.pc += 1
-    
+
     @instruction(name="ORA", mode="zpi", cycles=5)
     def inst_0x12(self):
         self.opORA(self.ZeroPageIndirectAddr)
@@ -143,10 +143,10 @@ class MPU(mpu6502.MPU):
         self.opSTZ(self.ZeroPageXAddr)
         self.pc += 1
 
-    @instruction(name="PHY", mode="imp", cycles=4)
+    @instruction(name="PLY", mode="imp", cycles=4)
     def inst_0x7a(self):
         self.y = self.stPop()
-        self.FlagsNZ(self.y)    
+        self.FlagsNZ(self.y)
 
     @instruction(name="RMB7", mode="zpg", cycles=5)
     def inst_0x77(self):
