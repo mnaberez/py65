@@ -10,6 +10,8 @@
   - Fixed the cycle count of 0xD2 (CMP zero page indirect) in
     the 65C02 simulation.  Thanks to Brian Cassidy for reporting it.
 
+  - Added "h" as a monitor shortcut for "help".
+
 0.11 (2012-01-07)
 
   - Added a new 65Org16 MPU simulation written by Ed Spittles.

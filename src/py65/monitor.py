@@ -117,7 +117,6 @@ class Monitor(cmd.Cmd):
 
     def _add_shortcuts(self):
         self._shortcuts = {'~':   'tilde',
-                           '?':   'help',
                            'a':   'assemble',
                            'al':  'add_label',
                            'd':   'disassemble',
@@ -125,6 +124,8 @@ class Monitor(cmd.Cmd):
                            'f':   'fill',
                            '>':   'fill',
                            'g':   'goto',
+                           'h':   'help',
+                           '?':   'help',
                            'l':   'load',
                            'm':   'mem',
                            'q':   'quit',

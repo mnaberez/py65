@@ -379,18 +379,41 @@ class MonitorTests(unittest.TestCase):
 
     # help
 
-    def test_help_accepts_command_shortcuts(self):
+    def test_help_without_args_shows_documented_commands(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-
-        mon.onecmd("help assemble \t ")
-        help_for_command = stdout.getvalue()
+        mon.onecmd('help')
+        out = stdout.getvalue()
+        self.assertTrue("Documented commands" in out)
 
         stdout.truncate(0)
-        mon.onecmd("help a \t ")
-        help_for_shortcut = stdout.getvalue()
+        mon.onecmd('h')
+        out = stdout.getvalue()
+        self.assertTrue("Documented commands" in out)
 
-        self.assertEqual(help_for_command, help_for_shortcut)
+        stdout.truncate(0)
+        mon.onecmd('?')
+        out = stdout.getvalue()
+        self.assertTrue("Documented commands" in out)
+
+    def test_help_with_args_shows_command_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('help assemble')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("assemble <address>"))
+
+        stdout.truncate(0)
+        mon.onecmd('h a')
+        out = stdout.getvalue()
+        self.assertTrue("assemble <address>" in out)
+
+    def test_help_with_invalid_args_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('help foo')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("*** No help on foo"))
 
     # load
 
