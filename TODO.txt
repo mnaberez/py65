@@ -1,8 +1,0 @@
-Instructions needing unit tests:
-  cmp
-  cpx
-  cpy
-
-Better error messages when assembling fails.
-
-Add tests for 65Org16 module.
