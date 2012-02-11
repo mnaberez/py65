@@ -55,7 +55,8 @@ class MonitorTests(unittest.TestCase):
         mon = Monitor(stdout=stdout)
         mon.do_add_label('should be label space value')
         out = stdout.getvalue()
-        self.assertEqual("Syntax error: should be label space value\n", out)
+        err = "Syntax error: should be label space value\n"
+        self.assertTrue(out.startswith(err))
 
     def test_do_add_label_adds_label(self):
         stdout = StringIO()

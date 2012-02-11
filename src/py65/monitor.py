@@ -627,7 +627,7 @@ class Monitor(cmd.Cmd):
         split = shlex.split(args)
         if len(split) != 2:
             self._output("Syntax error: %s" % args)
-            return
+            return self.help_add_label()
 
         address = self._address_parser.number(split[0])
         label   = split[1]
