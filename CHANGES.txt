@@ -1,4 +1,4 @@
-0.12-dev *Next Release*
+0.12 (2012-02-16)
 
   - Fixed a bug that caused ``help cd`` to raise an exception
     in the monitor.
