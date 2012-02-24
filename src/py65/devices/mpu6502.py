@@ -22,9 +22,8 @@ class MPU:
     ADDR_WIDTH  = 16
     ADDR_FORMAT = "%04x"
 
-    def __init__(self, memory=None, pc=0x0000, debug=False):
+    def __init__(self, memory=None, pc=0x0000):
         # config
-        self.debug = debug
         self.name = '6502'
         self.byteMask = ((1<<self.BYTE_WIDTH)-1)
         self.addrMask = ((1<<self.ADDR_WIDTH)-1)
@@ -494,8 +493,6 @@ class MPU:
     # instructions
 
     def inst_not_implemented(self):
-        if self.debug:
-          raise NotImplementedError
         self.pc += 1
 
     instruct    = [inst_not_implemented] * 256

@@ -12,7 +12,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assert_('65C02' in repr(mpu))
 
     # ADC Zero Page, Indirect
-    
+
     def test_adc_bcd_off_zp_indirect_carry_clear_in_accumulator_zeroes(self):
         mpu = self._make_mpu()
         mpu.a = 0x00
@@ -26,7 +26,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.CARRY)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
-       
+
     def test_adc_bcd_off_zp_indirect_carry_set_in_accumulator_zero(self):
         mpu = self._make_mpu()
         mpu.a = 0
@@ -41,7 +41,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
-    
+
     def test_adc_bcd_off_zp_indirect_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
         mpu.a = 0x01
@@ -53,20 +53,20 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(5, mpu.processorCycles)
         self.assertEqual(0xFF, mpu.a)
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
-        self.assertEqual(0, mpu.p & mpu.CARRY)    
+        self.assertEqual(0, mpu.p & mpu.CARRY)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-    
+
     def test_adc_bcd_off_zp_indirect_carry_clear_in_carry_set_out(self):
         mpu = self._make_mpu()
         mpu.a = 0x02
         self._write(mpu.memory, 0x0000, (0x72, 0x10)) #=> $0000 ADC ($0010)
         self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
         mpu.memory[0xABCD] = 0xFF
-        mpu.step()    
+        mpu.step()
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
         self.assertEqual(0x01, mpu.a)
-        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)        
+        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
@@ -127,12 +127,12 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.step()
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(0x80, mpu.a)
-        self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)    
-        self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)       
-        self.assertEqual(0, mpu.p & mpu.ZERO)       
-      
+        self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
+        self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
+
     # AND Zero Page, Indirect
-    
+
     def test_and_zp_indirect_all_zeros_setting_zero_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0xFF
@@ -145,12 +145,12 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
-  
+
     def test_and_zp_indirect_zeros_and_ones_setting_negative_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0xFF
         self._write(mpu.memory, 0x0000, (0x32, 0x10)) #=> AND ($0010)
-        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD    
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB)) #=> Vector to $ABCD
         mpu.memory[0xABCD] = 0xAA
         mpu.step()
         self.assertEqual(0x0002, mpu.pc)
@@ -158,13 +158,13 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xAA, mpu.a)
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-  
+
     # BIT (Absolute, X-Indexed)
-  
+
     def test_bit_abs_x_copies_bit_7_of_memory_to_n_flag_when_0(self):
         mpu = self._make_mpu()
-        mpu.p &= ~(mpu.NEGATIVE) 
-        mpu.x = 0x02                                      
+        mpu.p &= ~(mpu.NEGATIVE)
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0xFF
         mpu.a = 0xFF
@@ -172,11 +172,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-  
+
     def test_bit_abs_x_copies_bit_7_of_memory_to_n_flag_when_1(self):
         mpu = self._make_mpu()
         mpu.p |= mpu.NEGATIVE
-        mpu.x = 0x02                                      
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
         mpu.a = 0xFF
@@ -184,11 +184,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-      
+
     def test_bit_abs_x_copies_bit_6_of_memory_to_v_flag_when_0(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.OVERFLOW)
-        mpu.x = 0x02                                      
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0xFF
         mpu.a = 0xFF
@@ -196,11 +196,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-  
+
     def test_bit_abs_x_copies_bit_6_of_memory_to_v_flag_when_1(self):
         mpu = self._make_mpu()
         mpu.p |= mpu.OVERFLOW
-        mpu.x = 0x02                                      
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
         mpu.a = 0xFF
@@ -208,11 +208,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.OVERFLOW)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-  
+
     def test_bit_abs_x_stores_result_of_and_in_z_while_preserving_a_when_1(self):
-        mpu = self._make_mpu()   
+        mpu = self._make_mpu()
         mpu.p &= ~mpu.ZERO
-        mpu.x = 0x02                                      
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
         mpu.a = 0x01
@@ -222,11 +222,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x00, mpu.memory[0xFEED])
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-  
+
     def test_bit_abs_x_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
-        mpu = self._make_mpu()   
+        mpu = self._make_mpu()
         mpu.p |= mpu.ZERO
-        mpu.x = 0x02                                      
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x01
         mpu.a = 0x01
@@ -236,11 +236,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x01, mpu.memory[0xFEED])
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-  
+
     def test_bit_abs_x_stores_result_of_and_when_zero_in_z_while_preserving_a(self):
-        mpu = self._make_mpu()   
+        mpu = self._make_mpu()
         mpu.p &= ~(mpu.ZERO)
-        mpu.x = 0x02                                      
+        mpu.x = 0x02
         self._write(mpu.memory, 0x0000, (0x3C, 0xEB, 0xFE)) #=> BIT $FEEB,X
         mpu.memory[0xFEED] = 0x00
         mpu.a = 0x01
@@ -250,9 +250,9 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x00, mpu.memory[0xFEED])
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
-  
+
     # BIT (Zero Page, X-Indexed)
-  
+
     def test_bit_zp_x_copies_bit_7_of_memory_to_n_flag_when_0(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.NEGATIVE)
@@ -264,7 +264,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
-  
+
     def test_bit_zp_x_copies_bit_7_of_memory_to_n_flag_when_1(self):
         mpu = self._make_mpu()
         mpu.p |= mpu.NEGATIVE
@@ -276,7 +276,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
-    
+
     def test_bit_zp_x_copies_bit_6_of_memory_to_v_flag_when_0(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.OVERFLOW)
@@ -288,7 +288,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)
-  
+
     def test_bit_zp_x_copies_bit_6_of_memory_to_v_flag_when_1(self):
         mpu = self._make_mpu()
         mpu.p |= mpu.OVERFLOW
@@ -300,9 +300,9 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0, mpu.p & mpu.OVERFLOW)
-  
+
     def test_bit_zp_x_stores_result_of_and_in_z_while_preserving_a_when_1(self):
-        mpu = self._make_mpu()   
+        mpu = self._make_mpu()
         mpu.p &= ~mpu.ZERO
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x00
@@ -311,12 +311,12 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.step()
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0x0002, mpu.pc)
-        self.assertEqual(4, mpu.processorCycles) 
-        self.assertEqual(0x01, mpu.a)  
+        self.assertEqual(4, mpu.processorCycles)
+        self.assertEqual(0x01, mpu.a)
         self.assertEqual(0x00, mpu.memory[0x0010 + mpu.x])
-  
+
     def test_bit_zp_x_stores_result_of_and_when_nonzero_in_z_while_preserving_a(self):
-        mpu = self._make_mpu()   
+        mpu = self._make_mpu()
         mpu.p |= mpu.ZERO
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x01
@@ -328,9 +328,9 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0x01, mpu.memory[0x0010 + mpu.x])
-  
+
     def test_bit_zp_x_stores_result_of_and_when_zero_in_z_while_preserving_a(self):
-        mpu = self._make_mpu()   
+        mpu = self._make_mpu()
         mpu.p &= ~(mpu.ZERO)
         self._write(mpu.memory, 0x0000, (0x34, 0x10)) #=> BIT $0010,X
         mpu.memory[0x0013] = 0x00
@@ -342,9 +342,9 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO) # result of AND is zero
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0x00, mpu.memory[0x0010 + mpu.x])
-   
+
     # EOR Zero Page, Indirect
-  
+
     def test_eor_zp_indirect_flips_bits_over_setting_z_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0xFF
@@ -353,11 +353,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0xABCD] = 0xFF
         mpu.step()
         self.assertEqual(0x0002, mpu.pc)
-        self.assertEqual(5, mpu.processorCycles) 
+        self.assertEqual(5, mpu.processorCycles)
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(0xFF, mpu.memory[0xABCD])
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
-  
+
     def test_eor_zp_indirect_flips_bits_over_setting_n_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0x00
@@ -366,11 +366,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0xABCD] = 0xFF
         mpu.step()
         self.assertEqual(0x0002, mpu.pc)
-        self.assertEqual(5, mpu.processorCycles) 
+        self.assertEqual(5, mpu.processorCycles)
         self.assertEqual(0xFF, mpu.a)
         self.assertEqual(0xFF, mpu.memory[0xABCD])
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
-        self.assertEqual(0, mpu.p & mpu.ZERO)      
+        self.assertEqual(0, mpu.p & mpu.ZERO)
 
     # LDA Zero Page, Indirect
 
@@ -401,7 +401,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
 
     # ORA Zero Page, Indirect
-    
+
     def test_ora_zp_indirect_zeroes_or_zeros_sets_z_flag(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.ZERO)
@@ -416,7 +416,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(5, mpu.processorCycles)
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
-          
+
     def test_ora_zp_indirect_turns_bits_on_sets_n_flag(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.NEGATIVE)
@@ -432,7 +432,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
     # PHX
-  
+
     def test_phx_pushes_x_and_updates_sp(self):
         mpu = self._make_mpu()
         mpu.x = 0xAB
@@ -442,10 +442,10 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xAB, mpu.x)
         self.assertEqual(0xAB, mpu.memory[0x01FF])
         self.assertEqual(0xFE, mpu.sp)
-        self.assertEqual(3, mpu.processorCycles) 
-        
+        self.assertEqual(3, mpu.processorCycles)
+
     # PHY
-  
+
     def test_phy_pushes_y_and_updates_sp(self):
         mpu = self._make_mpu()
         mpu.y = 0xAB
@@ -458,7 +458,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(3, mpu.processorCycles)
 
     # PLX
-    
+
     def test_plx_pulls_top_byte_from_stack_into_x_and_updates_sp(self):
         mpu = self._make_mpu()
         mpu.memory[0x0000] = 0xFA #=> PLX
@@ -469,9 +469,9 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xAB,   mpu.x)
         self.assertEqual(0xFF,   mpu.sp)
         self.assertEqual(4, mpu.processorCycles)
-        
+
     # PLY
-    
+
     def test_ply_pulls_top_byte_from_stack_into_y_and_updates_sp(self):
         mpu = self._make_mpu()
         mpu.memory[0x0000] = 0x7A #=> PLY
@@ -481,10 +481,10 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x0001, mpu.pc)
         self.assertEqual(0xAB,   mpu.y)
         self.assertEqual(0xFF,   mpu.sp)
-        self.assertEqual(4, mpu.processorCycles) 
+        self.assertEqual(4, mpu.processorCycles)
 
     # RMB0
-    
+
     def test_rmb0_clears_bit_0_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -505,7 +505,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB1
-    
+
     def test_rmb1_clears_bit_1_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -526,7 +526,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB2
-    
+
     def test_rmb2_clears_bit_2_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -547,7 +547,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB3
-    
+
     def test_rmb3_clears_bit_3_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -568,7 +568,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB4
-    
+
     def test_rmb4_clears_bit_4_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -589,7 +589,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB5
-    
+
     def test_rmb5_clears_bit_5_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -610,7 +610,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB6
-    
+
     def test_rmb6_clears_bit_6_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -631,7 +631,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # RMB7
-    
+
     def test_rmb7_clears_bit_7_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('11111111',2)
@@ -652,7 +652,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # STA Zero Page, Indirect
-    
+
     def test_sta_zp_indirect_stores_a_leaves_a_and_n_flag_unchanged(self):
         mpu = self._make_mpu()
         mpu.p = flags = 0xFF & ~(mpu.NEGATIVE)
@@ -666,7 +666,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xFF, mpu.memory[0xFEED])
         self.assertEqual(0xFF, mpu.a)
         self.assertEqual(flags, mpu.p)
-  
+
     def test_sta_zp_indirect_stores_a_leaves_a_and_z_flag_unchanged(self):
         mpu = self._make_mpu()
         mpu.p = flags = 0xFF & ~(mpu.ZERO)
@@ -682,7 +682,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(flags, mpu.p)
 
     # SMB0
-    
+
     def test_smb0_sets_bit_0_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('00000000',2)
@@ -703,7 +703,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # SMB1
-    
+
     def test_smb1_sets_bit_1_without_affecting_other_bits(self):
         mpu = self._make_mpu()
         mpu.memory[0x0043] = int('00000000',2)
@@ -827,7 +827,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.p = expected
         mpu.step()
         self.assertEqual(expected, mpu.p)
- 
+
     # SMB7
 
     def test_smb7_sets_bit_7_without_affecting_other_bits(self):
@@ -850,7 +850,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(expected, mpu.p)
 
     # SBC Zero Page, Indirect
- 
+
     def test_sbc_zp_indirect_all_zeros_and_no_borrow_is_zero(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.DECIMAL)
@@ -866,7 +866,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(mpu.CARRY, mpu.CARRY)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
-    
+
     def test_sbc_zp_indirect_downto_zero_no_borrow_sets_z_clears_n(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.DECIMAL)
@@ -882,7 +882,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(mpu.CARRY, mpu.CARRY)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
-  
+
     def test_sbc_zp_indirect_downto_zero_with_borrow_sets_z_clears_n(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.DECIMAL)
@@ -897,8 +897,8 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(mpu.CARRY, mpu.CARRY)
-        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)  
-            
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+
     def test_sbc_zp_indirect_downto_four_with_borrow_clears_z_n(self):
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.DECIMAL)
@@ -912,13 +912,13 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(5, mpu.processorCycles)
         self.assertEqual(0x04, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
-        self.assertEqual(0, mpu.p & mpu.ZERO)  
+        self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(mpu.CARRY, mpu.CARRY)
-            
+
     # STZ Zero Page
 
     def test_stz_zp_stores_zero(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0x0032] = 0x88
         mpu.memory[0x0000:0x0000+2] = [0x64, 0x32] #=> STZ $32
         self.assertEqual(0x88, mpu.memory[0x0032])
@@ -930,7 +930,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # STZ Zero Page, X-Indexed
 
     def test_stz_zp_x_stores_zero(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0x0032] = 0x88
         mpu.memory[0x0000:0x0000+2] = [0x74, 0x32] #=> STZ $32,X
         self.assertEqual(0x88, mpu.memory[0x0032])
@@ -942,7 +942,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # STZ Absolute
 
     def test_stz_abs_stores_zero(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0x88
         mpu.memory[0x0000:0x0000+3] = [0x9C, 0xED, 0xFE] #=> STZ $FEED
         self.assertEqual(0x88, mpu.memory[0xFEED])
@@ -954,7 +954,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # STZ Absolute, X-Indexed
 
     def test_stz_abs_stores_zero(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0x88
         mpu.x = 0x0D
         mpu.memory[0x0000:0x0000+3] = [0x9E, 0xE0, 0xFE] #=> STZ $FEE0,X
@@ -964,11 +964,11 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x00, mpu.memory[0xFEED])
         self.assertEqual(0x0003, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
- 
+
     # TSB Zero Page
 
     def test_tsb_sp_ones(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0x00BB] = 0xE0
         self._write(mpu.memory, 0x0000, [0x04, 0xBB]) #=> TSB $BD
         mpu.a = 0x70
@@ -980,7 +980,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(5, mpu.processorCycles)
 
     def test_tsb_sp_zeros(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0x00BB] = 0x80
         self._write(mpu.memory, 0x0000, [0x04, 0xBB]) #=> TSB $BD
         mpu.a = 0x60
@@ -995,7 +995,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # TSB Absolute
 
     def test_tsb_abs_ones(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0xE0
         self._write(mpu.memory, 0x0000, [0x0C, 0xED, 0xFE]) #=> TSB $FEED
         mpu.a = 0x70
@@ -1007,7 +1007,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(6, mpu.processorCycles)
 
     def test_tsb_abs_zeros(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0x80
         self._write(mpu.memory, 0x0000, [0x0C, 0xED, 0xFE]) #=> TSB $FEED
         mpu.a = 0x60
@@ -1021,7 +1021,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # TRB Zero Page
 
     def test_trb_sp_ones(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0x00BB] = 0xE0
         self._write(mpu.memory, 0x0000, [0x14, 0xBB]) #=> TRB $BD
         mpu.a = 0x70
@@ -1033,7 +1033,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(5, mpu.processorCycles)
 
     def test_trb_sp_zeros(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0x00BB] = 0x80
         self._write(mpu.memory, 0x0000, [0x14, 0xBB]) #=> TRB $BD
         mpu.a = 0x60
@@ -1048,7 +1048,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     # TRB Absolute
 
     def test_trb_abs_ones(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0xE0
         self._write(mpu.memory, 0x0000, [0x1C, 0xED, 0xFE]) #=> TRB $FEED
         mpu.a = 0x70
@@ -1060,7 +1060,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(6, mpu.processorCycles)
 
     def test_trb_abs_zeros(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0x80
         self._write(mpu.memory, 0x0000, [0x1C, 0xED, 0xFE]) #=> TRB $FEED
         mpu.a = 0x60
@@ -1072,7 +1072,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(6, mpu.processorCycles)
 
     def test_dec_a_decreases_a(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         self._write(mpu.memory, 0x0000, [0x3A]) #=> DEC A
         mpu.a = 0x48
         mpu.step()
@@ -1081,7 +1081,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x47, mpu.a)
 
     def test_dec_a_sets_zero_flag(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         self._write(mpu.memory, 0x0000, [0x3A]) #=> DEC A
         mpu.a = 0x01
         mpu.step()
@@ -1090,7 +1090,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x00, mpu.a)
 
     def test_dec_a_wraps_at_zero(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         self._write(mpu.memory, 0x0000, [0x3A]) #=> DEC A
         mpu.a = 0x00
         mpu.step()
@@ -1099,14 +1099,14 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xFF, mpu.a)
 
     def test_bra_forward(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         self._write(mpu.memory, 0x0000, [0x80, 0x10]) #=> BRA $10
         mpu.step()
         self.assertEqual(0x12, mpu.pc)
         self.assertEqual(2, mpu.processorCycles)
 
     def test_bra_backward(self):
-        mpu = self._make_mpu(debug=True)
+        mpu = self._make_mpu()
         self._write(mpu.memory, 0x0204, [0x80, 0xF0]) #=> BRA $F0
         mpu.pc = 0x0204
         mpu.step()

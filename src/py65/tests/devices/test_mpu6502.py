@@ -5215,11 +5215,6 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu = self._make_mpu()
         self.assert_("6502" in repr(mpu))
 
-    def test_stz_not_supported(self):
-        mpu = self._make_mpu(debug=True)
-        mpu.memory[0x0000] = 0x64 #=> stz (on 65c02)
-        self.assertRaises(NotImplementedError, mpu.step)
-
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU
 
