@@ -13,13 +13,18 @@ class MPU(mpu6502.MPU):
     One implementation can be found here: https://github.com/BigEd/verilog-6502/wiki
     """
 
-    def __init__(self, byteWidth=16, addrWidth=32, addrFmt="%08x", byteFmt="%04x", *args, **kwargs):
-        mpu6502.MPU.__init__(self, byteWidth=byteWidth, addrWidth=addrWidth, addrFmt=addrFmt, byteFmt=byteFmt, *args, **kwargs)
+    BYTE_WIDTH  = 16
+    BYTE_FORMAT = "%04x"
+    ADDR_WIDTH  = 32
+    ADDR_FORMAT = "%08x"
+
+    def __init__(self, *args, **kwargs):
+        mpu6502.MPU.__init__(self, *args, **kwargs)
         self.name = '65Org16'
         self.waiting = False
-        self.IrqTo   = (1<<self.addrWidth)-2
-        self.ResetTo = (1<<self.addrWidth)-4
-        self.NMITo   = (1<<self.addrWidth)-6
+        self.IrqTo   = (1<<self.ADDR_WIDTH)-2
+        self.ResetTo = (1<<self.ADDR_WIDTH)-4
+        self.NMITo   = (1<<self.ADDR_WIDTH)-6
         self.NEGATIVE = 1 << 15
         self.OVERFLOW = 1 << 14
 

@@ -8,10 +8,10 @@ class Disassembler:
         self._mpu = mpu
         self._address_parser = address_parser
 
-        self.addrWidth = mpu.addrWidth
-        self.byteWidth = mpu.byteWidth
-        self.addrFmt = mpu.addrFmt
-        self.byteFmt = mpu.byteFmt
+        self.addrWidth = mpu.ADDR_WIDTH
+        self.byteWidth = mpu.BYTE_WIDTH
+        self.addrFmt = mpu.ADDR_FORMAT
+        self.byteFmt = mpu.BYTE_FORMAT
         self.addrMask = mpu.addrMask
         self.byteMask = mpu.byteMask
 

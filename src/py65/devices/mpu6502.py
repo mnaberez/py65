@@ -17,18 +17,19 @@ class MPU:
     ZERO      = 2
     CARRY     = 1
 
-    def __init__(self, memory=None, pc=0x0000, debug=False, byteWidth=8, addrWidth=16, addrFmt="%04x", byteFmt="%02x"):
+    BYTE_WIDTH  = 8
+    BYTE_FORMAT = "%02x"
+    ADDR_WIDTH  = 16
+    ADDR_FORMAT = "%04x"
+
+    def __init__(self, memory=None, pc=0x0000, debug=False):
         # config
         self.debug = debug
         self.name = '6502'
-        self.byteWidth = byteWidth
-        self.byteMask = ((1<<byteWidth)-1)
-        self.addrWidth = addrWidth
-        self.addrMask = ((1<<addrWidth)-1)
-        self.addrHighMask = (self.byteMask<<byteWidth)
-        self.addrFmt=addrFmt
-        self.byteFmt=byteFmt
-        self.spBase = 1<<byteWidth
+        self.byteMask = ((1<<self.BYTE_WIDTH)-1)
+        self.addrMask = ((1<<self.ADDR_WIDTH)-1)
+        self.addrHighMask = (self.byteMask<<self.BYTE_WIDTH)
+        self.spBase = 1<<self.BYTE_WIDTH
 
         # vm status
         self.excycles = 0
@@ -49,7 +50,7 @@ class MPU:
                )
 
     def __repr__(self):
-        flags  = itoa(self.p, 2).rjust(self.byteWidth, '0')
+        flags  = itoa(self.p, 2).rjust(self.BYTE_WIDTH, '0')
         indent = ' ' * (len(self.name) + 2)
 
         return self.reprformat() % (indent, self.name,
@@ -79,11 +80,11 @@ class MPU:
         return self.memory[addr]
 
     def WordAt(self, addr):
-        return self.ByteAt(addr) + (self.ByteAt(addr + 1) << self.byteWidth)
+        return self.ByteAt(addr) + (self.ByteAt(addr + 1) << self.BYTE_WIDTH)
 
     def WrapAt(self, addr):
         wrap = lambda x: (x & self.addrHighMask) + ((x + 1) & self.byteMask)
-        return self.ByteAt(addr) + (self.ByteAt(wrap(addr)) << self.byteWidth)
+        return self.ByteAt(addr) + (self.ByteAt(wrap(addr)) << self.BYTE_WIDTH)
 
     def ProgramCounter(self):
         return self.pc
@@ -166,12 +167,12 @@ class MPU:
         return self.ByteAt(self.sp+self.spBase)
 
     def stPushWord(self, z):
-        self.stPush((z>>self.byteWidth)&self.byteMask)
+        self.stPush((z>>self.BYTE_WIDTH)&self.byteMask)
         self.stPush(z&self.byteMask)
 
     def stPopWord(self):
         z = self.stPop()
-        z += self.stPop()<<self.byteWidth
+        z += self.stPop()<<self.BYTE_WIDTH
         return z
 
     def FlagsNZ(self, value):

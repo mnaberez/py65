@@ -104,10 +104,10 @@ class Monitor(cmd.Cmd):
 
     def _reset(self, mpu_type):
         self._mpu = mpu_type()
-        self.addrWidth = self._mpu.addrWidth
-        self.byteWidth = self._mpu.byteWidth
-        self.addrFmt = self._mpu.addrFmt
-        self.byteFmt = self._mpu.byteFmt
+        self.addrWidth = self._mpu.ADDR_WIDTH
+        self.byteWidth = self._mpu.BYTE_WIDTH
+        self.addrFmt = self._mpu.ADDR_FORMAT
+        self.byteFmt = self._mpu.BYTE_FORMAT
         self.addrMask = self._mpu.addrMask
         self.byteMask = self._mpu.byteMask
         self._install_mpu_observers()
