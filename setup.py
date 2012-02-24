@@ -36,7 +36,7 @@ setup(
     name = 'py65',
     version = __version__,
     license = 'License :: OSI Approved :: BSD License',
-    url = 'http://github.com/mnaberez/py65',
+    url = 'https://github.com/mnaberez/py65',
     description = '6502 microprocessor simulation package',
     long_description= DESC,
     classifiers = CLASSIFIERS,
