@@ -5,4 +5,4 @@
 *.swp
 build/
 dist/
-src/py65.egg-info/
+py65.egg-info/
