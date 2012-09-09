@@ -97,12 +97,16 @@ class AddressParserTests(unittest.TestCase):
         except KeyError, why:
             self.assertEqual('Label not found: bad_label', why[0])
 
-    def test_number_truncates_address_at_maxwidth_16(self):
+    def test_number_constrains_address_at_zero_or_above(self):
+        parser = AddressParser()
+        self.assertEqual(0x0000, parser.number('-1'))
+
+    def test_number_constrains_address_at_maxwidth_16(self):
         parser = AddressParser()
         parser.labels = {'foo': 0xFFFF}
         self.assertEqual(0xFFFF, parser.number('foo+5'))
 
-    def test_number_truncates_address_at_maxwidth_24(self):
+    def test_number_constrains_address_at_maxwidth_24(self):
         parser = AddressParser()
         parser.maxwidth = 24
         parser.labels = {'foo': 0xFFFFFF}

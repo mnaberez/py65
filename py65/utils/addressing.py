@@ -11,18 +11,21 @@ class AddressParser(object):
         names that can be substituted for addresses.
         """
         self.radix = radix
-        self.labels = labels
         self.maxwidth = maxwidth
-        
+
+        self.labels = {}
+        for k, v in labels.items():
+            self.labels[k] = self._constrain(v)
+
     def _get_maxwidth(self):
-        return self._maxwidth    
+        return self._maxwidth
 
     def _set_maxwidth(self, width):
         self._maxwidth = width
         self._maxaddr = pow(2, width) - 1
 
     maxwidth = property(_get_maxwidth, _set_maxwidth)
-              
+
     def label_for(self, address, default=None):
         """Given an address, return the corresponding label or a default.
         """
@@ -35,17 +38,17 @@ class AddressParser(object):
         """Parse a string containing a label or number into an address.
         """
         if num.startswith('$'):
-            return int(num[1:], 16)
+            return self._constrain(int(num[1:], 16))
 
         elif num.startswith('+'):
-            return int(num[1:], 10)
+            return self._constrain(int(num[1:], 10))
 
         elif num.startswith('%'):
-            return int(num[1:], 2)
+            return self._constrain(int(num[1:], 2))
 
         elif num in self.labels:
             return self.labels[num]
-      
+
         else:
             matches = re.match('^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
             if matches:
@@ -62,15 +65,11 @@ class AddressParser(object):
                 else:
                     address = base - offset
 
-                if address < 0:
-                    address = 0
-                if address > self._maxaddr:
-                    address = self._maxaddr
-                return address
+                return self._constrain(address)
 
             else:
                 try:
-                    return int(num, self.radix)
+                    return self._constrain(int(num, self.radix))
                 except ValueError:
                     raise KeyError("Label not found: %s" % num)
 
@@ -85,5 +84,11 @@ class AddressParser(object):
             start = end = self.number(addresses)
 
         if start > end:
-            start, end = end, start            
+            start, end = end, start
         return (start, end)
+
+    def _constrain(self, address):
+        """Constrains a number to be within the address range"""
+        address = max(address, 0)
+        address = min(address, self._maxaddr)
+        return address

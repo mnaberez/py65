@@ -132,6 +132,14 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertEqual("$4000  70 03     BVS $4005\n", out)
 
+    def test_do_assemble_constrains_address_to_valid_range(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble("-1 lda #$ab")
+
+        out = stdout.getvalue()
+        self.assertEqual("$0000  a9 ab     LDA #$ab\n", out)
+
     def test_help_assemble(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)

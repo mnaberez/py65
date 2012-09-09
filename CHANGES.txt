@@ -1,5 +1,8 @@
 0.13-dev *Next Release*
 
+  - Fixed a bug where negative numbers could be entered
+    for addresses in the monitor.
+
 0.12 (2012-02-16)
 
   - Fixed a bug that caused ``help cd`` to raise an exception
