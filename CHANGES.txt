@@ -1,4 +1,4 @@
-0.13-dev *Next Release*
+0.13 (2012-11-15)
 
   - Fixed a bug where negative numbers could be entered
     for addresses in the monitor.
