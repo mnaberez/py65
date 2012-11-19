@@ -293,40 +293,40 @@ class Monitor(cmd.Cmd):
 
     def _interactive_assemble(self, args):
         if args == '':
-          start = self._mpu.pc
+            start = self._mpu.pc
         else:
-          try:
-              start = self._address_parser.number(args)
-          except KeyError:
-              self._output("Bad label: %s" % start)
-              return
+            try:
+                start = self._address_parser.number(args)
+            except KeyError:
+                self._output("Bad label: %s" % start)
+                return
 
         assembling = True
 
         while assembling:
-          prompt = "\r$" + ( self.addrFmt % start ) + "   " + (" " * (1 + self.byteWidth/4) * 3)
-          line = console.line_input(prompt,
-                    stdin=self.stdin, stdout=self.stdout)
+            prompt = "\r$" + ( self.addrFmt % start ) + "   " + (" " * (1 + self.byteWidth/4) * 3)
+            line = console.line_input(prompt,
+                      stdin=self.stdin, stdout=self.stdout)
 
-          if not line:
-            self.stdout.write("\n")
-            return
+            if not line:
+                self.stdout.write("\n")
+                return
 
-          # assemble into memory
-          bytes = self._assembler.assemble(line, pc=start)
-          if bytes is None:
-              self.stdout.write("\r$" + (self.addrFmt % start) + "  ???\n")
-              continue
-          end = start + len(bytes)
-          self._mpu.memory[start:end] = bytes
+            # assemble into memory
+            bytes = self._assembler.assemble(line, pc=start)
+            if bytes is None:
+                self.stdout.write("\r$" + (self.addrFmt % start) + "  ???\n")
+                continue
+            end = start + len(bytes)
+            self._mpu.memory[start:end] = bytes
 
-          # print disassembly
-          bytes, disasm = self._disassembler.instruction_at(start)
-          disassembly = self._format_disassembly(start, bytes, disasm)
-          self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ) + "\r")
-          self.stdout.write(disassembly + "\n")
+            # print disassembly
+            bytes, disasm = self._disassembler.instruction_at(start)
+            disassembly = self._format_disassembly(start, bytes, disasm)
+            self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ) + "\r")
+            self.stdout.write(disassembly + "\n")
 
-          start += bytes
+            start += bytes
 
     def do_disassemble(self, args):
         split = shlex.split(args)
