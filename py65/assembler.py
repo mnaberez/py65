@@ -68,7 +68,7 @@ class Assembler:
     def assemble(self, statement, pc=0000):
         """ Assemble the given assembly language statement.  If the statement
         uses relative addressing, the program counter (pc) must also be given.
-        The result is a list of bytes, or None if the assembly failed.
+        The result is a list of bytes.  Raises when assembly fails.
         """
         opcode, operands = self.normalize_and_split(statement)
 
@@ -99,7 +99,7 @@ class Assembler:
                 return bytes
 
         # assembly failed
-        return None
+        raise SyntaxError(statement)
 
     def normalize_and_split(self, statement):
         """ Given an assembly language statement like "lda $c12,x", normalize
