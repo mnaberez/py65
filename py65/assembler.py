@@ -2,44 +2,76 @@ import re
 from py65.devices.mpu6502 import MPU
 from py65.utils.addressing import AddressParser
 
+
 class Assembler:
     Statement = re.compile(r'^([A-z]{3}[0-7]?\s+'
                            r'\(?\s*)([^,\s\)]+)(\s*[,xXyY\s]*\)?'
                            r'[,xXyY\s]*)$')
 
     Addressing8 = [
-        ['zpi', re.compile(r'^\(\$00([0-9A-F]{2})\)$')],            # "($0012)"
-        ['zpx', re.compile(r'^\$00([0-9A-F]{2}),X$')],              # "$0012,X"
-        ['zpy', re.compile(r'^\$00([0-9A-F]{2}),Y$')],              # "$0012,Y"
-        ['zpg', re.compile(r'^\$00([0-9A-F]{2})$')],                # "$0012"
-        ['inx', re.compile(r'^\(\$00([0-9A-F]{2}),X\)$')],          # "($0012,X)"
-        ['iny', re.compile(r'^\(\$00([0-9A-F]{2})\),Y$')],          # "($0012),Y"
-        ['ind', re.compile(r'^\(\$([0-9A-F]{2})([0-9A-F]{2})\)$')], # "($1234)"
-        ['abx', re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2}),X$')],   # "$1234,X"
-        ['aby', re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2}),Y$')],   # "$1234,Y"
-        ['abs', re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2})$')],     # "$1234"
-        ['rel', re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2})$')],     # "$1234"
-        ['imp', re.compile(r'^$')],                                 # ""
-        ['acc', re.compile(r'^$')],                                 # ""
-        ['acc', re.compile(r'^A$')],                                # "A"
-        ['imm', re.compile(r'^#\$([0-9A-F]{2})$')]                  # "#$12"
+        ['zpi',  # "($0012)"
+         re.compile(r'^\(\$00([0-9A-F]{2})\)$')],
+        ['zpx',  # "$0012,X"
+         re.compile(r'^\$00([0-9A-F]{2}),X$')],
+        ['zpy',  # "$0012,Y"
+         re.compile(r'^\$00([0-9A-F]{2}),Y$')],
+        ['zpg',  # "$0012"
+         re.compile(r'^\$00([0-9A-F]{2})$')],
+        ['inx',  # "($0012,X)
+         re.compile(r'^\(\$00([0-9A-F]{2}),X\)$')],
+        ['iny',  # "($0012),Y"
+         re.compile(r'^\(\$00([0-9A-F]{2})\),Y$')],
+        ['ind',  # "($1234)"
+         re.compile(r'^\(\$([0-9A-F]{2})([0-9A-F]{2})\)$')],
+        ['abx',  # "$1234,X"
+         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2}),X$')],
+        ['aby',  # "$1234,Y"
+         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2}),Y$')],
+        ['abs',  # "$1234"
+         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2})$')],
+        ['rel',  # "$1234"
+         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2})$')],
+        ['imp',  # ""
+         re.compile(r'^$')],
+        ['acc',  # ""
+         re.compile(r'^$')],
+        ['acc',  # "A"
+         re.compile(r'^A$')],
+        ['imm',  # "#$12"
+         re.compile(r'^#\$([0-9A-F]{2})$')]
     ]
+
     Addressing16 = [
-        ['zpi', re.compile(r'^\(\$0000([0-9A-F]{4})\)$')],          # "($00001234)"
-        ['zpx', re.compile(r'^\$0000([0-9A-F]{4}),X$')],            # "$00001234,X"
-        ['zpy', re.compile(r'^\$0000([0-9A-F]{4}),Y$')],            # "$00001234,Y"
-        ['zpg', re.compile(r'^\$0000([0-9A-F]{4})$')],              # "$00001234"
-        ['inx', re.compile(r'^\(\$0000([0-9A-F]{4}),X\)$')],        # "($00001234,X)"
-        ['iny', re.compile(r'^\(\$0000([0-9A-F]{4})\),Y$')],        # "($00001234),Y"
-        ['ind', re.compile(r'^\(\$([0-9A-F]{4})([0-9A-F]{4})\)$')], # "($12345678)"
-        ['abx', re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4}),X$')],   # "$12345678,X"
-        ['aby', re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4}),Y$')],   # "$12345678,Y"
-        ['abs', re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4})$')],     # "$12345678"
-        ['rel', re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4})$')],     # "$12345678"
-        ['imp', re.compile(r'^$')],                                 # ""
-        ['acc', re.compile(r'^$')],                                 # ""
-        ['acc', re.compile(r'^A$')],                                # "A"
-        ['imm', re.compile(r'^#\$([0-9A-F]{4})$')]                  # "#$1234"
+        ['zpi',  # "($00001234)"
+         re.compile(r'^\(\$0000([0-9A-F]{4})\)$')],
+        ['zpx',  # "$00001234,X"
+         re.compile(r'^\$0000([0-9A-F]{4}),X$')],
+        ['zpy',  # "$00001234,Y"
+         re.compile(r'^\$0000([0-9A-F]{4}),Y$')],
+        ['zpg',  # "$00001234"
+         re.compile(r'^\$0000([0-9A-F]{4})$')],
+        ['inx',  # "($00001234,X)"
+         re.compile(r'^\(\$0000([0-9A-F]{4}),X\)$')],
+        ['iny',  # "($00001234),Y"
+         re.compile(r'^\(\$0000([0-9A-F]{4})\),Y$')],
+        ['ind',  # "($12345678)"
+         re.compile(r'^\(\$([0-9A-F]{4})([0-9A-F]{4})\)$')],
+        ['abx',  # "$12345678,X"
+         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4}),X$')],
+        ['aby',  # "$12345678,Y"
+         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4}),Y$')],
+        ['abs',  # "$12345678"
+         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4})$')],
+        ['rel',  # "$12345678"
+         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4})$')],
+        ['imp',  # ""
+         re.compile(r'^$')],
+        ['acc',  # ""
+         re.compile(r'^$')],
+        ['acc',  # "A"
+         re.compile(r'^A$')],
+        ['imm',  # "#$1234"
+         re.compile(r'^#\$([0-9A-F]{4})$')]
     ]
     Addressing = Addressing8
 
@@ -77,7 +109,7 @@ class Assembler:
 
             if match:
                 try:
-                    bytes = [ self._mpu.disassemble.index((opcode, mode)) ]
+                    bytes = [self._mpu.disassemble.index((opcode, mode))]
                 except ValueError:
                     continue
 
@@ -88,13 +120,13 @@ class Assembler:
                     absolute = int(''.join(operands), 16)
                     relative = (absolute - pc) - 2
                     relative = relative & self.byteMask
-                    operands = [ (self.byteFmt % relative) ]
+                    operands = [(self.byteFmt % relative)]
 
                 elif len(operands) == 2:
                     # swap bytes
                     operands = (operands[1], operands[0])
 
-                operands = [ int(hex, 16) for hex in operands ]
+                operands = [int(hex, 16) for hex in operands]
                 bytes.extend(operands)
                 return bytes
 

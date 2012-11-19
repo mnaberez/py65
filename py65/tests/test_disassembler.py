@@ -5,6 +5,7 @@ from py65.devices.mpu65c02 import MPU as MPU65C02
 from py65.disassembler import Disassembler
 from py65.utils.addressing import AddressParser
 
+
 class DisassemblerTests(unittest.TestCase):
     def test_disassembles_00(self):
         length, disasm = self.disassemble([0x00])
@@ -1304,8 +1305,9 @@ class DisassemblerTests(unittest.TestCase):
             mpu = MPU()
         address_parser = AddressParser()
         disasm = Disassembler(mpu, address_parser)
-        mpu.memory[pc:len(bytes)-1] = bytes
+        mpu.memory[pc:len(bytes) - 81] = bytes
         return disasm.instruction_at(pc)
+
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])

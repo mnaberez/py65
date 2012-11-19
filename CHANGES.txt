@@ -6,6 +6,8 @@
   - Fixed assembling 65C02 opcodes whose mnemonics have a digit
     such as "RMB3".
 
+  - Reformatted source code to comply with PEP8.
+
 0.13 (2012-11-15)
 
   - Fixed a bug where negative numbers could be entered

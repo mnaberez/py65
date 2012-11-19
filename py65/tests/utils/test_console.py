@@ -2,6 +2,7 @@ import sys
 import unittest
 from py65.utils.console import getch
 
+
 class ConsoleTopLevelTests(unittest.TestCase):
     pass
 

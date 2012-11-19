@@ -2,6 +2,7 @@ import sys
 import unittest
 from py65.utils.conversions import itoa
 
+
 class ConversionsTopLevelTests(unittest.TestCase):
     def test_itoa_decimal_output(self):
         self.assertEqual('10', itoa(10, base=10))

@@ -4,6 +4,7 @@ import re
 import os
 from py65.memory import ObservableMemory
 
+
 class ObservableMemoryTests(unittest.TestCase):
 
     # __setitem__
@@ -56,7 +57,7 @@ class ObservableMemoryTests(unittest.TestCase):
         def read_subscriber(address, value):
             return 0xAB
 
-        mem.subscribe_to_read(xrange(0xC000, 0xC001+1), read_subscriber)
+        mem.subscribe_to_read(xrange(0xC000, 0xC001 + 1), read_subscriber)
 
         mem[0xC000] = 0xAB
         mem[0xC001] = 0xAB
@@ -68,6 +69,7 @@ class ObservableMemoryTests(unittest.TestCase):
         mem = ObservableMemory(subject=subject)
 
         calls = []
+
         def read_subscriber(address):
             calls.append('read_subscriber')
 
@@ -107,6 +109,7 @@ class ObservableMemoryTests(unittest.TestCase):
         mem = ObservableMemory(subject=subject)
 
         calls = []
+
         def read_subscriber_1(address):
             calls.append('read_subscriber_1')
             return 0x01
@@ -139,7 +142,7 @@ class ObservableMemoryTests(unittest.TestCase):
 
         def write_subscriber(address, value):
             return 0xFF
-        mem.subscribe_to_write([0xC000,0xC001], write_subscriber)
+        mem.subscribe_to_write([0xC000, 0xC001], write_subscriber)
 
         mem.write(0xC000, [0x01, 002])
         self.assertEqual(0x01, subject[0xC000])

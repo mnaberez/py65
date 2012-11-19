@@ -2,12 +2,14 @@ import unittest
 import sys
 from py65.utils.hexdump import load, Loader
 
+
 class TopLevelHexdumpTests(unittest.TestCase):
     def test_load(self):
         text = 'c000: aa bb'
         start, data = load(text)
         self.assertEqual(0xC000, start)
         self.assertEqual([0xAA, 0xBB], data)
+
 
 class HexdumpLoaderTests(unittest.TestCase):
     def test_empty_string_does_nothing(self):
@@ -124,7 +126,6 @@ class HexdumpLoaderTests(unittest.TestCase):
         load = Loader(text)
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB], load.data)
-
 
 
 def test_suite():

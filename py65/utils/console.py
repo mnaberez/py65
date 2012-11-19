@@ -4,11 +4,11 @@ if sys.platform[:3] == "win":
     import msvcrt
 
     def getch(stdin):
-      """ Read one character from the Windows console, blocking until one
-      is available.  Does not echo the character.  The stdin argument is
-      for function signature compatibility and is ignored.
-      """
-      return msvcrt.getch()
+        """ Read one character from the Windows console, blocking until one
+        is available.  Does not echo the character.  The stdin argument is
+        for function signature compatibility and is ignored.
+        """
+        return msvcrt.getch()
 
     def getch_noblock(stdin):
         """ Read one character from the Windows console without blocking.
@@ -26,19 +26,19 @@ else:
     import fcntl
 
     def getch(stdin):
-      """ Read one character from stdin, blocking until one is available.
-      Does not echo the character.
-      """
-      fd = stdin.fileno()
-      oldattr = termios.tcgetattr(fd)
-      newattr = oldattr[:]
-      newattr[3] &= ~termios.ICANON & ~termios.ECHO
-      try:
-          termios.tcsetattr(fd, termios.TCSANOW, newattr)
-          char = stdin.read(1)
-      finally:
-          termios.tcsetattr(fd, termios.TCSAFLUSH, oldattr)
-      return char
+        """ Read one character from stdin, blocking until one is available.
+        Does not echo the character.
+        """
+        fd = stdin.fileno()
+        oldattr = termios.tcgetattr(fd)
+        newattr = oldattr[:]
+        newattr[3] &= ~termios.ICANON & ~termios.ECHO
+        try:
+            termios.tcsetattr(fd, termios.TCSANOW, newattr)
+            char = stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSAFLUSH, oldattr)
+        return char
 
     def getch_noblock(stdin):
         """ Read one character from stdin without blocking.  Does not echo the
@@ -63,7 +63,7 @@ else:
                 if char == "\n":
                     char = "\r"
             else:
-              char = ''
+                char = ''
         finally:
             termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
             fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
@@ -79,18 +79,18 @@ def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
     stdout.write(prompt)
     line = ''
     while True:
-      char = getch(stdin)
-      code = ord(char)
-      if char in ("\n", "\r"):
-        break
-      elif code in (0x7f, 0x08): # backspace
-        if len(line) > 0:
-          line = line[:-1]
-          stdout.write("\r%s\r%s%s" % \
-            (' ' * (len(prompt+line) +5), prompt, line))
-      elif code == 0x1b: # escape
-        pass
-      else:
-        line += char
-        stdout.write(char)
+        char = getch(stdin)
+        code = ord(char)
+        if char in ("\n", "\r"):
+            break
+        elif code in (0x7f, 0x08):  # backspace
+            if len(line) > 0:
+                line = line[:-1]
+                stdout.write("\r%s\r%s%s" %
+                             (' ' * (len(prompt + line) + 5), prompt, line))
+        elif code == 0x1b:  # escape
+            pass
+        else:
+            line += char
+            stdout.write(char)
     return line

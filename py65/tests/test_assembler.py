@@ -5,6 +5,7 @@ from py65.devices.mpu65c02 import MPU as MPU65C02
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
 
+
 class AssemblerTests(unittest.TestCase):
     def test_assemble_bad_syntax_raises_syntaxerror(self):
         self.assertRaises(SyntaxError,
@@ -954,6 +955,7 @@ class AssemblerTests(unittest.TestCase):
         address_parser = AddressParser()
         assembler = Assembler(mpu, address_parser)
         return assembler.assemble(statement, pc)
+
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])

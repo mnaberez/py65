@@ -1,6 +1,7 @@
 from py65.devices import mpu6502
 from py65.utils.devices import make_instruction_decorator
 
+
 class MPU(mpu6502.MPU):
     def __init__(self, *args, **kwargs):
         mpu6502.MPU.__init__(self, *args, **kwargs)
@@ -15,18 +16,18 @@ class MPU(mpu6502.MPU):
         return self
 
     # Make copies of the lists
-    instruct    = mpu6502.MPU.instruct[:]
-    cycletime   = mpu6502.MPU.cycletime[:]
+    instruct = mpu6502.MPU.instruct[:]
+    cycletime = mpu6502.MPU.cycletime[:]
     extracycles = mpu6502.MPU.extracycles[:]
     disassemble = mpu6502.MPU.disassemble[:]
 
     instruction = make_instruction_decorator(instruct, disassemble,
-                                                cycletime, extracycles)
+                                             cycletime, extracycles)
 
     # addressing modes
 
     def ZeroPageIndirectAddr(self):
-        return self.WordAt( 255 & (self.ByteAt(self.pc)))
+        return self.WordAt(255 & (self.ByteAt(self.pc)))
 
     def AccumulatorAddr(self):
         return self.a
@@ -267,4 +268,3 @@ class MPU(mpu6502.MPU):
     def inst_0xf2(self):
         self.opSBC(self.ZeroPageIndirectAddr)
         self.pc += 1
-

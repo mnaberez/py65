@@ -1,5 +1,6 @@
 import re
 
+
 class AddressParser(object):
     """Parse user input into addresses or ranges of addresses.
     """

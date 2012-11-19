@@ -6,6 +6,7 @@ import tempfile
 from py65.monitor import Monitor
 from StringIO import StringIO
 
+
 class MonitorTests(unittest.TestCase):
 
     # line processing
@@ -213,7 +214,7 @@ class MonitorTests(unittest.TestCase):
     def test_do_cycles_shows_count_after_step(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon._mpu.memory[0x0000] = 0xEA #=> NOP (2 cycles)
+        mon._mpu.memory[0x0000] = 0xEA  # => NOP (2 cycles)
         mon._mpu.step()
         mon.do_cycles("")
 
@@ -249,7 +250,7 @@ class MonitorTests(unittest.TestCase):
         mon = Monitor(stdout=stdout)
         mon._address_parser.labels['foo'] = 0xc000
         mon.do_delete_label('foo')
-        self.assertFalse(mon._address_parser.labels.has_key('foo'))
+        self.assertFalse('foo' in mon._address_parser.labels)
         out = stdout.getvalue()
         self.assertEqual('', out)
 
@@ -280,7 +281,7 @@ class MonitorTests(unittest.TestCase):
     def test_disassemble_will_disassemble_one_address(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon._mpu.memory[0xc000] = 0xEA #=> NOP
+        mon._mpu.memory[0xc000] = 0xEA  # => NOP
         mon._mpu.step()
         mon.do_disassemble("c000")
 
@@ -291,8 +292,8 @@ class MonitorTests(unittest.TestCase):
     def test_disassemble_will_disassemble_an_address_range(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon._mpu.memory[0xc000] = 0xEA #=> NOP
-        mon._mpu.memory[0xc001] = 0xEA #=> NOP
+        mon._mpu.memory[0xc000] = 0xEA  # => NOP
+        mon._mpu.memory[0xc001] = 0xEA  # => NOP
         mon._mpu.step()
         mon.do_disassemble("c000:c002")
 
@@ -462,7 +463,8 @@ class MonitorTests(unittest.TestCase):
             mon.do_load("'%s' a600" % filename)
             self.assertEqual('Wrote +3 bytes from $a600 to $a602\n',
                              stdout.getvalue())
-            self.assertEqual([0xAA, 0xBB, 0xCC], mon._mpu.memory[0xA600:0xA603])
+            self.assertEqual([0xAA, 0xBB, 0xCC],
+                             mon._mpu.memory[0xA600:0xA603])
         finally:
             os.unlink(filename)
 
@@ -632,7 +634,6 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertEqual("%s\n" % os.getcwd(), out)
 
-
     def test_help_pwd(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
@@ -714,7 +715,7 @@ class MonitorTests(unittest.TestCase):
         mon = Monitor(stdout=stdout)
         mon.help_registers()
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("registers[<reg_name>"))
+        self.assertTrue(out.startswith("registers[<name>"))
 
     # return
 

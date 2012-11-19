@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+
 class ObservableMemory:
     def __init__(self, subject=None, addrWidth=16):
         self.physMask = 0xffff
@@ -8,10 +9,10 @@ class ObservableMemory:
             self.physMask = 0x3ffff
 
         if subject is None:
-            subject = (self.physMask+1) * [0x00]
+            subject = (self.physMask + 1) * [0x00]
         self._subject = subject
 
-        self._read_subscribers  = defaultdict(list)
+        self._read_subscribers = defaultdict(list)
         self._write_subscribers = defaultdict(list)
 
     def __setitem__(self, address, value):
@@ -59,4 +60,4 @@ class ObservableMemory:
 
     def write(self, start_address, bytes):
         start_address &= self.physMask
-        self._subject[start_address:start_address+len(bytes)] = bytes
+        self._subject[start_address:start_address + len(bytes)] = bytes

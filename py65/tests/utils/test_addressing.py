@@ -2,6 +2,7 @@ import unittest
 import sys
 from py65.utils.addressing import AddressParser
 
+
 class AddressParserTests(unittest.TestCase):
     def test_maxwidth_can_be_set_in_constructor(self):
         parser = AddressParser(maxwidth=24)
@@ -122,7 +123,7 @@ class AddressParserTests(unittest.TestCase):
         self.assertRaises(OverflowError, parser.number, 'foo+5')
 
     def test_label_for_returns_label(self):
-        parser = AddressParser(labels={'chrout':0xFFD2})
+        parser = AddressParser(labels={'chrout': 0xFFD2})
         self.assertEqual('chrout', parser.label_for(0xFFD2))
 
     def test_label_for_returns_none_by_default(self):

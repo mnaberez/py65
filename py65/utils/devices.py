@@ -1,4 +1,5 @@
 
+
 def make_instruction_decorator(instruct, disasm, allcycles, allextras):
     def instruction(name, mode, cycles, extracycles=0):
         def decorate(f):
@@ -7,6 +8,6 @@ def make_instruction_decorator(instruct, disasm, allcycles, allextras):
             disasm[opcode] = (name, mode)
             allcycles[opcode] = cycles
             allextras[opcode] = extracycles
-            return f # Return the original function
+            return f  # Return the original function
         return decorate
     return instruction

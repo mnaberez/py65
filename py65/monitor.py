@@ -30,12 +30,15 @@ from py65.utils import console
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
+
 class Monitor(cmd.Cmd):
 
-    Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02, '65Org16': V65Org16}
+    Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02,
+                       '65Org16': V65Org16}
 
-    def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None, stdout=None, argv=None):
-        self.mpu_type=mpu_type
+    def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None,
+                 stdout=None, argv=None):
+        self.mpu_type = mpu_type
         if argv is None:
             argv = sys.argv
         self._reset(self.mpu_type)
@@ -47,37 +50,44 @@ class Monitor(cmd.Cmd):
 
     def _parse_args(self, argv):
         try:
-            options, args = getopt.getopt(argv[1:], 'hm:l:r:g:',
-                                          ['help', 'mpu=', 'load=', 'rom=', 'goto='])
+            shortopts = 'hm:l:r:g:'
+            longopts = ['help', 'mpu=', 'load=', 'rom=', 'goto=']
+            options, args = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError, err:
             self._output(str(err))
             self._usage()
             self._exit(1)
 
         for opt, value in options:
-            if opt in ('-l','--load'):
+            if opt in ('-l', '--load'):
                 cmd = "load %s" % value
                 self.onecmd(cmd)
-            if opt in ('-r','--rom'):
+
+            if opt in ('-r', '--rom'):
                 # load a ROM and run from the reset vector
                 cmd = "load %s %d" % (value, -1)
                 self.onecmd(cmd)
                 physMask = self._mpu.memory.physMask
                 reset = self._mpu.ResetTo & physMask
-                dest = self._mpu.memory[reset] + (self._mpu.memory[reset+1] << self.byteWidth)
+                dest = self._mpu.memory[reset] + \
+                    (self._mpu.memory[reset + 1] << self.byteWidth)
                 cmd = "goto %08x" % dest
                 self.onecmd(cmd)
-            if opt in ('-g','--goto'):
+
+            if opt in ('-g', '--goto'):
                 cmd = "goto %s" % value
                 self.onecmd(cmd)
-            if opt in ('-m','--mpu'):
+
+            if opt in ('-m', '--mpu'):
                 if self._get_mpu(value) is None:
                     mpus = self.Microprocessors.keys()
                     mpus.sort()
-                    self._output("Fatal: no such MPU. Available MPUs: %s" % ', '.join(mpus))
+                    msg = "Fatal: no such MPU. Available MPUs: %s"
+                    self._output(msg % ', '.join(mpus))
                     sys.exit(1)
                 cmd = "mpu %s" % value
                 self.onecmd(cmd)
+
             elif opt in ("-h", "--help"):
                 self._usage()
                 self._exit(1)
@@ -94,7 +104,7 @@ class Monitor(cmd.Cmd):
             result = cmd.Cmd.onecmd(self, line)
         except KeyboardInterrupt:
             self._output("Interrupt")
-        except Exception,e:
+        except Exception, e:
             (file, fun, line), t, v, tbinfo = compact_traceback()
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
             self._output(error)
@@ -152,7 +162,7 @@ class Monitor(cmd.Cmd):
 
         # special case for vice compatibility
         if line.startswith('~'):
-          line = self._shortcuts['~'] + ' ' + line[1:]
+            line = self._shortcuts['~'] + ' ' + line[1:]
 
         # command shortcuts
         for shortcut, command in self._shortcuts.iteritems():
@@ -279,7 +289,8 @@ class Monitor(cmd.Cmd):
 
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
-            self.do_disassemble((self.addrFmt+":"+self.addrFmt) % (start, end))
+            rangestr = (self.addrFmt + ":" + self.addrFmt) % (start, end)
+            self.do_disassemble(rangestr)
         except KeyError:
             self._output("Bad label: %s" % args)
         except OverflowError:
@@ -304,9 +315,11 @@ class Monitor(cmd.Cmd):
                 return
 
         while True:
-            prompt = "\r$" + ( self.addrFmt % start ) + "   " + (" " * (1 + self.byteWidth/4) * 3)
+            prompt = "\r$" + (self.addrFmt % start) + "   " + \
+                (" " * (1 + self.byteWidth / 4) * 3)
+
             line = console.line_input(prompt,
-                      stdin=self.stdin, stdout=self.stdout)
+                                      stdin=self.stdin, stdout=self.stdout)
 
             if not line.strip():
                 self.stdout.write("\n")
@@ -322,16 +335,20 @@ class Monitor(cmd.Cmd):
                 # print disassembly
                 bytes, disasm = self._disassembler.instruction_at(start)
                 disassembly = self._format_disassembly(start, bytes, disasm)
-                self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ) + "\r")
+                indent = ' ' * (len(prompt + line) + 5)
+                self.stdout.write("\r" + indent + "\r")
                 self.stdout.write(disassembly + "\n")
 
                 start += bytes
             except KeyError:
-                self.stdout.write("\r$" + (self.addrFmt % start) + "  ?Label\n")
+                addr = self.addrFmt % start
+                self.stdout.write("\r$%s  ?Label\n" % addr)
             except OverflowError:
-                self.stdout.write("\r$" + (self.addrFmt % start) + "  ?Overflow\n")
+                addr = self.addrFmt % start
+                self.stdout.write("\r$%s  ?Overflow\n" % addr)
             except SyntaxError:
-                self.stdout.write("\r$" + (self.addrFmt % start) + "  ?Syntax\n")
+                addr = self.addrFmt % start
+                self.stdout.write("\r$%s  ?Syntax\n" % addr)
 
     def do_disassemble(self, args):
         split = shlex.split(args)
@@ -350,10 +367,10 @@ class Monitor(cmd.Cmd):
 
     def _format_disassembly(self, address, bytes, disasm):
         mem = ''
-        for byte in self._mpu.memory[address:address+bytes]:
+        for byte in self._mpu.memory[address:address + bytes]:
             mem += self.byteFmt % byte + " "
 
-        fieldwidth = 1 + (1 + self.byteWidth/4) * 3
+        fieldwidth = 1 + (1 + self.byteWidth / 4) * 3
         fieldfmt = "%%-%ds" % fieldwidth
         return "$" + self.addrFmt % address + "  " + fieldfmt % mem + disasm
 
@@ -376,7 +393,7 @@ class Monitor(cmd.Cmd):
         self._output("before the next RTS or RTI is executed.")
 
     def do_return(self, args):
-        returns = [0x60, 0x40] # RTS, RTI
+        returns = [0x60, 0x40]  # RTS, RTI
         self._run(stopcodes=returns)
 
     def help_goto(self):
@@ -385,7 +402,7 @@ class Monitor(cmd.Cmd):
 
     def do_goto(self, args):
         self._mpu.pc = self._address_parser.number(args)
-        brks = [0x00] # BRK
+        brks = [0x00]  # BRK
         self._run(stopcodes=brks)
 
     def _run(self, stopcodes=[]):
@@ -396,7 +413,7 @@ class Monitor(cmd.Cmd):
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
-        self._output("Set the default radix to hex, decimal, octal, or binary.")
+        self._output("Set default radix to hex, decimal, octal, or binary.")
         self._output("With no argument, the current radix is printed.")
 
     def help_cycles(self):
@@ -424,7 +441,7 @@ class Monitor(cmd.Cmd):
 
     def help_tilde(self):
         self._output("~ <number>")
-        self._output("Display the specified number in decimal, hex, octal, and binary.")
+        self._output("Display a number in decimal, hex, octal, and binary.")
 
     def do_tilde(self, args):
         try:
@@ -439,7 +456,7 @@ class Monitor(cmd.Cmd):
         self._output(itoa(num, 2).zfill(8))
 
     def help_registers(self):
-        self._output("registers[<reg_name> = <number> [, <reg_name> = <number>]*]")
+        self._output("registers[<name>=<value> [, <name>=<value>]*]")
         self._output("Assign respective registers.  With no parameters,")
         self._output("display register values.")
 
@@ -487,7 +504,7 @@ class Monitor(cmd.Cmd):
 
     def help_load(self):
         self._output("load \"filename\" <address>")
-        self._output("Load the specified file into memory at the specified address.")
+        self._output("Load a file into memory at the specified address.")
         self._output("Commodore-style load address bytes are ignored.")
 
     def do_load(self, args):
@@ -524,12 +541,15 @@ class Monitor(cmd.Cmd):
 
         # if the start address was -1, we load to top of memory
         if start == -1:
-            start = self.addrMask - len(bytes)/(self.byteWidth/8) + 1
+            start = self.addrMask - len(bytes) / (self.byteWidth / 8) + 1
 
-        if self.byteWidth==8:
-            bytes=map(ord, bytes)
-        elif self.byteWidth==16:
-            bytes=map(lambda msb,lsb: (ord(msb)<<8)+ord(lsb),bytes[0::2],bytes[1::2])
+        if self.byteWidth == 8:
+            bytes = map(ord, bytes)
+
+        elif self.byteWidth == 16:
+            def format(msb, lsb):
+                return (ord(msb) << 8) + ord(lsb)
+            bytes = map(format, bytes[0::2], bytes[1::2])
 
         self._fill(start, start, bytes)
 
@@ -541,15 +561,15 @@ class Monitor(cmd.Cmd):
 
         filename = split[0]
         start = self._address_parser.number(split[1])
-        end   = self._address_parser.number(split[2])
+        end = self._address_parser.number(split[2])
 
-        bytes = self._mpu.memory[start:end+1]
+        bytes = self._mpu.memory[start:end + 1]
         try:
             f = open(filename, 'wb')
             for byte in bytes:
                 # output each octect from msb first
-                for shift in range (self.byteWidth-8,-1,-8):
-                    f.write(chr((byte>>shift) & 0xff))
+                for shift in range(self.byteWidth - 8, -1, -8):
+                    f.write(chr((byte >> shift) & 0xff))
             f.close()
         except (OSError, IOError), why:
             msg = "Cannot save file: [%d] %s" % (why[0], why[1])
@@ -560,14 +580,15 @@ class Monitor(cmd.Cmd):
 
     def help_save(self):
         self._output("save \"filename\" <start> <end>")
-        self._output("Save the specified memory range to disk as a binary file.")
+        self._output("Save the specified memory range as a binary file.")
         self._output("Commodore-style load address bytes are not written.")
 
     def help_fill(self):
         self._output("fill <address_range> <data_list>")
-        self._output("Fill memory in the specified address range with the data in")
-        self._output("<data_list>.  If the size of the address range is greater")
-        self._output("than the size of the data_list, the data_list is repeated.")
+        self._output("Fill memory in the address range with the data in")
+        self._output("<data_list>.  If the size of the address range is")
+        self._output("greater than the size of the data_list, the data_list ")
+        self._output("is repeated.")
 
     def do_fill(self, args):
         split = shlex.split(args)
@@ -613,7 +634,7 @@ class Monitor(cmd.Cmd):
         start, end = self._address_parser.range(split[0])
 
         line = self.addrFmt % start + ":"
-        for address in range(start, end+1):
+        for address in range(start, end + 1):
             byte = self._mpu.memory[address]
             more = "  " + self.byteFmt % byte
 
@@ -635,7 +656,7 @@ class Monitor(cmd.Cmd):
             return self.help_add_label()
 
         address = self._address_parser.number(split[0])
-        label   = split[1]
+        label = split[1]
 
         self._address_parser.labels[label] = address
 
@@ -680,6 +701,7 @@ class Monitor(cmd.Cmd):
         self._output("width <columns>")
         self._output("Set the width used by some commands to wrap output.")
         self._output("With no argument, the current width is printed.")
+
 
 def main(args=None):
     c = Monitor()

@@ -1,34 +1,35 @@
 from py65.utils.conversions import convert_to_bin, convert_to_bcd, itoa
 from py65.utils.devices import make_instruction_decorator
 
+
 class MPU:
     # vectors
     ResetTo = 0xfffc
-    IrqTo   = 0xfffe
-    NMITo   = 0xfffa
+    IrqTo = 0xfffe
+    NMITo = 0xfffa
 
     # processor flags
-    NEGATIVE  = 128
-    OVERFLOW  = 64
-    UNUSED    = 32
-    BREAK     = 16 # there is no BREAK flag, but this position indicates BREAK
-    DECIMAL   = 8
+    NEGATIVE = 128
+    OVERFLOW = 64
+    UNUSED = 32
+    BREAK = 16  # there is no actual BREAK flag but this indicates BREAK
+    DECIMAL = 8
     INTERRUPT = 4
-    ZERO      = 2
-    CARRY     = 1
+    ZERO = 2
+    CARRY = 1
 
-    BYTE_WIDTH  = 8
+    BYTE_WIDTH = 8
     BYTE_FORMAT = "%02x"
-    ADDR_WIDTH  = 16
+    ADDR_WIDTH = 16
     ADDR_FORMAT = "%04x"
 
     def __init__(self, memory=None, pc=0x0000):
         # config
         self.name = '6502'
-        self.byteMask = ((1<<self.BYTE_WIDTH)-1)
-        self.addrMask = ((1<<self.ADDR_WIDTH)-1)
-        self.addrHighMask = (self.byteMask<<self.BYTE_WIDTH)
-        self.spBase = 1<<self.BYTE_WIDTH
+        self.byteMask = ((1 << self.BYTE_WIDTH) - 1)
+        self.addrMask = ((1 << self.ADDR_WIDTH) - 1)
+        self.addrHighMask = (self.byteMask << self.BYTE_WIDTH)
+        self.spBase = 1 << self.BYTE_WIDTH
 
         # vm status
         self.excycles = 0
@@ -44,16 +45,15 @@ class MPU:
         self.reset()
 
     def reprformat(self):
-        return ("%s PC  AC XR YR SP NV-BDIZC\n" + \
-                "%s: %04x %02x %02x %02x %02x %s"
-               )
+        return ("%s PC  AC XR YR SP NV-BDIZC\n"
+                "%s: %04x %02x %02x %02x %02x %s")
 
     def __repr__(self):
-        flags  = itoa(self.p, 2).rjust(self.BYTE_WIDTH, '0')
+        flags = itoa(self.p, 2).rjust(self.BYTE_WIDTH, '0')
         indent = ' ' * (len(self.name) + 2)
 
-        return self.reprformat() % (indent, self.name,
-                      self.pc, self.a, self.x, self.y, self.sp, flags)
+        return self.reprformat() % (indent, self.name, self.pc, self.a,
+                                    self.x, self.y, self.sp, flags)
 
     def step(self):
         instructCode = self.memory[self.pc]
@@ -61,7 +61,7 @@ class MPU:
         self.excycles = 0
         self.addcycles = self.extracycles[instructCode]
         self.instruct[instructCode](self)
-        self.processorCycles += self.cycletime[instructCode]+self.excycles
+        self.processorCycles += self.cycletime[instructCode] + self.excycles
         return self
 
     def reset(self):
@@ -103,20 +103,20 @@ class MPU:
         return self.byteMask & (self.y + self.ByteAt(self.pc))
 
     def IndirectXAddr(self):
-        return self.WrapAt( self.byteMask & (self.ByteAt(self.pc) + self.x))
+        return self.WrapAt(self.byteMask & (self.ByteAt(self.pc) + self.x))
 
     def IndirectYAddr(self):
         if self.addcycles:
             a1 = self.WrapAt(self.ByteAt(self.pc))
-            a2 = (a1+self.y) & self.addrMask
+            a2 = (a1 + self.y) & self.addrMask
             if (a1 & self.addrHighMask) != (a2 & self.addrHighMask):
                 self.excycles += 1
             return a2
         else:
-            return (self.WrapAt(self.ByteAt(self.pc))+self.y)&self.addrMask
+            return (self.WrapAt(self.ByteAt(self.pc)) + self.y) & self.addrMask
 
     def AbsoluteAddr(self):
-      return self.WordAt(self.pc)
+        return self.WordAt(self.pc)
 
     def AbsoluteXAddr(self):
         if self.addcycles:
@@ -126,7 +126,7 @@ class MPU:
                 self.excycles += 1
             return a2
         else:
-            return (self.WordAt(self.pc)+self.x)&self.addrMask
+            return (self.WordAt(self.pc) + self.x) & self.addrMask
 
     def AbsoluteYAddr(self):
         if self.addcycles:
@@ -136,7 +136,7 @@ class MPU:
                 self.excycles += 1
             return a2
         else:
-            return (self.WordAt(self.pc)+self.y)&self.addrMask
+            return (self.WordAt(self.pc) + self.y) & self.addrMask
 
     def BranchRelAddr(self):
         self.excycles += 1
@@ -155,23 +155,23 @@ class MPU:
 
     # stack
 
-    def stPush(self,z):
-        self.memory[self.sp+self.spBase] = z&self.byteMask
+    def stPush(self, z):
+        self.memory[self.sp + self.spBase] = z & self.byteMask
         self.sp -= 1
         self.sp &= self.byteMask
 
     def stPop(self):
         self.sp += 1
         self.sp &= self.byteMask
-        return self.ByteAt(self.sp+self.spBase)
+        return self.ByteAt(self.sp + self.spBase)
 
     def stPushWord(self, z):
-        self.stPush((z>>self.BYTE_WIDTH)&self.byteMask)
-        self.stPush(z&self.byteMask)
+        self.stPush((z >> self.BYTE_WIDTH) & self.byteMask)
+        self.stPush(z & self.byteMask)
 
     def stPopWord(self):
         z = self.stPop()
-        z += self.stPop()<<self.BYTE_WIDTH
+        z += self.stPop() << self.BYTE_WIDTH
         return z
 
     def FlagsNZ(self, value):
@@ -217,34 +217,34 @@ class MPU:
             addr = x()
             tbyte = self.ByteAt(addr)
 
-        self.p &=~(self.CARRY+self.NEGATIVE+self.ZERO)
-        self.p |=tbyte&1
+        self.p &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
+        self.p |= tbyte & 1
 
         tbyte = tbyte >> 1
         if tbyte:
-            pass # {}
+            pass
         else:
             self.p |= self.ZERO
 
         if x is None:
             self.a = tbyte
         else:
-            self.memory[addr]=tbyte
+            self.memory[addr] = tbyte
 
     def opBCL(self, x):
-      if self.p & x:
-        self.pc += 1
-      else:
-          self.BranchRelAddr()
+        if self.p & x:
+            self.pc += 1
+        else:
+            self.BranchRelAddr()
 
     def opBST(self, x):
-      if self.p & x:
-          self.BranchRelAddr()
-      else:
-          self.pc += 1
+        if self.p & x:
+            self.BranchRelAddr()
+        else:
+            self.pc += 1
 
     def opCLR(self, x):
-        self.p &=~x
+        self.p &= ~x
 
     def opSET(self, x):
         self.p |= x
@@ -255,10 +255,10 @@ class MPU:
 
     def opBIT(self, x):
         tbyte = self.ByteAt(x())
-        self.p &=~(self.ZERO+self.NEGATIVE+self.OVERFLOW)
+        self.p &= ~(self.ZERO + self.NEGATIVE + self.OVERFLOW)
         if (self.a & tbyte) == 0:
             self.p |= self.ZERO
-        self.p |= tbyte&(self.NEGATIVE+self.OVERFLOW)
+        self.p |= tbyte & (self.NEGATIVE + self.OVERFLOW)
 
     def opROL(self, x):
         if x is None:
@@ -281,7 +281,7 @@ class MPU:
         self.FlagsNZ(tbyte)
 
         if x is None:
-           self.a = tbyte
+            self.a = tbyte
         else:
             self.memory[addr] = tbyte
 
@@ -314,14 +314,14 @@ class MPU:
             # the final A contents will be decimally adjusted
             nibble0 = (nibble0 + adjust0) & 0xf
             nibble1 = (nibble1 + adjust1) & 0xf
-            self.p &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
+            self.p &= ~(self.CARRY + self.OVERFLOW + self.NEGATIVE + self.ZERO)
             if aluresult == 0:
                 self.p |= self.ZERO
             else:
                 self.p |= aluresult & self.NEGATIVE
             if decimalcarry == 1:
                 self.p |= self.CARRY
-            if ( ~(self.a ^ data) & (self.a ^ aluresult) ) & self.NEGATIVE:
+            if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
                 self.p |= self.OVERFLOW
             self.a = (nibble1 << 4) + nibble0
         else:
@@ -330,13 +330,13 @@ class MPU:
             else:
                 tmp = 0
             result = data + self.a + tmp
-            self.p &= ~(self.CARRY+self.OVERFLOW+self.NEGATIVE+self.ZERO)
-            if ( ~(self.a ^ data) & (self.a ^ result) ) & self.NEGATIVE:
+            self.p &= ~(self.CARRY + self.OVERFLOW + self.NEGATIVE + self.ZERO)
+            if (~(self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
                 self.p |= self.OVERFLOW
             data = result
             if data > self.byteMask:
                 self.p |= self.CARRY
-                data &=self.byteMask
+                data &= self.byteMask
             if data == 0:
                 self.p |= self.ZERO
             else:
@@ -347,19 +347,19 @@ class MPU:
         if x is None:
             tbyte = self.a
         else:
-            addr=x()
+            addr = x()
             tbyte = self.ByteAt(addr)
 
         if self.p & self.CARRY:
             if tbyte & 1:
-                pass # {}
+                pass
             else:
-                self.p &=~ self.CARRY
-            tbyte=(tbyte>>1)|self.NEGATIVE
+                self.p &= ~self.CARRY
+            tbyte = (tbyte >> 1) | self.NEGATIVE
         else:
-          if tbyte & 1:
-              self.p |= self.CARRY
-          tbyte=tbyte>>1
+            if tbyte & 1:
+                self.p |= self.CARRY
+            tbyte = tbyte >> 1
         self.FlagsNZ(tbyte)
 
         if x is None:
@@ -378,7 +378,7 @@ class MPU:
 
     def opCMPR(self, get_address, register_value):
         tbyte = self.ByteAt(get_address())
-        self.p &= ~(self.CARRY+self.ZERO+self.NEGATIVE)
+        self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE)
         if register_value == tbyte:
             self.p |= self.CARRY + self.ZERO
         elif register_value > tbyte:
@@ -386,59 +386,61 @@ class MPU:
         self.p |= (register_value - tbyte) & self.NEGATIVE
 
     def opSBC(self, x):
-      data = self.ByteAt(x())
+        data = self.ByteAt(x())
 
-      if self.p & self.DECIMAL:
-          halfcarry = 1
-          decimalcarry = 0
-          adjust0 = 0
-          adjust1 = 0
+        if self.p & self.DECIMAL:
+            halfcarry = 1
+            decimalcarry = 0
+            adjust0 = 0
+            adjust1 = 0
 
-          nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
-          if nibble0 <= 0xf:
-              halfcarry = 0
-              adjust0 = 10
-          nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
-          if nibble1 <= 0xf:
-              adjust1 = 10 << 4
+            nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
+            if nibble0 <= 0xf:
+                halfcarry = 0
+                adjust0 = 10
+            nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
+            if nibble1 <= 0xf:
+                adjust1 = 10 << 4
 
-          # the ALU outputs are not decimally adjusted
-          aluresult = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
-          if aluresult > self.byteMask:
-              decimalcarry = 1
-          aluresult &= self.byteMask
+            # the ALU outputs are not decimally adjusted
+            aluresult = self.a + (~data & self.byteMask) + \
+                (self.p & self.CARRY)
 
-          # but the final result will be adjusted
-          nibble0 = (aluresult + adjust0) & 0xf
-          nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+            if aluresult > self.byteMask:
+                decimalcarry = 1
+            aluresult &= self.byteMask
 
-          self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
-          if aluresult == 0:
-              self.p |= self.ZERO
-          else:
-              self.p |= aluresult & self.NEGATIVE
-          if decimalcarry == 1:
-              self.p |= self.CARRY
-          if ( (self.a ^ data) & (self.a ^ aluresult) ) & self.NEGATIVE:
-              self.p |= self.OVERFLOW
-          self.a = (nibble1 << 4) + nibble0
-      else:
-          if self.p & self.CARRY:
-              borrow = 0
-          else:
-              borrow = 1
+            # but the final result will be adjusted
+            nibble0 = (aluresult + adjust0) & 0xf
+            nibble1 = ((aluresult + adjust1) >> 4) & 0xf
 
-          result = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
-          self.p &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
-          if ( (self.a ^ data) & (self.a ^ result) ) & self.NEGATIVE:
-              self.p |= self.OVERFLOW
-          data = result & self.byteMask
-          if data == 0:
-              self.p |= self.ZERO
-          if result > self.byteMask:
-              self.p |= self.CARRY
-          self.p |= data & self.NEGATIVE
-          self.a = data
+            self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
+            if aluresult == 0:
+                self.p |= self.ZERO
+            else:
+                self.p |= aluresult & self.NEGATIVE
+            if decimalcarry == 1:
+                self.p |= self.CARRY
+            if ((self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
+                self.p |= self.OVERFLOW
+            self.a = (nibble1 << 4) + nibble0
+        else:
+            if self.p & self.CARRY:
+                borrow = 0
+            else:
+                borrow = 1
+
+            result = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
+            self.p &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
+            if ((self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
+                self.p |= self.OVERFLOW
+            data = result & self.byteMask
+            if data == 0:
+                self.p |= self.ZERO
+            if result > self.byteMask:
+                self.p |= self.CARRY
+            self.p |= data & self.NEGATIVE
+            self.a = data
 
     def opDECR(self, x):
         if x is None:
@@ -495,8 +497,8 @@ class MPU:
     def inst_not_implemented(self):
         self.pc += 1
 
-    instruct    = [inst_not_implemented] * 256
-    cycletime   = [0] * 256
+    instruct = [inst_not_implemented] * 256
+    cycletime = [0] * 256
     extracycles = [0] * 256
     disassemble = [('???', 'imp')] * 256
 
@@ -505,7 +507,8 @@ class MPU:
 
     @instruction(name="BRK", mode="imp", cycles=7)
     def inst_0x00(self):
-        pc = (self.pc + 1) & self.addrMask # The pc has already been increased one
+        # pc has already been increased one
+        pc = (self.pc + 1) & self.addrMask
         self.stPushWord(pc)
 
         self.p |= self.BREAK
@@ -592,8 +595,8 @@ class MPU:
 
     @instruction(name="JSR", mode="abs", cycles=6)
     def inst_0x20(self):
-        self.stPushWord((self.pc+1)&self.addrMask)
-        self.pc=self.WordAt(self.pc)
+        self.stPushWord((self.pc + 1) & self.addrMask)
+        self.pc = self.WordAt(self.pc)
 
     @instruction(name="AND", mode="inx", cycles=6)
     def inst_0x21(self):
@@ -716,7 +719,7 @@ class MPU:
 
     @instruction(name="JMP", mode="abs", cycles=3)
     def inst_0x4c(self):
-        self.pc=self.WordAt(self.pc)
+        self.pc = self.WordAt(self.pc)
 
     @instruction(name="EOR", mode="abs", cycles=4)
     def inst_0x4d(self):
@@ -754,7 +757,7 @@ class MPU:
     @instruction(name="EOR", mode="aby", cycles=4, extracycles=1)
     def inst_0x59(self):
         self.opEOR(self.AbsoluteYAddr)
-        self.pc +=2
+        self.pc += 2
 
     @instruction(name="EOR", mode="abx", cycles=4, extracycles=1)
     def inst_0x5d(self):
@@ -768,7 +771,7 @@ class MPU:
 
     @instruction(name="RTS", mode="imp", cycles=6)
     def inst_0x60(self):
-        self.pc=self.stPopWord()
+        self.pc = self.stPopWord()
         self.pc += 1
 
     @instruction(name="ADC", mode="inx", cycles=6)
@@ -808,7 +811,7 @@ class MPU:
     @instruction(name="ADC", mode="abs", cycles=4)
     def inst_0x6d(self):
         self.opADC(self.AbsoluteAddr)
-        self.pc +=2
+        self.pc += 2
 
     @instruction(name="ROR", mode="abs", cycles=6)
     def inst_0x6e(self):
@@ -876,12 +879,12 @@ class MPU:
     @instruction(name="DEY", mode="imp", cycles=2)
     def inst_0x88(self):
         self.y -= 1
-        self.y&=self.byteMask
+        self.y &= self.byteMask
         self.FlagsNZ(self.y)
 
     @instruction(name="TXA", mode="imp", cycles=2)
     def inst_0x8a(self):
-        self.a=self.x
+        self.a = self.x
         self.FlagsNZ(self.a)
 
     @instruction(name="STY", mode="abs", cycles=4)
@@ -935,7 +938,7 @@ class MPU:
 
     @instruction(name="TXS", mode="imp", cycles=2)
     def inst_0x9a(self):
-        self.sp=self.x
+        self.sp = self.x
 
     @instruction(name="STA", mode="abx", cycles=5)
     def inst_0x9d(self):
@@ -1089,7 +1092,7 @@ class MPU:
     @instruction(name="CMP", mode="imm", cycles=2)
     def inst_0xc9(self):
         self.opCMPR(self.ProgramCounter, self.a)
-        self.pc +=1
+        self.pc += 1
 
     @instruction(name="DEX", mode="imp", cycles=2)
     def inst_0xca(self):
@@ -1177,8 +1180,8 @@ class MPU:
 
     @instruction(name="INX", mode="imp", cycles=2)
     def inst_0xe8(self):
-        self.x+=1
-        self.x&=self.byteMask
+        self.x += 1
+        self.x &= self.byteMask
         self.FlagsNZ(self.x)
 
     @instruction(name="SBC", mode="imm", cycles=2)
