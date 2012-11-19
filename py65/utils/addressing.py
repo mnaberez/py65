@@ -93,7 +93,7 @@ class AddressParser(object):
         return (start, end)
 
     def _constrain(self, address):
-        """Constrains a number to be within the address range"""
-        address = max(address, 0)
-        address = min(address, self._maxaddr)
+        '''Raises OverflowError if the address is illegal'''
+        if address < 0 or address > self._maxaddr:
+            raise OverflowError(address)
         return address

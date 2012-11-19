@@ -268,28 +268,30 @@ class Monitor(cmd.Cmd):
         return self.help_EOF()
 
     def do_assemble(self, args):
-        split = args.split(None, 1)
-        if len(split) != 2:
+        splitted = args.split(None, 1)
+        if len(splitted) != 2:
             return self._interactive_assemble(args)
 
-        start, statement = split
+        statement = splitted[1]
         try:
-            start = self._address_parser.number(start)
-        except KeyError:
-            self._output("Bad label: %s" % start)
-            return
+            start = self._address_parser.number(splitted[0])
+            bytes = self._assembler.assemble(statement, start)
 
-        bytes = self._assembler.assemble(statement, start)
-        if bytes is None:
-            self._output("Assemble failed: %s" % statement)
-        else:
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
             self.do_disassemble((self.addrFmt+":"+self.addrFmt) % (start, end))
+        except KeyError:
+            self._output("Bad label: %s" % args)
+        except OverflowError:
+            self._output("Overflow error: %s" % args)
+        except SyntaxError:
+            self._output("Syntax error: %s" % statement)
 
     def help_assemble(self):
-        self._output("assemble <address> <statement>")
-        self._output("Assemble a statement at the address.")
+        self._output("assemble <address> <statement>\t"
+                     "Assemble a statement at the address.")
+        self._output("assemble <address>\t\t"
+                     "Start interactive assembly at the address.")
 
     def _interactive_assemble(self, args):
         if args == '':
@@ -298,35 +300,38 @@ class Monitor(cmd.Cmd):
             try:
                 start = self._address_parser.number(args)
             except KeyError:
-                self._output("Bad label: %s" % start)
+                self._output("Bad label: %s" % args)
                 return
 
-        assembling = True
-
-        while assembling:
+        while True:
             prompt = "\r$" + ( self.addrFmt % start ) + "   " + (" " * (1 + self.byteWidth/4) * 3)
             line = console.line_input(prompt,
                       stdin=self.stdin, stdout=self.stdout)
 
-            if not line:
+            if not line.strip():
                 self.stdout.write("\n")
                 return
 
             # assemble into memory
-            bytes = self._assembler.assemble(line, pc=start)
-            if bytes is None:
-                self.stdout.write("\r$" + (self.addrFmt % start) + "  ???\n")
-                continue
-            end = start + len(bytes)
-            self._mpu.memory[start:end] = bytes
+            try:
+                bytes = self._assembler.assemble(line, pc=start)
 
-            # print disassembly
-            bytes, disasm = self._disassembler.instruction_at(start)
-            disassembly = self._format_disassembly(start, bytes, disasm)
-            self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ) + "\r")
-            self.stdout.write(disassembly + "\n")
+                end = start + len(bytes)
+                self._mpu.memory[start:end] = bytes
 
-            start += bytes
+                # print disassembly
+                bytes, disasm = self._disassembler.instruction_at(start)
+                disassembly = self._format_disassembly(start, bytes, disasm)
+                self.stdout.write("\r" + (' ' * (len(prompt+line) + 5) ) + "\r")
+                self.stdout.write(disassembly + "\n")
+
+                start += bytes
+            except KeyError:
+                self.stdout.write("\r$" + (self.addrFmt % start) + "  ?Label\n")
+            except OverflowError:
+                self.stdout.write("\r$" + (self.addrFmt % start) + "  ?Overflow\n")
+            except SyntaxError:
+                self.stdout.write("\r$" + (self.addrFmt % start) + "  ?Syntax\n")
 
     def do_disassemble(self, args):
         split = shlex.split(args)

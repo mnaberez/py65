@@ -1,5 +1,8 @@
 0.14 *Next Release*
 
+  - Assembling now detects syntax errors, overflows, and bad labels
+    separately and shows specific error messages.
+
 0.13 (2012-11-15)
 
   - Fixed a bug where negative numbers could be entered

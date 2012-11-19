@@ -108,18 +108,18 @@ class AddressParserTests(unittest.TestCase):
 
     def test_number_constrains_address_at_zero_or_above(self):
         parser = AddressParser()
-        self.assertEqual(0x0000, parser.number('-1'))
+        self.assertRaises(OverflowError, parser.number, '-1')
 
     def test_number_constrains_address_at_maxwidth_16(self):
         parser = AddressParser()
         parser.labels = {'foo': 0xFFFF}
-        self.assertEqual(0xFFFF, parser.number('foo+5'))
+        self.assertRaises(OverflowError, parser.number, 'foo+5')
 
     def test_number_constrains_address_at_maxwidth_24(self):
         parser = AddressParser()
         parser.maxwidth = 24
         parser.labels = {'foo': 0xFFFFFF}
-        self.assertEqual(0xFFFFFF, parser.number('foo+5'))
+        self.assertRaises(OverflowError, parser.number, 'foo+5')
 
     def test_label_for_returns_label(self):
         parser = AddressParser(labels={'chrout':0xFFD2})

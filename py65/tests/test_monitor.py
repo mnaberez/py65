@@ -114,15 +114,23 @@ class MonitorTests(unittest.TestCase):
         mon.do_assemble('nonexistant rts')
 
         out = stdout.getvalue()
-        self.assertEqual("Bad label: nonexistant\n", out)
+        self.assertEqual("Bad label: nonexistant rts\n", out)
 
-    def test_do_assemble_shows_bad_statement_error(self):
+    def test_do_assemble_shows_bad_syntax_error(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon.do_assemble('c000 foo')
 
         out = stdout.getvalue()
-        self.assertEqual("Assemble failed: foo\n", out)
+        self.assertEqual("Syntax error: foo\n", out)
+
+    def test_do_assemble_shows_overflow_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_assemble('c000 lda #$fff')
+
+        out = stdout.getvalue()
+        self.assertEqual("Overflow error: c000 lda #$fff\n", out)
 
     def test_do_assemble_passes_addr_for_relative_branch_calc(self):
         stdout = StringIO()
@@ -138,7 +146,7 @@ class MonitorTests(unittest.TestCase):
         mon.do_assemble("-1 lda #$ab")
 
         out = stdout.getvalue()
-        self.assertEqual("$0000  a9 ab     LDA #$ab\n", out)
+        self.assertEqual("Overflow error: -1 lda #$ab\n", out)
 
     def test_help_assemble(self):
         stdout = StringIO()
