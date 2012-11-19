@@ -5,7 +5,7 @@ if sys.platform[:3] == "win":
 
     def getch(stdin):
       """ Read one character from the Windows console, blocking until one
-      is available.  Does not echo the character.  The stdin argument is 
+      is available.  Does not echo the character.  The stdin argument is
       for function signature compatibility and is ignored.
       """
       return msvcrt.getch()
@@ -27,7 +27,7 @@ else:
 
     def getch(stdin):
       """ Read one character from stdin, blocking until one is available.
-      Does not echo the character. 
+      Does not echo the character.
       """
       fd = stdin.fileno()
       oldattr = termios.tcgetattr(fd)
@@ -41,10 +41,10 @@ else:
       return char
 
     def getch_noblock(stdin):
-        """ Read one character from stdin without blocking.  Does not echo the 
+        """ Read one character from stdin without blocking.  Does not echo the
         character.  If no character is available, an empty string is returned.
         """
-    
+
         fd = stdin.fileno()
 
         oldterm = termios.tcgetattr(fd)
@@ -61,7 +61,7 @@ else:
             if r:
                 char = stdin.read(1)
                 if char == "\n":
-                    char = "\r" 
+                    char = "\r"
             else:
               char = ''
         finally:
@@ -71,7 +71,7 @@ else:
 
 
 def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
-    """ Read a line from stdin, printing each character as it is typed. 
+    """ Read a line from stdin, printing each character as it is typed.
     Does not echo a newline at the end.  This allows the calling program
     to overwrite the line by first sending a carriage return ('\r'), which
     is useful in modes like the interactive assembler.
@@ -82,7 +82,7 @@ def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
       char = getch(stdin)
       code = ord(char)
       if char in ("\n", "\r"):
-        break                            
+        break
       elif code in (0x7f, 0x08): # backspace
         if len(line) > 0:
           line = line[:-1]
@@ -90,8 +90,7 @@ def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
             (' ' * (len(prompt+line) +5), prompt, line))
       elif code == 0x1b: # escape
         pass
-      else: 
+      else:
         line += char
         stdout.write(char)
     return line
-  

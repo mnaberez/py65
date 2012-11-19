@@ -13,7 +13,7 @@ class Loader:
 
         for line in text.splitlines():
             self._parse_line(line)
-    
+
     def _reset(self):
         self.data = []
         self.start_address = None
@@ -25,8 +25,8 @@ class Loader:
 
         for piece in pieces:
             if piece.startswith('$'):
-                piece = piece[1:] 
-        
+                piece = piece[1:]
+
             if piece.endswith(':'):
                 self._parse_address(piece[:-1])
 
@@ -43,7 +43,7 @@ class Loader:
     def _parse_address(self, piece):
         try:
             addr_bytes = [ ord(c) for c in a2b_hex(piece) ]
-        except (TypeError, ValueError):        
+        except (TypeError, ValueError):
             msg = "Could not parse address: %s" % piece
             raise ValueError, msg
 
@@ -58,9 +58,9 @@ class Loader:
             self.start_address = address
             self.current_address = address
 
-        elif address != (self.current_address): 
+        elif address != (self.current_address):
             msg = "Non-contigous block detected.  Expected next address " \
-                  "to be $%04x, label was $%04x" % (self.current_address, 
+                  "to be $%04x, label was $%04x" % (self.current_address,
                                                                     address)
             raise ValueError, msg
 
@@ -71,7 +71,7 @@ class Loader:
 
         else:
             try:
-                bytes = [ ord(c) for c in a2b_hex(piece) ]  
+                bytes = [ ord(c) for c in a2b_hex(piece) ]
             except (TypeError, ValueError):
                 msg = "Could not parse data: %s" % piece
                 raise ValueError, msg

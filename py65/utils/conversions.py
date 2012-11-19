@@ -12,7 +12,7 @@ def itoa(num, base=10):
     if negative:
       digits.append('-')
     digits.reverse()
-    return ''.join(digits) 
+    return ''.join(digits)
 
 def convert_to_bin(bcd):
     return bcd2bin[bcd]

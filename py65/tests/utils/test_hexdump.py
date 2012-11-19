@@ -20,8 +20,8 @@ class HexdumpLoaderTests(unittest.TestCase):
         text = "  \r\n  \t  \n"
         loader = Loader(text)
         self.assertEqual(None, loader.start_address)
-        self.assertEqual([], loader.data)       
-   
+        self.assertEqual([], loader.data)
+
     def test_raises_when_start_address_not_found(self):
         text = 'aa bb cc'
         try:
@@ -36,7 +36,7 @@ class HexdumpLoaderTests(unittest.TestCase):
         try:
             Loader(text)
             self.fail()
-        except ValueError, why:                   
+        except ValueError, why:
             msg = 'Could not parse address: oops'
             self.assertEqual(msg, why[0])
 
@@ -45,7 +45,7 @@ class HexdumpLoaderTests(unittest.TestCase):
         try:
             Loader(text)
             self.fail()
-        except ValueError, why:                   
+        except ValueError, why:
             msg = 'Expected address to be 2 bytes, got 1'
             self.assertEqual(msg, why[0])
 
@@ -54,7 +54,7 @@ class HexdumpLoaderTests(unittest.TestCase):
         try:
             Loader(text)
             self.fail()
-        except ValueError, why:                   
+        except ValueError, why:
             msg = 'Expected address to be 2 bytes, got 3'
             self.assertEqual(msg, why[0])
 
@@ -67,7 +67,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             msg = 'Non-contigous block detected.  Expected next ' \
                   'address to be $c001, label was $c002'
             self.assertEqual(msg, why[0])
-    
+
     def test_raises_when_data_is_invalid(self):
         text = 'c000: foo'
         try:
@@ -75,7 +75,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError, why:
             msg = 'Could not parse data: foo'
-            self.assertEqual(msg, why[0]) 
+            self.assertEqual(msg, why[0])
 
     def test_loads_data_without_dollar_signs(self):
         text = 'c000: aa bb'
@@ -100,32 +100,32 @@ class HexdumpLoaderTests(unittest.TestCase):
         load = Loader(text)
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB, 0xCC], load.data)
-    
+
     def test_ignores_semicolon_comments(self):
         text = 'c000: aa bb ;comment'
         load = Loader(text)
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB], load.data)
-    
+
     def test_ignores_double_dash_comments(self):
         text = 'c000: aa bb -- comment'
         load = Loader(text)
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB], load.data)
-    
+
     def test_ignores_pound_comments(self):
         text = 'c000: aa bb # comment'
         load = Loader(text)
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB], load.data)
-    
+
     def test_ignores_pound_comments(self):
         text = 'c000: aa bb # comment'
         load = Loader(text)
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB], load.data)
-        
-        
+
+
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
