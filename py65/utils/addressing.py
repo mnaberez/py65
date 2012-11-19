@@ -37,41 +37,46 @@ class AddressParser(object):
     def number(self, num):
         """Parse a string containing a label or number into an address.
         """
-        if num.startswith('$'):
-            return self._constrain(int(num[1:], 16))
+        try:
+            if num.startswith('$'):
+                # hexadecimal
+                return self._constrain(int(num[1:], 16))
 
-        elif num.startswith('+'):
-            return self._constrain(int(num[1:], 10))
+            elif num.startswith('+'):
+                # decimal
+                return self._constrain(int(num[1:], 10))
 
-        elif num.startswith('%'):
-            return self._constrain(int(num[1:], 2))
+            elif num.startswith('%'):
+                # binary
+                return self._constrain(int(num[1:], 2))
 
-        elif num in self.labels:
-            return self.labels[num]
-
-        else:
-            matches = re.match('^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
-            if matches:
-                label, sign, offset = matches.groups()
-
-                if label not in self.labels:
-                    raise KeyError("Label not found: %s" % label)
-
-                base = self.labels[label]
-                offset = self.number(offset)
-
-                if sign == '+':
-                    address = base + offset
-                else:
-                    address = base - offset
-
-                return self._constrain(address)
+            elif num in self.labels:
+                # label name
+                return self.labels[num]
 
             else:
-                try:
+                matches = re.match('^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
+                if matches:
+                    label, sign, offset = matches.groups()
+
+                    if label not in self.labels:
+                        raise KeyError("Label not found: %s" % label)
+
+                    base = self.labels[label]
+                    offset = self.number(offset)
+
+                    if sign == '+':
+                        address = base + offset
+                    else:
+                        address = base - offset
+
+                    return self._constrain(address)
+
+                else:
                     return self._constrain(int(num, self.radix))
-                except ValueError:
-                    raise KeyError("Label not found: %s" % num)
+
+        except ValueError:
+            raise KeyError("Label not found: %s" % num)
 
     def range(self, addresses):
         """Parse a string containing an address or a range of addresses
