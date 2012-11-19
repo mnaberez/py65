@@ -3,7 +3,7 @@ from py65.devices.mpu6502 import MPU
 from py65.utils.addressing import AddressParser
 
 class Assembler:
-    Statement = re.compile(r'^([A-z]{3}\s+'
+    Statement = re.compile(r'^([A-z]{3}[0-7]?\s+'
                            r'\(?\s*)([^,\s\)]+)(\s*[,xXyY\s]*\)?'
                            r'[,xXyY\s]*)$')
 
@@ -70,10 +70,10 @@ class Assembler:
         uses relative addressing, the program counter (pc) must also be given.
         The result is a list of bytes.  Raises when assembly fails.
         """
-        opcode, operands = self.normalize_and_split(statement)
+        opcode, operand = self.normalize_and_split(statement)
 
         for mode, pattern in self.Addressing:
-            match = pattern.match(operands)
+            match = pattern.match(operand)
 
             if match:
                 try:
@@ -105,9 +105,8 @@ class Assembler:
         """ Given an assembly language statement like "lda $c12,x", normalize
             the statement by uppercasing it, removing unnecessary whitespace,
             and parsing the address part using AddressParser.  The result of
-            the normalization is a tuple of two strings (opcode, operands).
+            the normalization is a tuple of two strings (opcode, operand).
         """
-
         # normalize target in operand
         match = self.Statement.match(statement)
         if match:
@@ -129,7 +128,11 @@ class Assembler:
                 address = self._address_parser.number(target)
                 statement = before + '$' + self.addrFmt % address + after
 
-        # strip unnecessary whitespace
-        opcode  = statement[:3].upper()
-        operand = ''.join(statement[3:].split()).upper().strip()
+        # separate opcode and operand
+        splitted = statement.split(" ", 2)
+        opcode = splitted[0].strip().upper()
+        if len(splitted) > 1:
+            operand = splitted[1].strip().upper()
+        else:
+            operand = ''
         return (opcode, operand)

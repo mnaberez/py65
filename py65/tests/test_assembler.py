@@ -1,6 +1,7 @@
 import unittest
 import sys
 from py65.devices.mpu6502 import MPU
+from py65.devices.mpu65c02 import MPU as MPU65C02
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
 
@@ -42,8 +43,14 @@ class AssemblerTests(unittest.TestCase):
         self.assertEqual([0x06, 0x44],
                          self.assemble('ASL $44'))
 
-    def dont_test_assembles_07(self):
-        pass
+    def test_assembles_07_6502(self):
+        self.assertRaises(SyntaxError,
+                          self.assemble, "RMB0 $42")
+
+    def test_assembles_07_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x07, 0x42],
+                         self.assemble('RMB0 $42', 0x0000, mpu))
 
     def test_assembles_08(self):
         self.assertEqual([0x08],
@@ -941,8 +948,9 @@ class AssemblerTests(unittest.TestCase):
 
     # Test Helpers
 
-    def assemble(self, statement, pc=0000):
-        mpu = MPU()
+    def assemble(self, statement, pc=0000, mpu=None):
+        if mpu is None:
+            mpu = MPU()
         address_parser = AddressParser()
         assembler = Assembler(mpu, address_parser)
         return assembler.assemble(statement, pc)
