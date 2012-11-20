@@ -46,7 +46,6 @@ class Monitor(cmd.Cmd):
         self.prompt = "."
         self._add_shortcuts()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
-        self._output_mpu_status()
         self._parse_args(argv)
 
     def _parse_args(self, argv):
