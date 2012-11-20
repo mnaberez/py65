@@ -43,9 +43,10 @@ class Monitor(cmd.Cmd):
             argv = sys.argv
         self._reset(self.mpu_type)
         self._width = 78
-        self._update_prompt()
+        self.prompt = "."
         self._add_shortcuts()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
+        self._output_mpu_status()
         self._parse_args(argv)
 
     def _parse_args(self, argv):
@@ -109,7 +110,7 @@ class Monitor(cmd.Cmd):
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
             self._output(error)
 
-        self._update_prompt()
+        self._output_mpu_status()
         return result
 
     def _reset(self, mpu_type):
@@ -211,8 +212,8 @@ class Monitor(cmd.Cmd):
 
         self._mpu.memory = m
 
-    def _update_prompt(self):
-        self.prompt = "\n%s\n." % repr(self._mpu)
+    def _output_mpu_status(self):
+        self._output("\n" + repr(self._mpu))
 
     def _output(self, stuff):
         if stuff is not None:

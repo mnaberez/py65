@@ -44,5 +44,5 @@ class MPU(mpu6502.MPU):
     disassemble = mpu6502.MPU.disassemble[:]
 
     def reprformat(self):
-        return ("%s PC      AC   XR   YR   SP   NV---------BDIZC\n" +
+        return ("%s   PC     AC   XR   YR   SP  NV---------BDIZC\n" +
                 "%s: %08x %04x %04x %04x %04x %s")

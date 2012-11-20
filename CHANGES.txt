@@ -8,6 +8,9 @@
 
   - Reformatted source code to comply with PEP8.
 
+  - Fixed a bug where the MPU status display would wrap unexpectedly
+    on some terminals.
+
 0.13 (2012-11-15)
 
   - Fixed a bug where negative numbers could be entered
