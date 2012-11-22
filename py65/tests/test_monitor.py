@@ -804,6 +804,14 @@ class MonitorTests(unittest.TestCase):
         expected = "+16\n$10\n0020\n00010000\n"
         self.assertTrue(out.startswith(expected))
 
+    def test_do_tilde_with_no_arg_shows_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_tilde('')
+        out = stdout.getvalue()
+        expected = "~ <number>"
+        self.assertTrue(out.startswith(expected))
+
     def test_help_tilde(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)

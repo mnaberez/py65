@@ -442,16 +442,21 @@ class Monitor(cmd.Cmd):
         self._output("Display a number in decimal, hex, octal, and binary.")
 
     def do_tilde(self, args):
+        if args == '':
+            return self.help_tilde()
+
         try:
             num = self._address_parser.number(args)
-        except ValueError:
-            self._output("Syntax error: %s" % args)
-            return
-
-        self._output("+%u" % num)
-        self._output("$" + self.byteFmt % num)
-        self._output("%04o" % num)
-        self._output(itoa(num, 2).zfill(8))
+            self._output("+%u" % num)
+            self._output("$" + self.byteFmt % num)
+            self._output("%04o" % num)
+            self._output(itoa(num, 2).zfill(8))
+        except KeyError:
+            self._output("Bad label: %s" % args)
+        except OverflowError:
+            self._output("Overflow error: %s" % args)
+        except SyntaxError:
+            self._output("Syntax error: %s" % statement)
 
     def help_registers(self):
         self._output("registers[<name>=<value> [, <name>=<value>]*]")
