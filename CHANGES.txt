@@ -11,7 +11,9 @@
   - Fixed a bug where the MPU status display would wrap unexpectedly
     on some terminals.
 
-  - Added support for 65C02 opcode 0x89 (BIT immediate).
+  - Added support for 65C02 opcode 0x89: BIT #.
+
+  - Added support for 65C02 opcode 0x7C: JMP (abs,x).
 
 0.13 (2012-11-15)
 

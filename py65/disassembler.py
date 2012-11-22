@@ -78,6 +78,13 @@ class Disassembler:
             disasm += ' (%s,X)' % address_or_label
             length = 2
 
+        elif addressing == 'iax':
+            address = self._mpu.WordAt(pc + 1)
+            address_or_label = self._address_parser.label_for(
+                address, '$' + self.addrFmt % address)
+            disasm += ' (%s,X)' % address_or_label
+            length = 3
+
         elif addressing == 'rel':
             opv = self._mpu.ByteAt(pc + 1)
             targ = pc + 2

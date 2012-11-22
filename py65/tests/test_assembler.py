@@ -470,8 +470,19 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_7b(self):
         pass
 
-    def dont_test_assembles_7c(self):
-        pass
+    def test_assembles_7c_6502(self):
+        self.assertRaises(SyntaxError,
+                          self.assemble, "JMP ($1234,X)")
+
+    def test_assembles_7c_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x7c, 0x34, 0x12],
+                         self.assemble('JMP ($1234,X)', 0x0000, mpu))
+
+    def test_assembles_07_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x07, 0x42],
+                         self.assemble('RMB0 $42', 0x0000, mpu))
 
     def test_assembles_7d(self):
         self.assertEqual([0x7d, 0x00, 0x44],

@@ -633,10 +633,16 @@ class DisassemblerTests(unittest.TestCase):
         self.assertEqual(1, length)
         self.assertEqual('???', disasm)
 
-    def test_disassembles_7c(self):
+    def test_disassembles_7c_6502(self):
         length, disasm = self.disassemble([0x7c])
         self.assertEqual(1, length)
         self.assertEqual('???', disasm)
+
+    def test_disassembles_7c_65c02(self):
+        mpu = MPU65C02()
+        length, disasm = self.disassemble([0x7c, 0x34, 0x12], 0x0000, mpu)
+        self.assertEqual(3, length)
+        self.assertEqual('JMP ($1234,X)', disasm)
 
     def test_disassembles_7d(self):
         length, disasm = self.disassemble([0x7d, 0x00, 0x44])

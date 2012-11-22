@@ -463,6 +463,19 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
+    # JMP Indirect Absolute X-Indexed
+
+    def test_jmp_iax_jumps_to_address(self):
+        mpu = self._make_mpu()
+        mpu.x = 2
+        # $0000 JMP ($ABCD,X)
+        # $ABCF Vector to $1234
+        self._write(mpu.memory, 0x0000, (0x7C, 0xCD, 0xAB))
+        self._write(mpu.memory, 0xABCF, (0x34, 0x12))
+        mpu.step()
+        self.assertEqual(0x1234, mpu.pc)
+        self.assertEqual(6, mpu.processorCycles)
+
     # LDA Zero Page, Indirect
 
     def test_lda_zp_ind_loads_a_sets_n_flag(self):

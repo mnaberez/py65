@@ -29,6 +29,9 @@ class MPU(mpu6502.MPU):
     def ZeroPageIndirectAddr(self):
         return self.WordAt(255 & (self.ByteAt(self.pc)))
 
+    def IndirectAbsXAddr(self):
+        return (self.WordAt(self.pc) + self.x) & self.addrMask
+
     def AccumulatorAddr(self):
         return self.a
 
@@ -260,6 +263,10 @@ class MPU(mpu6502.MPU):
     @instruction(name="DEC", mode="acc", cycles=2)
     def inst_0x3a(self):
         self.opDECR(None)
+
+    @instruction(name="JMP", mode="iax", cycles=6)
+    def inst_0x7c(self):
+        self.pc = self.WordAt(self.IndirectAbsXAddr())
 
     @instruction(name="BRA", mode="rel", cycles=1, extracycles=1)
     def inst_0x80(self):
