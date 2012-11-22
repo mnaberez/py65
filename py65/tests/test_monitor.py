@@ -786,7 +786,7 @@ class MonitorTests(unittest.TestCase):
         mon.onecmd('~ $10')
         out = stdout.getvalue()
         expected = "+16\n$10\n0020\n00010000\n"
-        self.assertEqual(expected, out)
+        self.assertTrue(out.startswith(expected))
 
     def test_tilde_shortcut_without_space_for_vice_compatibility(self):
         stdout = StringIO()
@@ -794,7 +794,7 @@ class MonitorTests(unittest.TestCase):
         mon.onecmd('~$10')
         out = stdout.getvalue()
         expected = "+16\n$10\n0020\n00010000\n"
-        self.assertEqual(expected, out)
+        self.assertTrue(out.startswith(expected))
 
     def test_do_tilde(self):
         stdout = StringIO()
@@ -802,14 +802,15 @@ class MonitorTests(unittest.TestCase):
         mon.do_tilde('$10')
         out = stdout.getvalue()
         expected = "+16\n$10\n0020\n00010000\n"
-        self.assertEqual(expected, out)
+        self.assertTrue(out.startswith(expected))
 
     def test_help_tilde(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon.help_tilde()
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("~ <number>"))
+        expected = "~ <number>"
+        self.assertTrue(out.startswith(expected))
 
     # show_labels
 
