@@ -159,6 +159,16 @@ class MPU(mpu6502.MPU):
         self.opSMB(self.ZeroPageAddr, 0x01)
         self.pc += 1
 
+    @instruction(name="BIT", mode="imm", cycles=2)
+    def inst_0x89(self):
+        # This instruction (BIT #$12) does not use opBIT because in the
+        # immediate mode, BIT only affects the Z flag.
+        tbyte = self.ImmediateByte()
+        self.p &= ~(self.ZERO)
+        if (self.a & tbyte) == 0:
+            self.p |= self.ZERO
+        self.pc += 1
+
     @instruction(name="STA", mode="zpi", cycles=5)
     def inst_0x92(self):
         self.opSTA(self.ZeroPageIndirectAddr)

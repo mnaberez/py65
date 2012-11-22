@@ -280,6 +280,57 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(4, mpu.processorCycles)
         self.assertEqual(0x0003, mpu.pc)
 
+    # BIT (Immediate)
+
+    def test_bit_imm_does_not_affect_n_and_z_flags(self):
+        mpu = self._make_mpu()
+        mpu.p |= mpu.NEGATIVE | mpu.OVERFLOW
+        # $0000 BIT #$FF
+        self._write(mpu.memory, 0x0000, (0x89, 0xff))
+        mpu.a = 0x00
+        mpu.step()
+        self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
+        self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)
+        self.assertEqual(0x00, mpu.a)
+        self.assertEqual(2, mpu.processorCycles)
+        self.assertEqual(0x02, mpu.pc)
+
+    def test_bit_imm_stores_result_of_and_in_z_preserves_a_when_1(self):
+        mpu = self._make_mpu()
+        mpu.p &= ~mpu.ZERO
+        # $0000 BIT #$00
+        self._write(mpu.memory, 0x0000, (0x89, 0x00))
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0x01, mpu.a)
+        self.assertEqual(2, mpu.processorCycles)
+        self.assertEqual(0x02, mpu.pc)
+
+    def test_bit_imm_stores_result_of_and_when_nonzero_in_z_preserves_a(self):
+        mpu = self._make_mpu()
+        mpu.p |= mpu.ZERO
+        # $0000 BIT #$01
+        self._write(mpu.memory, 0x0000, (0x89, 0x01))
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEqual(0, mpu.p & mpu.ZERO)  # result of AND is non-zero
+        self.assertEqual(0x01, mpu.a)
+        self.assertEqual(2, mpu.processorCycles)
+        self.assertEqual(0x02, mpu.pc)
+
+    def test_bit_imm_stores_result_of_and_when_zero_in_z_preserves_a(self):
+        mpu = self._make_mpu()
+        mpu.p &= ~(mpu.ZERO)
+        # $0000 BIT #$00
+        self._write(mpu.memory, 0x0000, (0x89, 0x00))
+        mpu.a = 0x01
+        mpu.step()
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)  # result of AND is zero
+        self.assertEqual(0x01, mpu.a)
+        self.assertEqual(2, mpu.processorCycles)
+        self.assertEqual(0x02, mpu.pc)
+
     # BIT (Zero Page, X-Indexed)
 
     def test_bit_zp_x_copies_bit_7_of_memory_to_n_flag_when_0(self):
