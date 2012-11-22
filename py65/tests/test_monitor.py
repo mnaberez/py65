@@ -582,34 +582,14 @@ class MonitorTests(unittest.TestCase):
 
     # quit
 
-    def test_shortcut_x_for_quit(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_help('x')
+    def test_shortcuts_for_quit(self):
+        for shortcut in ["exit", "x", "q", "EOF"]:
+            stdout = StringIO()
+            mon = Monitor(stdout=stdout)
+            mon.do_help(shortcut)
 
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith('To quit'))
-
-    def test_shortcut_q_for_quit(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.do_help('q')
-
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith('To quit'))
-
-    def test_do_EOF(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        exitnow = mon.do_EOF('')
-        self.assertEqual(True, exitnow)
-
-    def test_help_EOF(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon.help_EOF()
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith("To quit,"))
+            out = stdout.getvalue()
+            self.assertTrue(out.startswith('To quit'))
 
     def test_do_quit(self):
         stdout = StringIO()
@@ -620,7 +600,7 @@ class MonitorTests(unittest.TestCase):
     def test_help_quit(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.help_EOF()
+        mon.help_quit()
         out = stdout.getvalue()
         self.assertTrue(out.startswith("To quit,"))
 

@@ -109,7 +109,9 @@ class Monitor(cmd.Cmd):
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
             self._output(error)
 
-        self._output_mpu_status()
+        if not line.startswith("quit"):
+            self._output_mpu_status()
+
         return result
 
     def _reset(self, mpu_type):
@@ -126,26 +128,28 @@ class Monitor(cmd.Cmd):
         self._assembler = Assembler(self._mpu, self._address_parser)
 
     def _add_shortcuts(self):
-        self._shortcuts = {'~':   'tilde',
-                           'a':   'assemble',
-                           'al':  'add_label',
-                           'd':   'disassemble',
-                           'dl':  'delete_label',
-                           'f':   'fill',
-                           '>':   'fill',
-                           'g':   'goto',
-                           'h':   'help',
-                           '?':   'help',
-                           'l':   'load',
-                           'm':   'mem',
-                           'q':   'quit',
-                           'r':   'registers',
-                           'ret': 'return',
-                           'rad': 'radix',
-                           's':   'save',
-                           'shl': 'show_labels',
-                           'x':   'quit',
-                           'z':   'step'}
+        self._shortcuts = {'EOF':  'quit',
+                           '~':    'tilde',
+                           'a':    'assemble',
+                           'al':   'add_label',
+                           'd':    'disassemble',
+                           'dl':   'delete_label',
+                           'exit': 'quit',
+                           'f':    'fill',
+                           '>':    'fill',
+                           'g':    'goto',
+                           'h':    'help',
+                           '?':    'help',
+                           'l':    'load',
+                           'm':    'mem',
+                           'q':    'quit',
+                           'r':    'registers',
+                           'ret':  'return',
+                           'rad':  'radix',
+                           's':    'save',
+                           'shl':  'show_labels',
+                           'x':    'quit',
+                           'z':    'step'}
 
     def _preprocess_line(self, line):
         # line comments
@@ -264,18 +268,12 @@ class Monitor(cmd.Cmd):
         self._output("mpu\t\tPrint available microprocessors.")
         self._output("mpu <type>\tSelect a new microprocessor.")
 
-    def do_EOF(self, args):
+    def do_quit(self, args):
         self._output('')
         return 1
 
-    def help_EOF(self):
-        self._output("To quit, type ^D or use the quit command.")
-
-    def do_quit(self, args):
-        return self.do_EOF(args)
-
     def help_quit(self):
-        return self.help_EOF()
+        self._output("To quit, type ^D or use the quit command.")
 
     def do_assemble(self, args):
         splitted = args.split(None, 1)
