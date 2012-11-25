@@ -155,7 +155,7 @@ class MonitorTests(unittest.TestCase):
         mon.help_assemble()
 
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("assemble <address>"))
+        self.assertTrue("assemble <address>" in out)
 
     # cd
 
@@ -419,7 +419,7 @@ class MonitorTests(unittest.TestCase):
         mon = Monitor(stdout=stdout)
         mon.onecmd('help assemble')
         out = stdout.getvalue()
-        self.assertTrue(out.startswith("assemble <address>"))
+        self.assertTrue("assemble <address>" in out)
 
         stdout.truncate(0)
         mon.onecmd('h a')
