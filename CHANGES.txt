@@ -15,6 +15,9 @@
 
   - Added support for 65C02 opcode 0x7C: JMP (abs,x).
 
+  - Assembling now shows an Overflow Error if the statement won't
+    fit at the top of memory.
+
 0.13 (2012-11-15)
 
   - Fixed a bug where negative numbers could be entered

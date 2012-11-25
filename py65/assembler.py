@@ -130,6 +130,11 @@ class Assembler:
 
                 operands = [int(hex, 16) for hex in operands]
                 bytes.extend(operands)
+
+                # raise if the assembled bytes would exceed top of memory
+                if (pc + len(bytes)) > (2 ** self._mpu.ADDR_WIDTH):
+                    raise OverflowError
+
                 return bytes
 
         # assembly failed

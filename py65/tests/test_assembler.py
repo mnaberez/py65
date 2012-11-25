@@ -19,6 +19,17 @@ class AssemblerTests(unittest.TestCase):
         self.assertRaises(OverflowError,
                           self.assemble, 'lda #$fff')
 
+    def test_assemble_1_byte_at_top_of_mem_should_not_overflow(self):
+        self.assemble('nop', pc=0xFFFF)  # should not raise
+
+    def test_assemble_3_bytes_at_top_of_mem_should_not_overflow(self):
+        self.assemble('jmp $1234', pc=0xFFFD)  # should not raise
+
+    def test_assemble_should_overflow_if_over_top_of_mem(self):
+        # jmp $1234 requires 3 bytes but there's only 2 at $FFFE-FFFF
+        self.assertRaises(OverflowError,
+                          self.assemble, "jmp $1234", pc=0xFFFE)
+
     def test_assembles_00(self):
         self.assertEqual([0x00],
                          self.assemble('BRK'))
