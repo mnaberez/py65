@@ -328,18 +328,22 @@ class Monitor(cmd.Cmd):
             # assemble into memory
             try:
                 bytes = self._assembler.assemble(line, pc=start)
+                numbytes = len(bytes)
 
-                end = start + len(bytes)
+                end = start + numbytes
                 self._mpu.memory[start:end] = bytes
 
                 # print disassembly
-                bytes, disasm = self._disassembler.instruction_at(start)
-                disassembly = self._format_disassembly(start, bytes, disasm)
+                _, disasm = self._disassembler.instruction_at(start)
+                fdisasm = self._format_disassembly(start, numbytes, disasm)
                 indent = ' ' * (len(prompt + line) + 5)
                 self.stdout.write("\r" + indent + "\r")
-                self.stdout.write(disassembly + "\n")
+                self.stdout.write(fdisasm + "\n")
 
-                start += bytes
+                # advance to next address
+                start += numbytes
+                if start >= (2 ** self._mpu.ADDR_WIDTH):
+                    start = 0
             except KeyError:
                 addr = self.addrFmt % start
                 self.stdout.write("\r$%s  ?Label\n" % addr)
