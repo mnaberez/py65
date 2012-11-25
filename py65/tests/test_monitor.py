@@ -301,6 +301,18 @@ class MonitorTests(unittest.TestCase):
         disasm = "$c000  ea        NOP\n$c001  ea        NOP\n"
         self.assertEqual(out, disasm)
 
+    def test_disassemble_wraps_to_0_after_to_of_memory(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xffff] = 0x20  # => JSR
+        mon._mpu.memory[0x0000] = 0xD2  #
+        mon._mpu.memory[0x0001] = 0xFF  # => $FFD2
+        mon.do_disassemble("ffff")
+
+        out = stdout.getvalue()
+        disasm = "$ffff  20 d2 ff  JSR $ffd2\n"
+        self.assertEqual(out, disasm)
+
     # fill
 
     def test_shortcut_f_for_fill(self):

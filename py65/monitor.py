@@ -369,14 +369,23 @@ class Monitor(cmd.Cmd):
             self._output(self._format_disassembly(address, bytes, disasm))
             address += bytes
 
-    def _format_disassembly(self, address, bytes, disasm):
-        mem = ''
-        for byte in self._mpu.memory[address:address + bytes]:
-            mem += self.byteFmt % byte + " "
+    def _format_disassembly(self, address, length, disasm):
+        cur_address = address
+        max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
+
+        bytes_remaining = length
+        dump = ''
+
+        while bytes_remaining:
+            if cur_address > max_address:
+                cur_address = 0
+            dump += self.byteFmt % self._mpu.memory[cur_address] + " "
+            cur_address += 1
+            bytes_remaining -= 1
 
         fieldwidth = 1 + (1 + self.byteWidth / 4) * 3
         fieldfmt = "%%-%ds" % fieldwidth
-        return "$" + self.addrFmt % address + "  " + fieldfmt % mem + disasm
+        return "$" + self.addrFmt % address + "  " + fieldfmt % dump + disasm
 
     def help_disassemble(self):
         self._output("disassemble <address_range>")

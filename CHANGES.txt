@@ -18,6 +18,9 @@
   - Assembling now shows an Overflow Error if the statement won't
     fit at the top of memory.
 
+  - Fixed a bug in the disassembler where instructions that wrap past
+    the top of memory would not be displayed properly.
+
 0.13 (2012-11-15)
 
   - Fixed a bug where negative numbers could be entered
