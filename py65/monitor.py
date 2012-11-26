@@ -297,7 +297,7 @@ class Monitor(cmd.Cmd):
             self._output("Syntax error: %s" % statement)
 
     def help_assemble(self):
-        self._output("assemble\t\t"
+        self._output("assemble\t\t\t"
                      "Start interactive assembly at the program counter.")
         self._output("assemble <address>\t\t"
                      "Start interactive assembly at the address.")
