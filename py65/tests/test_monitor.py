@@ -301,7 +301,7 @@ class MonitorTests(unittest.TestCase):
         disasm = "$c000  ea        NOP\n$c001  ea        NOP\n"
         self.assertEqual(out, disasm)
 
-    def test_disassemble_wraps_to_0_after_to_of_memory(self):
+    def test_disassemble_wraps_to_0_after_top_of_memory(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon._mpu.memory[0xffff] = 0x20  # => JSR
