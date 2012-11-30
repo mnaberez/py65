@@ -301,7 +301,7 @@ class MonitorTests(unittest.TestCase):
         disasm = "$c000  ea        NOP\n$c001  ea        NOP\n"
         self.assertEqual(out, disasm)
 
-    def test_disassemble_wraps_to_0_after_top_of_memory(self):
+    def test_disassemble_wraps_an_instruction_around_memory(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon._mpu.memory[0xffff] = 0x20  # => JSR
@@ -311,6 +311,23 @@ class MonitorTests(unittest.TestCase):
 
         out = stdout.getvalue()
         disasm = "$ffff  20 d2 ff  JSR $ffd2\n"
+        self.assertEqual(out, disasm)
+
+    def test_disassemble_wraps_disassembly_list_around_memory(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._mpu.memory[0xffff] = 0x20  # => JSR
+        mon._mpu.memory[0x0000] = 0xD2
+        mon._mpu.memory[0x0001] = 0xFF  # => $FFD2
+        mon._mpu.memory[0x0002] = 0x20  # => JSR
+        mon._mpu.memory[0x0003] = 0xE4
+        mon._mpu.memory[0x0004] = 0xFF  # => $FFE4
+        mon._mpu.memory[0x0005] = 0xEA  # => NOP
+        mon.do_disassemble("ffff:6")
+        out = stdout.getvalue()
+        disasm = ("$ffff  20 d2 ff  JSR $ffd2\n"
+                  "$0002  20 e4 ff  JSR $ffe4\n"
+                  "$0005  ea        NOP\n")
         self.assertEqual(out, disasm)
 
     # fill

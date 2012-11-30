@@ -355,19 +355,38 @@ class Monitor(cmd.Cmd):
                 self.stdout.write("\r$%s  ?Syntax\n" % addr)
 
     def do_disassemble(self, args):
-        split = shlex.split(args)
-        if len(split) != 1:
+        splitted = shlex.split(args)
+        if len(splitted) != 1:
             return self.help_disassemble()
 
-        start, end = self._address_parser.range(split[0])
+        address_parts = splitted[0].split(":")
+        start = self._address_parser.number(address_parts[0])
+        if len(address_parts) > 1:
+            end = self._address_parser.number(address_parts[1])
+        else:
+            end = start
+
+        max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
+
         if start == end:
             end += 1
+        if end > max_address:
+            end = 0
 
-        address = start
-        while address < end:
-            bytes, disasm = self._disassembler.instruction_at(address)
-            self._output(self._format_disassembly(address, bytes, disasm))
-            address += bytes
+        cur_address = start
+        needs_wrap = start > end
+
+        while needs_wrap or cur_address < end:
+            length, disasm = self._disassembler.instruction_at(cur_address)
+            self._output(self._format_disassembly(cur_address, length, disasm))
+
+            remaining = length
+            while remaining:
+                remaining -= 1
+                cur_address += 1
+                if cur_address > max_address:
+                    needs_wrap = False
+                    cur_address = 0
 
     def _format_disassembly(self, address, length, disasm):
         cur_address = address

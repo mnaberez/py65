@@ -1,5 +1,8 @@
 0.15-dev (Next Release)
 
+  - Disassembling can now wrap around memory if the start address
+    given is greater than the end address.
+
 0.14 (2012-11-30)
 
   - Assembling now detects syntax errors, overflows, and bad labels
