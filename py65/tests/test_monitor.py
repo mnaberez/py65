@@ -295,7 +295,7 @@ class MonitorTests(unittest.TestCase):
         mon._mpu.memory[0xc000] = 0xEA  # => NOP
         mon._mpu.memory[0xc001] = 0xEA  # => NOP
         mon._mpu.step()
-        mon.do_disassemble("c000:c002")
+        mon.do_disassemble("c000:c001")
 
         out = stdout.getvalue()
         disasm = "$c000  ea        NOP\n$c001  ea        NOP\n"
@@ -323,7 +323,7 @@ class MonitorTests(unittest.TestCase):
         mon._mpu.memory[0x0003] = 0xE4
         mon._mpu.memory[0x0004] = 0xFF  # => $FFE4
         mon._mpu.memory[0x0005] = 0xEA  # => NOP
-        mon.do_disassemble("ffff:6")
+        mon.do_disassemble("ffff:5")
         out = stdout.getvalue()
         disasm = ("$ffff  20 d2 ff  JSR $ffd2\n"
                   "$0002  20 e4 ff  JSR $ffe4\n"

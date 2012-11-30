@@ -284,11 +284,9 @@ class Monitor(cmd.Cmd):
         try:
             start = self._address_parser.number(splitted[0])
             bytes = self._assembler.assemble(statement, start)
-
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
-            rangestr = (self.addrFmt + ":" + self.addrFmt) % (start, end)
-            self.do_disassemble(rangestr)
+            self.do_disassemble(self.addrFmt % start)
         except KeyError:
             self._output("Bad label: %s" % args)
         except OverflowError:
@@ -367,16 +365,10 @@ class Monitor(cmd.Cmd):
             end = start
 
         max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
-
-        if start == end:
-            end += 1
-        if end > max_address:
-            end = 0
-
         cur_address = start
         needs_wrap = start > end
 
-        while needs_wrap or cur_address < end:
+        while needs_wrap or cur_address <= end:
             length, disasm = self._disassembler.instruction_at(cur_address)
             self._output(self._format_disassembly(cur_address, length, disasm))
 
@@ -384,7 +376,7 @@ class Monitor(cmd.Cmd):
             while remaining:
                 remaining -= 1
                 cur_address += 1
-                if cur_address > max_address:
+                if start > end and cur_address > max_address:
                     needs_wrap = False
                     cur_address = 0
 
@@ -409,7 +401,7 @@ class Monitor(cmd.Cmd):
     def help_disassemble(self):
         self._output("disassemble <address_range>")
         self._output("Disassemble instructions in the address range.")
-        self._output('Range is specified like "<start>:<end+1>".')
+        self._output('Range is specified like "<start>:<end>".')
 
     def help_step(self):
         self._output("step")
