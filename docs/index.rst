@@ -26,7 +26,8 @@ The monitor is started using the ``py65mon`` command::
 
   Py65 Monitor
 
-  <6502: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>
+         PC  AC XR YR SP NV-BDIZC
+  6502: 0000 00 00 00 ff 00110000
   .
 
 Once the monitor has started, it will display a register dump and the
