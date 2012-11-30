@@ -1,4 +1,4 @@
-0.14 *Next Release*
+0.14 (2012-11-30)
 
   - Assembling now detects syntax errors, overflows, and bad labels
     separately and shows specific error messages.
