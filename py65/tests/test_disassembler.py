@@ -7,19 +7,6 @@ from py65.utils.addressing import AddressParser
 
 
 class DisassemblerTests(unittest.TestCase):
-    def test_disassemble_wraps_after_top_of_mem(self):
-        mpu = MPU()
-        mpu.memory[0xFFFF] = 0x20  # JSR
-        mpu.memory[0x0000] = 0xD2  #
-        mpu.memory[0x0001] = 0xFF  # $FFD2
-
-        dis = Disassembler(mpu)
-#        length, disasm = dis.instruction_at(0xFFFF)
-        from pprint import pprint as pp
-#        pp(disasm)
-
-#        return disasm.instruction_at(pc)
-
     def test_disassembles_00(self):
         length, disasm = self.disassemble([0x00])
         self.assertEqual(1, length)
