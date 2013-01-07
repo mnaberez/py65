@@ -1,4 +1,4 @@
-0.15-dev (Next Release)
+0.15 (2012-01-06)
 
   - Disassembling can now wrap around memory if the start address
     given is greater than the end address.
