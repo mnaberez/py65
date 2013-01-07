@@ -42,7 +42,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Py65'
-copyright = u'2008-2012, Mike Naberezny'
+copyright = u'2008-2013, Mike Naberezny'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
