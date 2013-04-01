@@ -543,11 +543,6 @@ class Monitor(cmd.Cmd):
             return
 
         filename = split[0]
-        if len(split) == 2:
-            # if the start address is -1, we will adjust it later
-            start = self._address_parser.number(split[1])
-        else:
-            start = self._mpu.pc
 
         if "://" in filename:
             try:
@@ -568,9 +563,14 @@ class Monitor(cmd.Cmd):
                 self._output(msg)
                 return
 
-        # if the start address was -1, we load to top of memory
-        if start == -1:
-            start = self.addrMask - len(bytes) / (self.byteWidth / 8) + 1
+        if len(split) == 2:
+            if split[1] == "-1":
+                # load a ROM to top of memory
+                start = self.addrMask - len(bytes) / (self.byteWidth / 8) + 1
+            else:
+                start = self._address_parser.number(split[1])
+        else:
+            start = self._mpu.pc
 
         if self.byteWidth == 8:
             bytes = map(ord, bytes)
