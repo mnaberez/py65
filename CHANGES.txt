@@ -1,5 +1,8 @@
 0.16 (Next Release)
 
+  - Fixed a bug in the monitor that caused loading from the command
+    line with "--rom" to crash.
+
 0.15 (2013-01-06)
 
   - Disassembling can now wrap around memory if the start address
