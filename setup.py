@@ -1,4 +1,4 @@
-__version__ = '0.16'
+__version__ = '0.17-dev'
 
 import os
 import sys

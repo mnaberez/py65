@@ -1,3 +1,5 @@
+0.17 (Next Release)
+
 0.16 (2013-04-03)
 
   - Fixed a bug in the monitor that caused loading from the command
