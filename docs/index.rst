@@ -297,14 +297,16 @@ Command Reference
 
     .registers
 
-    <6502: A=00, X=00, Y=00, Flags=20, SP=ff, PC=0000>
+           PC  AC XR YR SP NV-BDIZC
+    6502: 0000 00 00 00 ff 00110000
 
   Registers can changed giving ``name=value``, separated by commas if
   multiple registers are to be changed::
 
     .registers a=02, x=04
 
-    <6502: A=02, X=04, Y=00, Flags=20, SP=ff, PC=0000>
+           PC  AC XR YR SP NV-BDIZC
+    6502: 0000 02 04 00 ff 00110000
 
 .. describe:: reset
 
@@ -352,14 +354,17 @@ Command Reference
   Execute a single instruction at the program counter.  After the instruction
   executes, the next instruction is disassembled and printed::
 
-    <6502: A=00, X=00, Y=00, Flags=34, SP=fc, PC=0000>
+           PC  AC XR YR SP NV-BDIZC
+    6502: 0000 00 00 00 ff 00110000
     .registers pc=c000
 
-    <6502: A=00, X=00, Y=00, Flags=34, SP=fc, PC=c000>
+           PC  AC XR YR SP NV-BDIZC
+    6502: c000 00 00 00 ff 00110000
     .step
     $c002  a9 42     LDA #$42
 
-    <6502: A=00, X=00, Y=00, Flags=34, SP=fc, PC=c000>
+           PC  AC XR YR SP NV-BDIZC
+    6502: c002 00 00 00 ff 00110000
     .
 
   In the example above, the instruction at ``$C000`` executes and the monitor
@@ -406,7 +411,3 @@ Command Reference
     Terminal width is 130
 
   The number of columns is always specified as a decimal number.
-
-
-
-
