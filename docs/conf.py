@@ -15,6 +15,7 @@
 
 import os
 import sys
+from datetime import date
 
 # If your extensions are in another directory, add it here. If the directory
 # is relative to the documentation root, use os.path.abspath to make it
@@ -42,7 +43,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Py65'
-copyright = u'2008-2013, Mike Naberezny'
+year = date.today().year
+copyright = u'2008-%d, Mike Naberezny and contributors' % year
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
