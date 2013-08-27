@@ -165,14 +165,18 @@ Command Reference
 
 .. describe:: disassemble <address_range>
 
-  Disassembles a range of memory.  All legal NMOS 6502 opcodes and addressing
-  modes are supported::
+  Disassemble a range of memory::
 
     .disassemble ff80:ff84
     $ff80  d8        CLD
     $ff81  a2 ff     LDX #$ff
     $ff83  9a        TXS
     $ff84  a0 1c     LDY #$1c
+
+  The disassembly will use the instruction set of the selected MPU.  For
+  example, the extra instructions of the 65C02 will only be displayed if
+  a 65C02 MPU is selected.  On an NMOS 6502, those instructions would be
+  disassembled as ``???``.
 
   If labels have been defined, they will be substituted for
   addresses in the operands.
