@@ -481,8 +481,6 @@ class Monitor(cmd.Cmd):
             self._output("Bad label: %s" % args)
         except OverflowError:
             self._output("Overflow error: %s" % args)
-        except SyntaxError:
-            self._output("Syntax error: %s" % statement)
 
     def help_registers(self):
         self._output("registers[<name>=<value> [, <name>=<value>]*]")
