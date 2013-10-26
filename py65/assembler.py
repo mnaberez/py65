@@ -1,5 +1,4 @@
 import re
-from py65.devices.mpu6502 import MPU
 from py65.utils.addressing import AddressParser
 
 
