@@ -16,6 +16,12 @@ class ObservableMemory:
         self._write_subscribers = defaultdict(list)
 
     def __setitem__(self, address, value):
+        if isinstance(address, slice):
+            r = range(*address.indices(self.physMask + 1))
+            for n, v in zip(r, value):
+                self[n] = v
+            return
+
         address &= self.physMask
         callbacks = self._write_subscribers[address]
 
@@ -27,6 +33,10 @@ class ObservableMemory:
         self._subject[address] = value
 
     def __getitem__(self, address):
+        if isinstance(address, slice):
+            r = range(*address.indices(self.physMask + 1))
+            return [ self[n] for n in r ]
+
         address &= self.physMask
         callbacks = self._read_subscribers[address]
         final_result = None
