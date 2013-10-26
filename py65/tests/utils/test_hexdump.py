@@ -31,7 +31,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError as exc:
             msg = 'Start address was not found in data'
-            self.assert_(str(exc).startswith('Start address'))
+            self.assertTrue(str(exc).startswith('Start address'))
 
     def test_raises_when_start_address_is_invalid(self):
         text = 'oops: aa bb cc'

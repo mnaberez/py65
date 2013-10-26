@@ -76,7 +76,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_absolute_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -193,7 +193,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_zp_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -308,7 +308,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_immediate_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -469,7 +469,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_abs_x_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -591,7 +591,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_abs_y_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -713,7 +713,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_zp_x_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -843,7 +843,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_ind_indexed_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -987,7 +987,7 @@ class Common6502Tests:
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_indexed_ind_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
@@ -5544,7 +5544,7 @@ class Common6502Tests:
                           py65.assembler.Assembler.Addressing)
         mpu = self._make_mpu()
         for name, mode in mpu.disassemble:
-            self.assert_(mode in valid_modes)
+            self.assertTrue(mode in valid_modes)
 
     def test_brk_interrupt(self):
         mpu = self._make_mpu()
@@ -5647,7 +5647,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     def test_repr(self):
         mpu = self._make_mpu()
-        self.assert_("6502" in repr(mpu))
+        self.assertTrue("6502" in repr(mpu))
 
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU

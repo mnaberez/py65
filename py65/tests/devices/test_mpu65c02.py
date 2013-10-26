@@ -9,7 +9,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     def test_repr(self):
         mpu = self._make_mpu()
-        self.assert_('65C02' in repr(mpu))
+        self.assertTrue('65C02' in repr(mpu))
 
     # ADC Zero Page, Indirect
 
@@ -44,7 +44,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertNotEquals(mpu.CARRY, mpu.p & mpu.CARRY)
+        self.assertNotEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def test_adc_bcd_off_zp_ind_carry_clear_in_no_carry_clear_out(self):
         mpu = self._make_mpu()
