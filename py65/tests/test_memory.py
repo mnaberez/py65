@@ -144,7 +144,7 @@ class ObservableMemoryTests(unittest.TestCase):
             return 0xFF
         mem.subscribe_to_write([0xC000, 0xC001], write_subscriber)
 
-        mem.write(0xC000, [0x01, 002])
+        mem.write(0xC000, [0x01, 0x02])
         self.assertEqual(0x01, subject[0xC000])
         self.assertEqual(0x02, subject[0xC001])
 
