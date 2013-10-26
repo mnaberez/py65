@@ -1,6 +1,5 @@
 import unittest
 import sys
-import re
 import os
 import tempfile
 from py65.monitor import Monitor

@@ -1,7 +1,4 @@
 import unittest
-import sys
-import re
-import os
 from py65.memory import ObservableMemory
 
 
