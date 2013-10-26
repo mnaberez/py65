@@ -31,7 +31,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError as exc:
             msg = 'Start address was not found in data'
-            self.assert_(exc[0].startswith('Start address'))
+            self.assert_(str(exc).startswith('Start address'))
 
     def test_raises_when_start_address_is_invalid(self):
         text = 'oops: aa bb cc'
@@ -40,7 +40,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError as exc:
             msg = 'Could not parse address: oops'
-            self.assertEqual(msg, exc[0])
+            self.assertEqual(msg, str(exc))
 
     def test_raises_when_start_address_is_too_short(self):
         text = '01: aa bb cc'
@@ -49,7 +49,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError as exc:
             msg = 'Expected address to be 2 bytes, got 1'
-            self.assertEqual(msg, exc[0])
+            self.assertEqual(msg, str(exc))
 
     def test_raises_when_start_address_is_too_long(self):
         text = '010304: aa bb cc'
@@ -58,7 +58,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError as exc:
             msg = 'Expected address to be 2 bytes, got 3'
-            self.assertEqual(msg, exc[0])
+            self.assertEqual(msg, str(exc))
 
     def test_raises_when_next_address_is_unexpected(self):
         text = "c000: aa\nc002: cc"
@@ -68,7 +68,7 @@ class HexdumpLoaderTests(unittest.TestCase):
         except ValueError as exc:
             msg = 'Non-contigous block detected.  Expected next ' \
                   'address to be $c001, label was $c002'
-            self.assertEqual(msg, exc[0])
+            self.assertEqual(msg, str(exc))
 
     def test_raises_when_data_is_invalid(self):
         text = 'c000: foo'
@@ -77,7 +77,7 @@ class HexdumpLoaderTests(unittest.TestCase):
             self.fail()
         except ValueError as exc:
             msg = 'Could not parse data: foo'
-            self.assertEqual(msg, exc[0])
+            self.assertEqual(msg, str(exc))
 
     def test_loads_data_without_dollar_signs(self):
         text = 'c000: aa bb'

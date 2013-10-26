@@ -54,7 +54,7 @@ class Monitor(cmd.Cmd):
             longopts = ['help', 'mpu=', 'load=', 'rom=', 'goto=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
-            self._output(str(exc))
+            self._output(exc.message)
             self._usage()
             self._exit(1)
 
@@ -507,7 +507,7 @@ class Monitor(cmd.Cmd):
                         intval &= self.byteMask
                     setattr(self._mpu, register, intval)
                 except KeyError as exc:
-                    self._output(exc[0])
+                    self._output(exc.message)
 
     def help_cd(self):
         self._output("cd <directory>")
@@ -520,7 +520,8 @@ class Monitor(cmd.Cmd):
         try:
             os.chdir(args)
         except OSError as exc:
-            msg = "Cannot change directory: [%d] %s" % (exc[0], exc[1])
+            msg = "Cannot change directory: [%d] %s" % (exc.errno,
+                exc.strerror)
             self._output(msg)
         self.do_pwd()
 
@@ -550,7 +551,7 @@ class Monitor(cmd.Cmd):
                 bytes = f.read()
                 f.close()
             except (urllib2.URLError, urllib2.HTTPError) as exc:
-                msg = "Cannot fetch remote file: %s" % str(exc)
+                msg = "Cannot fetch remote file: %s" % exc.message
                 self._output(msg)
                 return
         else:
@@ -559,7 +560,7 @@ class Monitor(cmd.Cmd):
                 bytes = f.read()
                 f.close()
             except (OSError, IOError) as exc:
-                msg = "Cannot load file: [%d] %s" % (exc[0], exc[1])
+                msg = "Cannot load file: [%d] %s" % (exc.errno, exc.strerror)
                 self._output(msg)
                 return
 
@@ -601,7 +602,7 @@ class Monitor(cmd.Cmd):
                     f.write(chr((byte >> shift) & 0xff))
             f.close()
         except (OSError, IOError) as exc:
-            msg = "Cannot save file: [%d] %s" % (exc[0], exc[1])
+            msg = "Cannot save file: [%d] %s" % (exc.errno, exc.strerror)
             self._output(msg)
             return
 

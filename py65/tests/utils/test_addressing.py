@@ -50,7 +50,7 @@ class AddressParserTests(unittest.TestCase):
             parser.number('bad_label')
             self.fail()
         except KeyError as exc:
-            self.assertEqual('Label not found: bad_label', exc[0])
+            self.assertEqual('Label not found: bad_label', exc.message)
 
     def test_number_label_hex_offset(self):
         parser = AddressParser()
@@ -96,7 +96,7 @@ class AddressParserTests(unittest.TestCase):
             parser.number('bad_label+3')
             self.fail()
         except KeyError as exc:
-            self.assertEqual('Label not found: bad_label', exc[0])
+            self.assertEqual('Label not found: bad_label', exc.message)
 
     def test_number_bad_label_syntax(self):
         parser = AddressParser()
@@ -105,7 +105,7 @@ class AddressParserTests(unittest.TestCase):
             parser.number('#$foo')
             self.fail()
         except KeyError as exc:
-            self.assertEqual('Label not found: #$foo', exc[0])
+            self.assertEqual('Label not found: #$foo', exc.message)
 
     def test_number_constrains_address_at_zero_or_above(self):
         parser = AddressParser()
