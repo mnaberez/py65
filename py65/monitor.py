@@ -80,7 +80,7 @@ class Monitor(cmd.Cmd):
 
             if opt in ('-m', '--mpu'):
                 if self._get_mpu(value) is None:
-                    mpus = self.Microprocessors.keys()
+                    mpus = list(self.Microprocessors.keys())
                     mpus.sort()
                     msg = "Fatal: no such MPU. Available MPUs: %s"
                     self._output(msg % ', '.join(mpus))
@@ -248,7 +248,7 @@ class Monitor(cmd.Cmd):
 
     def do_mpu(self, args):
         def available_mpus():
-            mpus = self.Microprocessors.keys()
+            mpus = list(self.Microprocessors.keys())
             mpus.sort()
             self._output("Available MPUs: %s" % ', '.join(mpus))
 
@@ -626,7 +626,7 @@ class Monitor(cmd.Cmd):
             return self.help_fill()
 
         start, end = self._address_parser.range(split[0])
-        filler = map(self._address_parser.number, split[1:])
+        filler = list(map(self._address_parser.number, split[1:]))
 
         self._fill(start, end, filler)
 
@@ -695,10 +695,10 @@ class Monitor(cmd.Cmd):
         self._output("Display current label mappings.")
 
     def do_show_labels(self, args):
-        values = self._address_parser.labels.values()
-        keys = self._address_parser.labels.keys()
+        values = list(self._address_parser.labels.values())
+        keys = list(self._address_parser.labels.keys())
 
-        byaddress = zip(values, keys)
+        byaddress = list(zip(values, keys))
         byaddress.sort()
         for address, label in byaddress:
             self._output(self.addrFmt % address + ": " + label)
