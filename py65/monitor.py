@@ -58,7 +58,7 @@ class Monitor(cmd.Cmd):
             longopts = ['help', 'mpu=', 'load=', 'rom=', 'goto=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
-            self._output(exc.message)
+            self._output(exc.args[0])
             self._usage()
             self._exit(1)
 
@@ -509,7 +509,7 @@ class Monitor(cmd.Cmd):
                         intval &= self.byteMask
                     setattr(self._mpu, register, intval)
                 except KeyError as exc:
-                    self._output(exc.message)
+                    self._output(exc.args[0])
 
     def help_cd(self):
         self._output("cd <directory>")
