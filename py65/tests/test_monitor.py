@@ -4,7 +4,11 @@ import re
 import os
 import tempfile
 from py65.monitor import Monitor
-from StringIO import StringIO
+
+try:
+    from StringIO import StringIO
+except ImportError: # Python 3
+    from io import StringIO
 
 
 class MonitorTests(unittest.TestCase):

@@ -18,7 +18,7 @@ import os
 import re
 import shlex
 import sys
-import urllib2
+
 from asyncore import compact_traceback
 from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.devices.mpu65c02 import MPU as CMOS65C02
@@ -30,6 +30,10 @@ from py65.utils import console
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
+try:
+    from urllib2 import urlopen
+except ImportError: # Python 3
+    from urllib.request import urlopen
 
 class Monitor(cmd.Cmd):
 
@@ -545,11 +549,11 @@ class Monitor(cmd.Cmd):
 
         if "://" in filename:
             try:
-                f = urllib2.urlopen(filename)
+                f = urlopen(filename)
                 bytes = f.read()
                 f.close()
-            except (urllib2.URLError, urllib2.HTTPError) as exc:
-                msg = "Cannot fetch remote file: %s" % exc.message
+            except Exception as exc:
+                msg = "Cannot fetch remote file: %s" % str(exc)
                 self._output(msg)
                 return
         else:
