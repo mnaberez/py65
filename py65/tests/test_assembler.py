@@ -175,9 +175,6 @@ class AssemblerTests(unittest.TestCase):
         self.assertEqual([0x26, 0x44],
                          self.assemble('ROL $44'))
 
-    def dont_test_assembles_23(self):
-        pass
-
     def dont_test_assembles_27(self):
         pass
 
@@ -490,11 +487,6 @@ class AssemblerTests(unittest.TestCase):
         self.assertEqual([0x7c, 0x34, 0x12],
                          self.assemble('JMP ($1234,X)', 0x0000, mpu))
 
-    def test_assembles_07_65c02(self):
-        mpu = MPU65C02()
-        self.assertEqual([0x07, 0x42],
-                         self.assemble('RMB0 $42', 0x0000, mpu))
-
     def test_assembles_7d(self):
         self.assertEqual([0x7d, 0x00, 0x44],
                          self.assemble('ADC $4400,X'))
@@ -650,7 +642,7 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_a7(self):
         pass
 
-    def test_assembles_a9(self):
+    def test_assembles_a8(self):
         self.assertEqual([0xa8],
                          self.assemble('TAY'))
 

@@ -378,16 +378,6 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('Wrote +1 bytes from $c000 to $c000'))
 
-    def test_do_fill_will_fill_one_address(self):
-        stdout = StringIO()
-        mon = Monitor(stdout=stdout)
-        mon._mpu.memory[0xc000] = 0x00
-        mon.do_fill('c000 aa')
-
-        self.assertEqual(0xAA, mon._mpu.memory[0xc000])
-        out = stdout.getvalue()
-        self.assertTrue(out.startswith('Wrote +1 bytes from $c000 to $c000'))
-
     def test_do_fill_will_fill_an_address_range_with_a_single_byte(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
