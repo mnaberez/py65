@@ -169,7 +169,7 @@ class Monitor(cmd.Cmd):
             line = self._shortcuts['~'] + ' ' + line[1:]
 
         # command shortcuts
-        for shortcut, command in self._shortcuts.iteritems():
+        for shortcut, command in self._shortcuts.items():
             if line == shortcut:
                 line = command
                 break
@@ -452,14 +452,14 @@ class Monitor(cmd.Cmd):
         if args != '':
             new = args[0].lower()
             changed = False
-            for name, radix in radixes.iteritems():
+            for name, radix in radixes.items():
                 if name[0].lower() == new:
                     self._address_parser.radix = radix
                     changed = True
             if not changed:
                 self._output("Illegal radix: %s" % args)
 
-        for name, radix in radixes.iteritems():
+        for name, radix in radixes.items():
             if self._address_parser.radix == radix:
                 self._output("Default radix is %s" % name)
 

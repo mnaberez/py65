@@ -30,7 +30,7 @@ class AddressParser(object):
     def label_for(self, address, default=None):
         """Given an address, return the corresponding label or a default.
         """
-        for label, label_address in self.labels.iteritems():
+        for label, label_address in self.labels.items():
             if label_address == address:
                 return label
         return default
