@@ -490,7 +490,7 @@ class MonitorTests(unittest.TestCase):
         filename = tempfile.mktemp()
         try:
             f = open(filename, 'wb')
-            f.write(chr(0xAA) + chr(0xBB) + chr(0xCC))
+            f.write(b'\xaa\xbb\xcc')
             f.close()
 
             mon.do_load("'%s' a600" % filename)
@@ -789,8 +789,7 @@ class MonitorTests(unittest.TestCase):
             f = open(filename, 'rb')
             contents = f.read()
             f.close()
-            self.assertEqual(chr(0xAA) + chr(0xBB) + chr(0xCC),
-                             contents)
+            self.assertEqual(b'\xaa\xbb\xcc', contents)
         finally:
             os.unlink(filename)
 
