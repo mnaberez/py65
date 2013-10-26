@@ -53,8 +53,8 @@ class Monitor(cmd.Cmd):
             shortopts = 'hm:l:r:g:'
             longopts = ['help', 'mpu=', 'load=', 'rom=', 'goto=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
-        except getopt.GetoptError, err:
-            self._output(str(err))
+        except getopt.GetoptError as exc:
+            self._output(str(exc))
             self._usage()
             self._exit(1)
 
@@ -104,7 +104,7 @@ class Monitor(cmd.Cmd):
             result = cmd.Cmd.onecmd(self, line)
         except KeyboardInterrupt:
             self._output("Interrupt")
-        except Exception, e:
+        except Exception:
             (file, fun, line), t, v, tbinfo = compact_traceback()
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
             self._output(error)
@@ -506,8 +506,8 @@ class Monitor(cmd.Cmd):
                     if len(register) == 1:
                         intval &= self.byteMask
                     setattr(self._mpu, register, intval)
-                except KeyError, why:
-                    self._output(why[0])
+                except KeyError as exc:
+                    self._output(exc[0])
 
     def help_cd(self):
         self._output("cd <directory>")
@@ -519,8 +519,8 @@ class Monitor(cmd.Cmd):
 
         try:
             os.chdir(args)
-        except OSError, why:
-            msg = "Cannot change directory: [%d] %s" % (why[0], why[1])
+        except OSError as exc:
+            msg = "Cannot change directory: [%d] %s" % (exc[0], exc[1])
             self._output(msg)
         self.do_pwd()
 
@@ -549,8 +549,8 @@ class Monitor(cmd.Cmd):
                 f = urllib2.urlopen(filename)
                 bytes = f.read()
                 f.close()
-            except (urllib2.URLError, urllib2.HTTPError), why:
-                msg = "Cannot fetch remote file: %s" % str(why)
+            except (urllib2.URLError, urllib2.HTTPError) as exc:
+                msg = "Cannot fetch remote file: %s" % str(exc)
                 self._output(msg)
                 return
         else:
@@ -558,8 +558,8 @@ class Monitor(cmd.Cmd):
                 f = open(filename, 'rb')
                 bytes = f.read()
                 f.close()
-            except (OSError, IOError), why:
-                msg = "Cannot load file: [%d] %s" % (why[0], why[1])
+            except (OSError, IOError) as exc:
+                msg = "Cannot load file: [%d] %s" % (exc[0], exc[1])
                 self._output(msg)
                 return
 
@@ -600,8 +600,8 @@ class Monitor(cmd.Cmd):
                 for shift in range(self.byteWidth - 8, -1, -8):
                     f.write(chr((byte >> shift) & 0xff))
             f.close()
-        except (OSError, IOError), why:
-            msg = "Cannot save file: [%d] %s" % (why[0], why[1])
+        except (OSError, IOError) as exc:
+            msg = "Cannot save file: [%d] %s" % (exc[0], exc[1])
             self._output(msg)
             return
 
