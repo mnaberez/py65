@@ -57,7 +57,7 @@ class ObservableMemoryTests(unittest.TestCase):
         def read_subscriber(address, value):
             return 0xAB
 
-        mem.subscribe_to_read(xrange(0xC000, 0xC001 + 1), read_subscriber)
+        mem.subscribe_to_read(range(0xC000, 0xC001 + 1), read_subscriber)
 
         mem[0xC000] = 0xAB
         mem[0xC001] = 0xAB
