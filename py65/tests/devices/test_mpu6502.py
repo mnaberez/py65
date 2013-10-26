@@ -5540,8 +5540,7 @@ class Common6502Tests:
         self.assertEqual(0x0001, mpu.pc)
 
     def test_decorated_addressing_modes_are_valid(self):
-        valid_modes = map(lambda x: x[0],
-                          py65.assembler.Assembler.Addressing)
+        valid_modes = [x[0] for x in py65.assembler.Assembler.Addressing]
         mpu = self._make_mpu()
         for name, mode in mpu.disassemble:
             self.assertTrue(mode in valid_modes)
