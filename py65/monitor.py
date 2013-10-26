@@ -740,6 +740,7 @@ def main(args=None):
 
     try:
         import readline
+        readline = readline  # pyflakes
     except ImportError:
         pass
 

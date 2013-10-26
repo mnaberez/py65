@@ -77,6 +77,7 @@ class ObservableMemoryTests(unittest.TestCase):
         mem.subscribe_to_read([0xC000], read_subscriber)
 
         value = mem[0xC000]
+        value = value  # pyflakes
         self.assertEqual(['read_subscriber'], calls)
 
     # __getitem__
