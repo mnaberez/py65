@@ -3,12 +3,15 @@ __version__ = '0.17-dev'
 import os
 import sys
 
-if sys.version_info[:2] < (2, 6):
-    msg = ("Py65 requires Python 2.6 or later, you are attempting to "
-           "install it using version %s.  Please install with a "
-           "supported version" % sys.version)
-    sys.stderr.write(msg)
-    sys.exit(1)
+py_version = sys.version_info[:2]
+PY3 = py_version[0] == 3
+
+if PY3:
+    if py_version < (3, 2):
+        raise RuntimeError('On Python 3, Py65 requires Python 3.2 or later')
+else:
+    if py_version < (2, 6):
+        raise RuntimeError('On Python 2, Py65 requires Python 2.6 or later')
 
 from setuptools import setup, find_packages
 here = os.path.abspath(os.path.dirname(__file__))
