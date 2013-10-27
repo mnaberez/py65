@@ -318,7 +318,7 @@ class Monitor(cmd.Cmd):
 
         while True:
             prompt = "\r$" + (self.addrFmt % start) + "   " + \
-                (" " * (1 + self.byteWidth / 4) * 3)
+                (" " * int(1 + self.byteWidth / 4) * 3)
 
             line = console.line_input(prompt,
                                       stdin=self.stdin, stdout=self.stdout)
@@ -398,7 +398,7 @@ class Monitor(cmd.Cmd):
             cur_address += 1
             bytes_remaining -= 1
 
-        fieldwidth = 1 + (1 + self.byteWidth / 4) * 3
+        fieldwidth = 1 + int(1 + self.byteWidth / 4) * 3
         fieldfmt = "%%-%ds" % fieldwidth
         return "$" + self.addrFmt % address + "  " + fieldfmt % dump + disasm
 
@@ -569,7 +569,7 @@ class Monitor(cmd.Cmd):
         if len(split) == 2:
             if split[1] == "-1":
                 # load a ROM to top of memory
-                start = self.addrMask - len(bytes) / (self.byteWidth / 8) + 1
+                start = self.addrMask - len(bytes) / int(self.byteWidth / 8) + 1
             else:
                 start = self._address_parser.number(split[1])
         else:
