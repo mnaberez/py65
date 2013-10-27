@@ -1,4 +1,4 @@
-0.17 (Next Release)
+0.17 (2013-10-26)
 
   - Added support for Python 3.2 and 3.3 based on work by David Beazley.
 
