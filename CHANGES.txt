@@ -1,5 +1,7 @@
 0.17 (Next Release)
 
+  - Added support for Python 3.2 and 3.3 based on work by David Beazley.
+
 0.16 (2013-04-03)
 
   - Fixed a bug in the monitor that caused loading from the command
