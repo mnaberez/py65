@@ -576,12 +576,18 @@ class Monitor(cmd.Cmd):
             start = self._mpu.pc
 
         if self.byteWidth == 8:
-            bytes = map(ord, bytes)
+            if isinstance(bytes, str):
+                bytes = map(ord, bytes)
+            else: # Python 3
+                bytes = [ b for b in bytes ]
 
         elif self.byteWidth == 16:
             def format(msb, lsb):
-                return (ord(msb) << 8) + ord(lsb)
-            bytes = map(format, bytes[0::2], bytes[1::2])
+                if isinstance(bytes, str):
+                    return (ord(msb) << 8) + ord(lsb)
+                else: # Python 3
+                    return (msb << 8) + lsb
+            bytes = list(map(format, bytes[0::2], bytes[1::2]))
 
         self._fill(start, start, bytes)
 
@@ -595,20 +601,20 @@ class Monitor(cmd.Cmd):
         start = self._address_parser.number(split[1])
         end = self._address_parser.number(split[2])
 
-        bytes = self._mpu.memory[start:end + 1]
+        mem = self._mpu.memory[start:end + 1]
         try:
             f = open(filename, 'wb')
-            for byte in bytes:
+            for m in mem:
                 # output each octect from msb first
                 for shift in range(self.byteWidth - 8, -1, -8):
-                    f.write(chr((byte >> shift) & 0xff))
+                    f.write(bytearray([(m >> shift) & 0xff]))
             f.close()
         except (OSError, IOError) as exc:
             msg = "Cannot save file: [%d] %s" % (exc.errno, exc.strerror)
             self._output(msg)
             return
 
-        self._output("Saved +%d bytes to %s" % (len(bytes), filename))
+        self._output("Saved +%d bytes to %s" % (len(mem), filename))
 
     def help_save(self):
         self._output("save \"filename\" <start> <end>")
