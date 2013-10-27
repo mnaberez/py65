@@ -1,0 +1,10 @@
+include CHANGES.txt
+include LICENSE.txt
+include README.rst
+
+recursive-include docs *.rst
+include docs/Makefile
+include docs/conf.py
+prune docs/build
+
+recursive-include examples *
