@@ -93,4 +93,5 @@ def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
         else:
             line += char
             stdout.write(char)
+            stdout.flush()
     return line
