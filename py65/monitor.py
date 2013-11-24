@@ -429,6 +429,9 @@ class Monitor(cmd.Cmd):
         self._output("Change the PC to address and continue execution.")
 
     def do_goto(self, args):
+        if args == '':
+            return self.help_goto()
+
         self._mpu.pc = self._address_parser.number(args)
         brks = [0x00]  # BRK
         self._run(stopcodes=brks)

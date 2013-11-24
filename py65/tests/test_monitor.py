@@ -417,6 +417,13 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('goto'))
 
+    def test_goto_without_args_shows_command_help(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.onecmd('goto')
+        out = stdout.getvalue()
+        self.assertTrue("goto <address>" in out)
+
     # help
 
     def test_help_without_args_shows_documented_commands(self):
