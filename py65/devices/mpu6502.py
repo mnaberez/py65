@@ -61,6 +61,7 @@ class MPU:
         self.excycles = 0
         self.addcycles = self.extracycles[instructCode]
         self.instruct[instructCode](self)
+        self.pc &= self.addrMask
         self.processorCycles += self.cycletime[instructCode] + self.excycles
         return self
 

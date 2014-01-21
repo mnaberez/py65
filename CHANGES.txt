@@ -1,5 +1,9 @@
 0.18-dev (Next Release)
 
+  - Fixed a bug in RTS where popping $FFFF off the stack would cause
+    program counter to overflow to $10000.  It now wraps around to
+    $0000 as it should.  Thanks to Gábor Lénárt for reporting it.
+
 0.17 (2013-10-26)
 
   - Added support for Python 3.2 and 3.3 based on work by David Beazley.

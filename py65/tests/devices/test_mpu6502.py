@@ -4329,10 +4329,23 @@ class Common6502Tests:
         # $0000 RTS
         mpu.memory[0x0000] = 0x60
         self._write(mpu.memory, 0x01FE, (0x03, 0xC0))  # PCL, PCH
+        mpu.pc = 0x0000
         mpu.sp = 0xFD
 
         mpu.step()
         self.assertEqual(0xC004, mpu.pc)
+        self.assertEqual(0xFF,   mpu.sp)
+
+    def test_rts_wraps_around_top_of_memory(self):
+        mpu = self._make_mpu()
+        # $0000 RTS
+        mpu.memory[0x1000] = 0x60
+        self._write(mpu.memory, 0x01FE, (0xFF, 0xFF))  # PCL, PCH
+        mpu.pc = 0x1000
+        mpu.sp = 0xFD
+
+        mpu.step()
+        self.assertEqual(0x0000, mpu.pc)
         self.assertEqual(0xFF,   mpu.sp)
 
     # SBC Absolute
