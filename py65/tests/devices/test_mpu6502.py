@@ -4338,7 +4338,7 @@ class Common6502Tests:
 
     def test_rts_wraps_around_top_of_memory(self):
         mpu = self._make_mpu()
-        # $0000 RTS
+        # $1000 RTS
         mpu.memory[0x1000] = 0x60
         self._write(mpu.memory, 0x01FE, (0xFF, 0xFF))  # PCL, PCH
         mpu.pc = 0x1000
