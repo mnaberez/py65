@@ -68,6 +68,21 @@ class MPU(mpu6502.MPU):
 
     # instructions
 
+    @instruction(name="BRK", mode="imp", cycles=7)
+    def inst_0x00(self):
+        # pc has already been increased one
+        pc = (self.pc + 1) & self.addrMask
+        self.stPushWord(pc)
+
+        self.p |= self.BREAK
+        self.stPush(self.p | self.BREAK | self.UNUSED)
+
+        self.p |= self.INTERRUPT
+        self.pc = self.WordAt(self.IrqTo)
+
+        # 65C02 clears decimal flag, NMOS 6502 does not
+        self.p &= ~self.DECIMAL
+
     @instruction(name="RMB0", mode="zpg", cycles=5)
     def inst_0x07(self):
         self.opRMB(self.ZeroPageAddr, 0xFE)

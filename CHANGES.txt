@@ -4,6 +4,9 @@
     the program counter to overflow to $10000.  It now wraps around
     to $0000 as it should.  Thanks to Gábor Lénárt for reporting it.
 
+  - Fixed BRK on 65C02 so it clears the decimal flag.  On NMOS 6502, the
+    decimal flag is unaffected on BRK.  On 65C02, it is always cleared.
+
 0.17 (2013-10-26)
 
   - Added support for Python 3.2 and 3.3 based on work by David Beazley.

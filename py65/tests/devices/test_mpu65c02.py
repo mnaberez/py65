@@ -430,6 +430,18 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x01, mpu.a)
         self.assertEqual(0x00, mpu.memory[0x0010 + mpu.x])
 
+    # BRK
+
+    def test_brk_clears_decimal_flag(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.DECIMAL
+        # $C000 BRK
+        mpu.memory[0xC000] = 0x00
+        mpu.pc = 0xC000
+        mpu.step()
+        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
+        self.assertEqual(0, mpu.p & mpu.DECIMAL)
+
     # EOR Zero Page, Indirect
 
     def test_eor_zp_ind_flips_bits_over_setting_z_flag(self):

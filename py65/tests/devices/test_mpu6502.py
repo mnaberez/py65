@@ -1919,7 +1919,7 @@ class Common6502Tests:
 
     def test_brk_pushes_pc_plus_2_and_status_then_sets_pc_to_irq_vector(self):
         mpu = self._make_mpu()
-        mpu.p = mpu.BREAK | mpu.UNUSED
+        mpu.p = mpu.UNUSED
         self._write(mpu.memory, 0xFFFE, (0xCD, 0xAB))
         # $C000 BRK
         mpu.memory[0xC000] = 0x00
@@ -5660,6 +5660,28 @@ class MPUTests(unittest.TestCase, Common6502Tests):
     def test_repr(self):
         mpu = self._make_mpu()
         self.assertTrue("6502" in repr(mpu))
+
+    # BRK
+
+    def test_brk_preserves_decimal_flag_when_it_is_set(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.DECIMAL
+        # $C000 BRK
+        mpu.memory[0xC000] = 0x00
+        mpu.pc = 0xC000
+        mpu.step()
+        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
+        self.assertEqual(mpu.DECIMAL, mpu.p & mpu.DECIMAL)
+
+    def test_brk_preserves_decimal_flag_when_it_is_clear(self):
+        mpu = self._make_mpu()
+        mpu.p = 0
+        # $C000 BRK
+        mpu.memory[0xC000] = 0x00
+        mpu.pc = 0xC000
+        mpu.step()
+        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
+        self.assertEqual(0, mpu.p & mpu.DECIMAL)
 
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU
