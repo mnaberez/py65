@@ -2769,7 +2769,7 @@ class Common6502Tests:
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
-    def test_lda_abs_x_indexed_loads_x_sets_z_flag(self):
+    def test_lda_abs_x_indexed_loads_a_sets_z_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0xFF
         mpu.x = 0x03
@@ -2781,6 +2781,17 @@ class Common6502Tests:
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
+    def test_lda_abs_x_indexed_does_not_page_wrap(self):
+        mpu = self._make_mpu()
+        mpu.a = 0
+        mpu.x = 0xFF
+        # $0000 LDA $0080,X
+        self._write(mpu.memory, 0x0000, (0xBD, 0x80, 0x00))
+        mpu.memory[0x0080 + mpu.x] = 0x42
+        mpu.step()
+        self.assertEqual(0x0003, mpu.pc)
+        self.assertEqual(0x42, mpu.a)
 
     # LDA Absolute, Y-Indexed
 
@@ -2809,6 +2820,17 @@ class Common6502Tests:
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
+    def test_lda_abs_y_indexed_does_not_page_wrap(self):
+        mpu = self._make_mpu()
+        mpu.a = 0
+        mpu.y = 0xFF
+        # $0000 LDA $0080,X
+        self._write(mpu.memory, 0x0000, (0xB9, 0x80, 0x00))
+        mpu.memory[0x0080 + mpu.y] = 0x42
+        mpu.step()
+        self.assertEqual(0x0003, mpu.pc)
+        self.assertEqual(0x42, mpu.a)
 
     # LDA Indirect, Indexed (X)
 
@@ -2876,11 +2898,11 @@ class Common6502Tests:
 
     # LDA Zero Page, X-Indexed
 
-    def test_lda_zp_x_indexed_loads_x_sets_n_flag(self):
+    def test_lda_zp_x_indexed_loads_a_sets_n_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0x00
         mpu.x = 0x03
-        # $0000 LDA $0010,X
+        # $0000 LDA $10,X
         self._write(mpu.memory, 0x0000, (0xB5, 0x10))
         mpu.memory[0x0010 + mpu.x] = 0x80
         mpu.step()
@@ -2889,11 +2911,11 @@ class Common6502Tests:
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
-    def test_lda_zp_x_indexed_loads_x_sets_z_flag(self):
+    def test_lda_zp_x_indexed_loads_a_sets_z_flag(self):
         mpu = self._make_mpu()
         mpu.a = 0xFF
         mpu.x = 0x03
-        # $0000 LDA $0010,X
+        # $0000 LDA $10,X
         self._write(mpu.memory, 0x0000, (0xB5, 0x10))
         mpu.memory[0x0010 + mpu.x] = 0x00
         mpu.step()
@@ -2901,6 +2923,17 @@ class Common6502Tests:
         self.assertEqual(0x00, mpu.a)
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
+    def test_lda_zp_x_indexed_page_wraps(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x00
+        mpu.x = 0xFF
+        # $0000 LDA $80,X
+        self._write(mpu.memory, 0x0000, (0xB5, 0x80))
+        mpu.memory[0x007F] = 0x42
+        mpu.step()
+        self.assertEqual(0x0002, mpu.pc)
+        self.assertEqual(0x42, mpu.a)
 
     # LDX Absolute
 
@@ -5619,7 +5652,7 @@ class Common6502Tests:
         mpu.step()
         self.assertEqual(0x31, mpu.a)
 
-    def test_zeropage_ind_indexed_indexwrap(self):
+    def test_zeropage_ind_indexed_index_wrap(self):
         mpu = self._make_mpu()
         mpu.x = 0xff
         mpu.memory[0xa100] = 0x31
@@ -5633,7 +5666,7 @@ class Common6502Tests:
         mpu = self._make_mpu()
         mpu.x = 0xff
         mpu.memory[0x00ff] = 0
-        # $0000  LDA ($00,X)
+        # $0000 LDA ($00,X)
         self._write(mpu.memory, 0, (0x6c, 0xff, 0x00))
         mpu.step()
         self.assertEqual(0x6c00, mpu.pc)
