@@ -82,6 +82,9 @@
   - Fixed long-standing bugs in relative branch calculations in the
     assembler and disassembler.  Based on a patch by Ed Spittles.
 
+  - Zero page operations now have the correct page wrap around.
+    Patch by Martti Kühne.
+
 0.9 (2011-03-27)
 
   - Fixed two monitor tests that were broken under Windows.  Thanks
