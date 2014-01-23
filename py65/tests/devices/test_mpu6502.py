@@ -5664,9 +5664,8 @@ class Common6502Tests:
 
     def test_indirect_wrap(self):
         mpu = self._make_mpu()
-        mpu.x = 0xff
         mpu.memory[0x00ff] = 0
-        # $0000 LDA ($00,X)
+        # $0000 JMP ($00)
         self._write(mpu.memory, 0, (0x6c, 0xff, 0x00))
         mpu.step()
         self.assertEqual(0x6c00, mpu.pc)
