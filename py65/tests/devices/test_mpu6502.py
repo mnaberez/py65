@@ -2924,17 +2924,6 @@ class Common6502Tests:
         self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
 
-    def test_lda_zp_x_indexed_page_wraps(self):
-        mpu = self._make_mpu()
-        mpu.a = 0x00
-        mpu.x = 0xFF
-        # $0000 LDA $80,X
-        self._write(mpu.memory, 0x0000, (0xB5, 0x80))
-        mpu.memory[0x007F] = 0x42
-        mpu.step()
-        self.assertEqual(0x0002, mpu.pc)
-        self.assertEqual(0x42, mpu.a)
-
     # LDX Absolute
 
     def test_ldx_absolute_loads_x_sets_n_flag(self):
@@ -5622,6 +5611,64 @@ class Common6502Tests:
         self.assertEqual(0x03, mpu.a)
         self.assertEqual(0x0008, mpu.pc)
 
+    # Test Helpers
+
+    def _write(self, memory, start_address, bytes):
+        memory[start_address:start_address + len(bytes)] = bytes
+
+    def _make_mpu(self, *args, **kargs):
+        klass = self._get_target_class()
+        mpu = klass(*args, **kargs)
+        if 'memory' not in kargs:
+            mpu.memory = 0x10000 * [0xAA]
+        return mpu
+
+    def _get_target_class(self):
+        raise NotImplementedError("Target class not specified")
+
+
+class MPUTests(unittest.TestCase, Common6502Tests):
+    """ NMOS 6502 tests """
+
+    def test_repr(self):
+        mpu = self._make_mpu()
+        self.assertTrue("6502" in repr(mpu))
+
+    # LDA Zero Page, X-Indexed
+
+    def test_lda_zp_x_indexed_page_wraps(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x00
+        mpu.x = 0xFF
+        # $0000 LDA $80,X
+        self._write(mpu.memory, 0x0000, (0xB5, 0x80))
+        mpu.memory[0x007F] = 0x42
+        mpu.step()
+        self.assertEqual(0x0002, mpu.pc)
+        self.assertEqual(0x42, mpu.a)
+
+    # BRK
+
+    def test_brk_preserves_decimal_flag_when_it_is_set(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.DECIMAL
+        # $C000 BRK
+        mpu.memory[0xC000] = 0x00
+        mpu.pc = 0xC000
+        mpu.step()
+        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
+        self.assertEqual(mpu.DECIMAL, mpu.p & mpu.DECIMAL)
+
+    def test_brk_preserves_decimal_flag_when_it_is_clear(self):
+        mpu = self._make_mpu()
+        mpu.p = 0
+        # $C000 BRK
+        mpu.memory[0xC000] = 0x00
+        mpu.pc = 0xC000
+        mpu.step()
+        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
+        self.assertEqual(0, mpu.p & mpu.DECIMAL)
+
     # Test page wrapping
 
     def test_zeropage_indexed_ind_wrap(self):
@@ -5669,51 +5716,6 @@ class Common6502Tests:
         self._write(mpu.memory, 0, (0x6c, 0xff, 0x00))
         mpu.step()
         self.assertEqual(0x6c00, mpu.pc)
-
-    # Test Helpers
-
-    def _write(self, memory, start_address, bytes):
-        memory[start_address:start_address + len(bytes)] = bytes
-
-    def _make_mpu(self, *args, **kargs):
-        klass = self._get_target_class()
-        mpu = klass(*args, **kargs)
-        if 'memory' not in kargs:
-            mpu.memory = 0x10000 * [0xAA]
-        return mpu
-
-    def _get_target_class(self):
-        raise NotImplementedError("Target class not specified")
-
-
-class MPUTests(unittest.TestCase, Common6502Tests):
-    """ NMOS 6502 tests """
-
-    def test_repr(self):
-        mpu = self._make_mpu()
-        self.assertTrue("6502" in repr(mpu))
-
-    # BRK
-
-    def test_brk_preserves_decimal_flag_when_it_is_set(self):
-        mpu = self._make_mpu()
-        mpu.p = mpu.DECIMAL
-        # $C000 BRK
-        mpu.memory[0xC000] = 0x00
-        mpu.pc = 0xC000
-        mpu.step()
-        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
-        self.assertEqual(mpu.DECIMAL, mpu.p & mpu.DECIMAL)
-
-    def test_brk_preserves_decimal_flag_when_it_is_clear(self):
-        mpu = self._make_mpu()
-        mpu.p = 0
-        # $C000 BRK
-        mpu.memory[0xC000] = 0x00
-        mpu.pc = 0xC000
-        mpu.step()
-        self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
-        self.assertEqual(0, mpu.p & mpu.DECIMAL)
 
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU
