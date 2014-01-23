@@ -2648,16 +2648,18 @@ class Common6502Tests:
         self.assertEqual(0x80, mpu.y)
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
 
-    # JMP
+    # JMP Absolute
 
-    def test_jmp_jumps_to_absolute_address(self):
+    def test_jmp_abs_jumps_to_absolute_address(self):
         mpu = self._make_mpu()
         # $0000 JMP $ABCD
         self._write(mpu.memory, 0x0000, (0x4C, 0xCD, 0xAB))
         mpu.step()
         self.assertEqual(0xABCD, mpu.pc)
 
-    def test_jmp_jumps_to_indirect_address(self):
+    # JMP Indirect
+
+    def test_jmp_ind_jumps_to_indirect_address(self):
         mpu = self._make_mpu()
         # $0000 JMP ($ABCD)
         self._write(mpu.memory, 0x0000, (0x6C, 0x00, 0x02))
@@ -5669,6 +5671,17 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
         self.assertEqual(0, mpu.p & mpu.DECIMAL)
 
+    # JMP Indirect
+
+    def test_jmp_jumps_to_address_with_page_wrap_bug(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x00ff] = 0
+        # $0000 JMP ($00)
+        self._write(mpu.memory, 0, (0x6c, 0xff, 0x00))
+        mpu.step()
+        self.assertEqual(0x6c00, mpu.pc)
+        self.assertEqual(5, mpu.processorCycles)
+
     # Test page wrapping
 
     def test_zeropage_indexed_ind_wrap(self):
@@ -5708,14 +5721,6 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self._write(mpu.memory, 0, (0xa1, 0))
         mpu.step()
         self.assertEqual(0x31, mpu.a)
-
-    def test_indirect_wrap(self):
-        mpu = self._make_mpu()
-        mpu.memory[0x00ff] = 0
-        # $0000 JMP ($00)
-        self._write(mpu.memory, 0, (0x6c, 0xff, 0x00))
-        mpu.step()
-        self.assertEqual(0x6c00, mpu.pc)
 
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU

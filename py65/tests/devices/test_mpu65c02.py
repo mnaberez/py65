@@ -475,6 +475,17 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
+    # JMP Indirect
+
+    def test_jmp_ind_does_not_have_page_wrap_bug(self):
+        mpu = self._make_mpu()
+        self._write(mpu.memory, 0x10FF, (0xCD, 0xAB))
+        # $0000 JMP ($10FF)
+        self._write(mpu.memory, 0, (0x6c, 0xFF, 0x10))
+        mpu.step()
+        self.assertEqual(0xABCD, mpu.pc)
+        self.assertEqual(6, mpu.processorCycles)
+
     # JMP Indirect Absolute X-Indexed
 
     def test_jmp_iax_jumps_to_address(self):

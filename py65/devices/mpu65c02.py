@@ -279,6 +279,11 @@ class MPU(mpu6502.MPU):
     def inst_0x3a(self):
         self.opDECR(None)
 
+    @instruction(name="JMP", mode="ind", cycles=6)
+    def inst_0x6c(self):
+        ta = self.WordAt(self.pc)
+        self.pc = self.WordAt(ta)
+
     @instruction(name="JMP", mode="iax", cycles=6)
     def inst_0x7c(self):
         self.pc = self.WordAt(self.IndirectAbsXAddr())
