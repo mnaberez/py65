@@ -18,35 +18,6 @@ class Common6502Tests:
         self.assertEqual(0, mpu.y)
         self.assertEqual(mpu.BREAK | mpu.UNUSED, mpu.p)
 
-    # Benchmark
-
-    def test_benchmark(self):
-        mpu = self._make_mpu()
-        self._write(mpu.memory, 0x0000, (
-            0xd8,        # $0000  d8        CLD
-            0x18,        # $0001  18        CLC
-            0xa9, 0x00,  # $0002  a9 00     LDA #$00
-            0xa2, 0x00,  # $0004  a2 00     LDX #$00
-            0xa0, 0x00,  # $0006  a0 00     LDY #$00
-            0xc8,        # $0008  c8        INY
-            0xd0, 0xfd,  # $0009  d0 fd     BNE $0008
-            0xe8,        # $000b  e8        INX
-            0xd0, 0xf8,  # $000c  d0 f8     BNE $0006
-            0x69, 0x01,  # $000e  69 01     ADC #$01
-            0xd0, 0xf2,  # $0010  d0 f2     BNE $0004
-            0x00,        # $0012  00        BRK
-            0xed))
-
-        # need a larger limit for this test to dominate the test time
-        # (but when benchmarking it doesn't need to pass)
-        for i in range(1, 100):
-            mpu.step()
-
-        self.assertEqual(47, mpu.y)
-        self.assertEqual(0, mpu.x)
-        self.assertEqual(0, mpu.a)
-        self.assertEqual(0, mpu.p & mpu.ZERO)
-
     # ADC Absolute
 
     def test_adc_bcd_off_absolute_carry_clear_in_accumulator_zeroes(self):
