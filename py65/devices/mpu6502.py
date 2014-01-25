@@ -176,7 +176,7 @@ class MPU:
         return z
 
     def FlagsNZ(self, value):
-        self.p &= ~(self.ZERO + self.NEGATIVE)
+        self.p &= ~(self.ZERO | self.NEGATIVE)
         if value == 0:
             self.p |= self.ZERO
         else:
@@ -195,7 +195,7 @@ class MPU:
             addr = x()
             tbyte = self.ByteAt(addr)
 
-        self.p &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
+        self.p &= ~(self.CARRY | self.NEGATIVE | self.ZERO)
 
         if tbyte & self.NEGATIVE:
             self.p |= self.CARRY
@@ -218,7 +218,7 @@ class MPU:
             addr = x()
             tbyte = self.ByteAt(addr)
 
-        self.p &= ~(self.CARRY + self.NEGATIVE + self.ZERO)
+        self.p &= ~(self.CARRY | self.NEGATIVE | self.ZERO)
         self.p |= tbyte & 1
 
         tbyte = tbyte >> 1
@@ -256,10 +256,10 @@ class MPU:
 
     def opBIT(self, x):
         tbyte = self.ByteAt(x())
-        self.p &= ~(self.ZERO + self.NEGATIVE + self.OVERFLOW)
+        self.p &= ~(self.ZERO | self.NEGATIVE | self.OVERFLOW)
         if (self.a & tbyte) == 0:
             self.p |= self.ZERO
-        self.p |= tbyte & (self.NEGATIVE + self.OVERFLOW)
+        self.p |= tbyte & (self.NEGATIVE | self.OVERFLOW)
 
     def opROL(self, x):
         if x is None:
@@ -315,7 +315,7 @@ class MPU:
             # the final A contents will be decimally adjusted
             nibble0 = (nibble0 + adjust0) & 0xf
             nibble1 = (nibble1 + adjust1) & 0xf
-            self.p &= ~(self.CARRY + self.OVERFLOW + self.NEGATIVE + self.ZERO)
+            self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
             if aluresult == 0:
                 self.p |= self.ZERO
             else:
@@ -331,7 +331,7 @@ class MPU:
             else:
                 tmp = 0
             result = data + self.a + tmp
-            self.p &= ~(self.CARRY + self.OVERFLOW + self.NEGATIVE + self.ZERO)
+            self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
             if (~(self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
                 self.p |= self.OVERFLOW
             data = result
@@ -379,9 +379,9 @@ class MPU:
 
     def opCMPR(self, get_address, register_value):
         tbyte = self.ByteAt(get_address())
-        self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE)
+        self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE)
         if register_value == tbyte:
-            self.p |= self.CARRY + self.ZERO
+            self.p |= self.CARRY | self.ZERO
         elif register_value > tbyte:
             self.p |= self.CARRY
         self.p |= (register_value - tbyte) & self.NEGATIVE
@@ -415,7 +415,7 @@ class MPU:
             nibble0 = (aluresult + adjust0) & 0xf
             nibble1 = ((aluresult + adjust1) >> 4) & 0xf
 
-            self.p &= ~(self.CARRY + self.ZERO + self.NEGATIVE + self.OVERFLOW)
+            self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
             if aluresult == 0:
                 self.p |= self.ZERO
             else:
@@ -432,7 +432,7 @@ class MPU:
                 borrow = 1
 
             result = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
-            self.p &= ~(self.CARRY + self.ZERO + self.OVERFLOW + self.NEGATIVE)
+            self.p &= ~(self.CARRY | self.ZERO | self.OVERFLOW | self.NEGATIVE)
             if ((self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
                 self.p |= self.OVERFLOW
             data = result & self.byteMask
@@ -450,7 +450,7 @@ class MPU:
             addr = x()
             tbyte = self.ByteAt(addr)
 
-        self.p &= ~(self.ZERO + self.NEGATIVE)
+        self.p &= ~(self.ZERO | self.NEGATIVE)
         tbyte = (tbyte - 1) & self.byteMask
         if tbyte:
             self.p |= tbyte & self.NEGATIVE
@@ -469,7 +469,7 @@ class MPU:
             addr = x()
             tbyte = self.ByteAt(addr)
 
-        self.p &= ~(self.ZERO + self.NEGATIVE)
+        self.p &= ~(self.ZERO | self.NEGATIVE)
         tbyte = (tbyte + 1) & self.byteMask
         if tbyte:
             self.p |= tbyte & self.NEGATIVE
