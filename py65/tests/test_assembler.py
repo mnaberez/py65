@@ -50,6 +50,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_04(self):
         pass
 
+    def test_assembles_04_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x04, 0x42],
+                         self.assemble('TSB $42', 0x0000, mpu))
+
     def test_assembles_05(self):
         self.assertEqual([0x05, 0x44],
                          self.assemble('ORA $44'))
@@ -58,7 +63,7 @@ class AssemblerTests(unittest.TestCase):
         self.assertEqual([0x06, 0x44],
                          self.assemble('ASL $44'))
 
-    def test_assembles_07_6502(self):
+    def test_assembles_07(self):
         self.assertRaises(SyntaxError,
                           self.assemble, "RMB0 $42")
 
@@ -85,6 +90,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_0c(self):
         pass
 
+    def test_assembles_0c_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x0c, 0x34, 0x12],
+                         self.assemble('TSB $1234', 0x0000, mpu))
+
     def test_assembles_0d(self):
         self.assertEqual([0x0d, 0x00, 0x44],
                          self.assemble('ORA $4400'))
@@ -107,11 +117,21 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_12(self):
         pass
 
+    def test_assembles_12_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x12, 0x44],
+                         self.assemble('ORA ($44)', 0x0000, mpu))
+
     def dont_test_assembles_13(self):
         pass
 
     def dont_test_assembles_14(self):
         pass
+
+    def test_assembles_14_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x14, 0x42],
+                         self.assemble('TRB $42', 0x0000, mpu))
 
     def test_assembles_15(self):
         self.assertEqual([0x15, 0x44],
@@ -124,6 +144,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_17(self):
         pass
 
+    def test_assembles_17_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x17, 0x42],
+                         self.assemble('RMB1 $42', 0x0000, mpu))
+
     def test_assembles_18(self):
         self.assertEqual([0x18],
                          self.assemble('CLC'))
@@ -135,11 +160,21 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_1a(self):
         pass
 
+    def test_assembles_1a_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x1a],
+                         self.assemble('INC', 0x0000, mpu))
+
     def dont_test_assembles_1b(self):
         pass
 
     def test_assembles_1c(self):
         pass
+
+    def test_assembles_1c_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x1c, 0x34, 0x12],
+                         self.assemble('TRB $1234', 0x0000, mpu))
 
     def test_assembles_1d(self):
         self.assertEqual([0x1d, 0x00, 0x44],
@@ -180,6 +215,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_27(self):
         pass
+
+    def test_assembles_27_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x27, 0x42],
+                         self.assemble('RMB2 $42', 0x0000, mpu))
 
     def test_assembles_28(self):
         self.assertEqual([0x28],
@@ -222,11 +262,21 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_32(self):
         pass
 
+    def test_assembles_32_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x32, 0x44],
+                         self.assemble('AND ($44)', 0x0000, mpu))
+
     def dont_test_assembles_33(self):
         pass
 
     def dont_test_assembles_34(self):
         pass
+
+    def test_assembles_34_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x34, 0x44],
+                         self.assemble('BIT $44,X', 0x0000, mpu))
 
     def test_assembles_35(self):
         self.assertEqual([0x35, 0x44],
@@ -239,6 +289,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_37(self):
         pass
 
+    def test_assembles_37_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x37, 0x42],
+                         self.assemble('RMB3 $42', 0x0000, mpu))
+
     def test_assembles_38(self):
         self.assertEqual([0x38],
                          self.assemble('SEC'))
@@ -250,11 +305,21 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_3a(self):
         pass
 
+    def test_assembles_3a_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x3a],
+                         self.assemble('DEC', 0x0000, mpu))
+
     def dont_test_assembles_3b(self):
         pass
 
     def dont_test_assembles_3c(self):
         pass
+
+    def test_assembles_3c_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x3c, 0x34, 0x12],
+                         self.assemble('BIT $1234,X', 0x0000, mpu))
 
     def test_assembles_3d(self):
         self.assertEqual([0x3d, 0x00, 0x44],
@@ -294,6 +359,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_47(self):
         pass
+
+    def test_assembles_47_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x47, 0x42],
+                         self.assemble('RMB4 $42', 0x0000, mpu))
 
     def test_assembles_48(self):
         self.assertEqual([0x48],
@@ -336,6 +406,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_52(self):
         pass
 
+    def test_assembles_52_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x52, 0x44],
+                         self.assemble('EOR ($44)', 0x0000, mpu))
+
     def dont_test_assembles_53(self):
         pass
 
@@ -353,6 +428,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_57(self):
         pass
 
+    def test_assembles_57_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x57, 0x42],
+                         self.assemble('RMB5 $42', 0x0000, mpu))
+
     def test_assembles_58(self):
         self.assertEqual([0x58],
                          self.assemble('CLI'))
@@ -363,6 +443,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_5a(self):
         pass
+
+    def test_assembles_5a_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x5a],
+                         self.assemble('PHY', 0x0000, mpu))
 
     def dont_test_assembles_5b(self):
         pass
@@ -398,6 +483,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_64(self):
         pass
 
+    def test_assembles_64_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x64],
+                         self.assemble('STZ', 0x0000, mpu))
+
     def test_assembles_65(self):
         self.assertEqual([0x65, 0x44],
                          self.assemble('ADC $44'))
@@ -408,6 +498,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_67(self):
         pass
+
+    def test_assembles_67_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x67, 0x42],
+                         self.assemble('RMB6 $42', 0x0000, mpu))
 
     def test_assembles_68(self):
         self.assertEqual([0x68],
@@ -450,11 +545,21 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_72(self):
         pass
 
+    def test_assembles_72_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x72, 0x44],
+                         self.assemble('ADC ($44)', 0x0000, mpu))
+
     def dont_test_assembles_73(self):
         pass
 
     def dont_test_assembles_74(self):
         pass
+
+    def test_assembles_74_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x74, 0x44],
+                         self.assemble('STZ $44,X', 0x0000, mpu))
 
     def test_assembles_75(self):
         self.assertEqual([0x75, 0x44],
@@ -467,6 +572,11 @@ class AssemblerTests(unittest.TestCase):
     def test_assembles_77(self):
         pass
 
+    def test_assembles_77_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x77, 0x42],
+                         self.assemble('RMB7 $42', 0x0000, mpu))
+
     def test_assembles_78(self):
         self.assertEqual([0x78],
                          self.assemble('SEI'))
@@ -477,6 +587,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_7a(self):
         pass
+
+    def test_assembles_7a_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x7a],
+                         self.assemble('PLY', 0x0000, mpu))
 
     def dont_test_assembles_7b(self):
         pass
@@ -504,6 +619,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_80(self):
         pass
 
+    def test_assembles_80_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x80, 0x44],
+                         self.assemble('BRA $0046', 0x0000, mpu))
+
     def test_assembles_81(self):
         self.assertEqual([0x81, 0x44],
                          self.assemble('STA ($44,X)'))
@@ -529,12 +649,22 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_87(self):
         pass
 
+    def test_assembles_87_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x87, 0x42],
+                         self.assemble('SMB0 $42', 0x0000, mpu))
+
     def test_assembles_88(self):
         self.assertEqual([0x88],
                          self.assemble('DEY'))
 
     def dont_test_assembles_89(self):
         pass
+
+    def test_assembles_89_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x89, 0x42],
+                         self.assemble('BIT #$42', 0x0000, mpu))
 
     def test_assembles_8a(self):
         self.assertEqual([0x8a],
@@ -569,6 +699,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_92(self):
         pass
 
+    def test_assembles_92_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x92, 0x44],
+                         self.assemble('STA ($44)', 0x0000, mpu))
+
     def dont_test_assembles_93(self):
         pass
 
@@ -586,6 +721,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_97(self):
         pass
+
+    def test_assembles_97_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x97, 0x42],
+                         self.assemble('SMB1 $42', 0x0000, mpu))
 
     def test_assembles_98(self):
         self.assertEqual([0x98],
@@ -605,12 +745,22 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_9c(self):
         pass
 
+    def test_assembles_9c_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x9c, 0x34, 0x12],
+                         self.assemble('STZ $1234', 0x0000, mpu))
+
     def test_assembles_9d(self):
         self.assertEqual([0x9d, 0x00, 0x44],
                          self.assemble('STA $4400,X'))
 
     def dont_test_assembles_9e(self):
         pass
+
+    def test_assembles_9e_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0x9e, 0x34, 0x12],
+                         self.assemble('STZ $1234,X', 0x0000, mpu))
 
     def dont_test_assembles_9f(self):
         pass
@@ -644,6 +794,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_a7(self):
         pass
+
+    def test_assembles_a7_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xa7, 0x42],
+                         self.assemble('SMB2 $42', 0x0000, mpu))
 
     def test_assembles_a8(self):
         self.assertEqual([0xa8],
@@ -686,6 +841,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_b2(self):
         pass
 
+    def test_assembles_b2_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xb2, 0x44],
+                         self.assemble('LDA ($44)', 0x0000, mpu))
+
     def dont_test_assembles_b3(self):
         pass
 
@@ -703,6 +863,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_b7(self):
         pass
+
+    def test_assembles_b7_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xb7, 0x42],
+                         self.assemble('SMB3 $42', 0x0000, mpu))
 
     def test_assembles_b8(self):
         self.assertEqual([0xb8],
@@ -763,6 +928,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_c7(self):
         pass
 
+    def test_assembles_c7_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xc7, 0x42],
+                         self.assemble('SMB4 $42', 0x0000, mpu))
+
     def test_assembles_c8(self):
         self.assertEqual([0xc8],
                          self.assemble('INY'))
@@ -777,6 +947,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_cb(self):
         pass
+
+    def test_assembles_cb_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xcb],
+                         self.assemble('WAI', 0x0000, mpu))
 
     def test_assembles_cc(self):
         self.assertEqual([0xcc, 0x00, 0x44],
@@ -804,6 +979,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_d2(self):
         pass
 
+    def test_assembles_d2_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xd2, 0x42],
+                         self.assemble('CMP ($42)', 0x0000, mpu))
+
     def dont_test_assembles_d3(self):
         pass
 
@@ -821,12 +1001,22 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_d7(self):
         pass
 
+    def test_assembles_d7_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xd7, 0x42],
+                         self.assemble('SMB5 $42', 0x0000, mpu))
+
     def test_assembles_d8(self):
         self.assertEqual([0xd8],
                          self.assemble('CLD'))
 
     def dont_test_assembles_da(self):
         pass
+
+    def test_assembles_da_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xda],
+                         self.assemble('PHX', 0x0000, mpu))
 
     def dont_test_assembles_db(self):
         pass
@@ -874,6 +1064,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_e7(self):
         pass
 
+    def test_assembles_e7_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xe7, 0x42],
+                         self.assemble('SMB6 $42', 0x0000, mpu))
+
     def test_assembles_e8(self):
         self.assertEqual([0xe8],
                          self.assemble('INX'))
@@ -919,6 +1114,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_f2(self):
         pass
 
+    def test_assembles_f2_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xf2, 0x42],
+                         self.assemble('SBC ($42)', 0x0000, mpu))
+
     def dont_test_assembles_f3(self):
         pass
 
@@ -936,6 +1136,11 @@ class AssemblerTests(unittest.TestCase):
     def dont_test_assembles_f7(self):
         pass
 
+    def test_assembles_f7_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xf7, 0x42],
+                         self.assemble('SMB7 $42', 0x0000, mpu))
+
     def test_assembles_f8(self):
         self.assertEqual([0xf8],
                          self.assemble('SED'))
@@ -946,6 +1151,11 @@ class AssemblerTests(unittest.TestCase):
 
     def dont_test_assembles_fa(self):
         pass
+
+    def test_assembles_fa_65c02(self):
+        mpu = MPU65C02()
+        self.assertEqual([0xfa],
+                         self.assemble('PLX', 0x0000, mpu))
 
     def dont_test_assembles_fb(self):
         pass
