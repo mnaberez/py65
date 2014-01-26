@@ -1,4 +1,4 @@
-from py65.utils.conversions import convert_to_bin, convert_to_bcd, itoa
+from py65.utils.conversions import itoa
 from py65.utils.devices import make_instruction_decorator
 
 

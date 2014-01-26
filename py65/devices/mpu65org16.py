@@ -1,5 +1,4 @@
 from py65.devices import mpu6502
-from py65.utils.devices import make_instruction_decorator
 
 
 class MPU(mpu6502.MPU):
