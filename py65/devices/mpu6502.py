@@ -426,11 +426,6 @@ class MPU:
                 self.p |= self.OVERFLOW
             self.a = (nibble1 << 4) + nibble0
         else:
-            if self.p & self.CARRY:
-                borrow = 0
-            else:
-                borrow = 1
-
             result = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
             self.p &= ~(self.CARRY | self.ZERO | self.OVERFLOW | self.NEGATIVE)
             if ((self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
