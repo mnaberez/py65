@@ -35,9 +35,6 @@ class MPU(mpu6502.MPU):
     def IndirectAbsXAddr(self):
         return self.addrMask & (self.WordAt(self.pc) + self.x)
 
-    def AccumulatorAddr(self):
-        return self.a
-
     # operations
 
     def opRMB(self, x, mask):
