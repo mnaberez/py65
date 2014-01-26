@@ -121,12 +121,6 @@ class HexdumpLoaderTests(unittest.TestCase):
         self.assertEqual(0xC000, load.start_address)
         self.assertEqual([0xAA, 0xBB], load.data)
 
-    def test_ignores_pound_comments(self):
-        text = 'c000: aa bb # comment'
-        load = Loader(text)
-        self.assertEqual(0xC000, load.start_address)
-        self.assertEqual([0xAA, 0xBB], load.data)
-
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
