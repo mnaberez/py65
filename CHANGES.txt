@@ -7,6 +7,8 @@
   - Fixed BRK on 65C02 so it clears the decimal flag.  On NMOS 6502, the
     decimal flag is unaffected on BRK.  On 65C02, it is always cleared.
 
+  - Assembling now tolerates extra whitespace between opcode and operand.
+
 0.17 (2013-10-26)
 
   - Added support for Python 3.2 and 3.3 based on work by David Beazley.

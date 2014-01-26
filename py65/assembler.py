@@ -145,6 +145,8 @@ class Assembler:
             and parsing the address part using AddressParser.  The result of
             the normalization is a tuple of two strings (opcode, operand).
         """
+        statement = ' '.join(str.split(statement))
+
         # normalize target in operand
         match = self.Statement.match(statement)
         if match:

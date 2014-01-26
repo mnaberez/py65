@@ -15,6 +15,9 @@ class AssemblerTests(unittest.TestCase):
         self.assertRaises(KeyError,
                           self.assemble, 'lda foo')
 
+    def test_assemble_tolerates_extra_whitespace(self):
+        self.assemble('   lda   #$00   ')  # should not raise
+
     def test_assemble_bad_number_raises_overflowerror(self):
         self.assertRaises(OverflowError,
                           self.assemble, 'lda #$fff')
