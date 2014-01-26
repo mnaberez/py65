@@ -758,7 +758,6 @@ def main(args=None):
         c.cmdloop()
     except KeyboardInterrupt:
         c._output('')
-        pass
 
 if __name__ == "__main__":
     main()
