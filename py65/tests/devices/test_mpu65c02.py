@@ -1279,7 +1279,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     # STZ Absolute, X-Indexed
 
-    def test_stz_abs_stores_zero(self):
+    def test_stz_abs_x_stores_zero(self):
         mpu = self._make_mpu()
         mpu.memory[0xFEED] = 0x88
         mpu.x = 0x0D
