@@ -56,14 +56,12 @@ else:
         fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
         try:
-            byte = 0
+            char = ''
             r, w, e = select.select([fd], [], [], 0.1)
             if r:
                 char = stdin.read(1)
                 if char == "\n":
                     char = "\r"
-            else:
-                char = ''
         finally:
             termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
             fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
