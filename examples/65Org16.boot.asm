@@ -7,7 +7,7 @@
 ;
 
 ; use this monitor like this:
-;   PYTHONPATH=. python py65/monitor.py -m 65Org16
+;   py65mon -m 65org16
 ;   load bootrom.bin fe00
 ;   goto fe00
 
