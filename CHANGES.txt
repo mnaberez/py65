@@ -1,4 +1,4 @@
-0.18-dev (Next Release)
+0.18 (2014-01-30)
 
   - Fixed a bug in RTS where popping $FFFF off the stack would cause
     the program counter to overflow to $10000.  It now wraps around
@@ -8,6 +8,10 @@
     decimal flag is unaffected on BRK.  On 65C02, it is always cleared.
 
   - Assembling now tolerates extra whitespace between opcode and operand.
+
+  - Removed page wrap bug from JMP indirect on 65C02.
+
+  - Removed page wrap bug from indexed indirect (X) operations on 65C02.
 
 0.17 (2013-10-26)
 
