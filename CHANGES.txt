@@ -1,3 +1,5 @@
+0.19-dev (Next Release)
+
 0.18 (2014-01-30)
 
   - Fixed a bug in RTS where popping $FFFF off the stack would cause
