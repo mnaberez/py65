@@ -1,5 +1,10 @@
 0.19-dev (Next Release)
 
+  - Blocking character input at $F005 has been removed.  The I/O area
+    was designed to be compatible with Michal Kowalski's simulator,
+    and it uses this address for another purpose.  Examples that depended
+    on $F005 have been changed to use $F004.
+
 0.18 (2014-01-30)
 
   - Fixed a bug in RTS where popping $FFFF off the stack would cause

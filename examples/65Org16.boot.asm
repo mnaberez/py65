@@ -15,15 +15,15 @@ START = $FFFFFe00
 
 ; I/O is memory-mapped in py65:
 PUTC     = $f001
-GETC     = $f005 ; blocking input
+GETC     = $f004
 
 ; Note that Hex format for 65Org16 uses ';' not ':' as the start of record mark
 ; also note that some fields are now composed of 16-bit elements:
 ; previously:
 ;  length offset type   data     checksum
-;     :/08/E008/00/08090A0B0C0D0E0F/xx 
+;     :/08/E008/00/08090A0B0C0D0E0F/xx
 ; now
-;     ;/10/E008/00/00080009000A000B000C000D000E000F/xx 
+;     ;/10/E008/00/00080009000A000B000C000D000E000F/xx
 
 ; Zero-page storage
 DPL       =  $00 ; data pointer (two bytes) used by PUTSTRI
@@ -85,8 +85,8 @@ HDLP1   jsr     GET4HX          ; Get the first/next/last data word
         bne     HDDLF1          ; If failed, report it
         ; Another successful record has been processed
         lda     #'#'            ; Character indicating record OK = '#'
-        sta     PUTC            ; write it out but don't wait for output 
-        jmp     HDWRECS         ; get next record     
+        sta     PUTC            ; write it out but don't wait for output
+        jmp     HDWRECS         ; get next record
 HDDLF1  lda     #'F'            ; Character indicating record failure = 'F'
         sta     DLFAIL          ; download failed if non-zero
         sta     PUTC            ; write it to transmit buffer register
@@ -100,13 +100,13 @@ HDER1   cmp     #1              ; Check for end-of-record type
         lda     RECTYPE         ; Get it
 	sta	DLFAIL		; non-zero --> download has failed
         jsr     PUTHEX          ; print it
-	lda     #13		; but we'll let it finish so as not to 
-        jsr     PUTSER		; falsely start a new d/l from existing 
-        lda     #10		; file that may still be coming in for 
+	lda     #13		; but we'll let it finish so as not to
+        jsr     PUTSER		; falsely start a new d/l from existing
+        lda     #10		; file that may still be coming in for
         jsr     PUTSER		; quite some time yet.
 	jmp	HDWRECS
 	; We've reached the end-of-record record
-HDER2   jsr     GETHEX          ; get the checksum 
+HDER2   jsr     GETHEX          ; get the checksum
         lda     CHKSUM          ; Add previous checksum accumulator value
         beq     HDER3           ; checksum = 0 means we're OK!
         jsr     PUTSTRI         ; Warn user of bad checksum
@@ -139,6 +139,7 @@ HDEROK  jsr     PUTSTRI
 
 ; For py65, the input routine will block until a character arrives
 GETSER  lda     GETC
+        beq     GETSER
         rts
 
 ; get four ascii chars, adding both octets into the checksum
@@ -194,7 +195,7 @@ PUTHEX  pha             	;
         jsr     PRNIBL
         pla
 PRNIBL  and     #$0F    	; strip off the low nibble
-        cmp     #$0A    
+        cmp     #$0A
         bcc     NOTHEX  	; if it's 0-9, add '0' else also add 7
         adc     #6      	; Add 7 (6+carry=1), result will be carry clear
 NOTHEX  adc     #'0'    	; If carry clear, we're 0-9
@@ -204,8 +205,8 @@ PUTSER  sta     PUTC
 
 ;Put the string following in-line until a NULL out to the console
 PUTSTRI pla			; Get the low part of "return" address (data start address)
-        sta     DPL     
-        pla 
+        sta     DPL
+        pla
         sta     DPH             ; Get the high part of "return" address
                                 ; (data start address)
         ; Note: actually we're pointing one short
@@ -215,10 +216,10 @@ PSINB   ldy     #1
         bne     PSICHO          ; if not, we're pointing to next character
         inc     DPH             ; account for page crossing
 PSICHO  ora     #0              ; Set flags according to contents of Accumulator
-        beq     PSIX1           ; don't print the final NULL 
+        beq     PSIX1           ; don't print the final NULL
         jsr     PUTSER          ; write it out
         jmp     PSINB           ; back around
-PSIX1   inc     DPL             ; 
+PSIX1   inc     DPL             ;
         bne     PSIX2           ;
         inc     DPH             ; account for page crossing
 PSIX2   jmp     (DPL)           ; return to byte following final NULL
@@ -227,7 +228,7 @@ PSIX2   jmp     (DPL)           ; return to byte following final NULL
 GOIRQ
 GONMI   RTI
 
-; vectors               
+; vectors
  .ORG $FFFFFFFA
 NMIENT  .word     GONMI
 RSTENT  .word     START
