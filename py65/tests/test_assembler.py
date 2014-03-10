@@ -2,11 +2,30 @@ import unittest
 import sys
 from py65.devices.mpu6502 import MPU
 from py65.devices.mpu65c02 import MPU as MPU65C02
+from py65.devices.mpu65org16 import MPU as MPU65Org16
 from py65.assembler import Assembler
 from py65.utils.addressing import AddressParser
 
 
 class AssemblerTests(unittest.TestCase):
+    def test_ctor_uses_provided_mpu_and_address_parser(self):
+        mpu = MPU()
+        address_parser = AddressParser()
+        asm = Assembler(mpu, address_parser)
+        self.assertTrue(asm._mpu is mpu)
+        self.assertTrue(asm._address_parser is address_parser)
+
+    def test_ctor_optionally_creates_address_parser(self):
+        mpu = MPU()
+        asm = Assembler(mpu)
+        self.assertFalse(asm._address_parser is None)
+
+    def test_ctor_uses_bus_width_from_mpu(self):
+        asm = Assembler(MPU())
+        self.assertEqual(16, asm.addrWidth)
+        asm = Assembler(MPU65Org16())
+        self.assertEqual(32, asm.addrWidth)
+
     def test_assemble_bad_syntax_raises_syntaxerror(self):
         self.assertRaises(SyntaxError,
                           self.assemble, 'foo')
