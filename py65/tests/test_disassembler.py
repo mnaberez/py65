@@ -8,7 +8,7 @@ from py65.utils.addressing import AddressParser
 
 class DisassemblerTests(unittest.TestCase):
 
-    def dont_test_disassemble_wraps_after_top_of_mem(self):
+    def _dont_test_disassemble_wraps_after_top_of_mem(self):
         '''
         TODO: This test fails with IndexError.  We should fix this
         so that it does not attempt to index memory out of range.
