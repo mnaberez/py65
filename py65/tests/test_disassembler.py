@@ -772,6 +772,12 @@ class DisassemblerTests(unittest.TestCase):
         self.assertEqual(1, length)
         self.assertEqual('???', disasm)
 
+    def test_disassembles_92_65c02(self):
+        mpu = MPU65C02()
+        length, disasm = self.disassemble([0x92, 0x12], 0x0000, mpu)
+        self.assertEqual(2, length)
+        self.assertEqual('STA ($12)', disasm)
+
     def test_disassembles_93(self):
         length, disasm = self.disassemble([0x93])
         self.assertEqual(1, length)
