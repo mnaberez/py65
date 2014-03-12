@@ -274,7 +274,7 @@ class MPU(mpu6502.MPU):
 
     @instruction(name="CMP", mode='zpi', cycles=5)
     def inst_0xd2(self):
-        self.opCPY(self.ZeroPageIndirectAddr)
+        self.opCMPR(self.ZeroPageIndirectAddr, self.a)
         self.pc += 1
 
     @instruction(name="SMB5", mode="zpg", cycles=5)

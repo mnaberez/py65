@@ -1,5 +1,7 @@
 0.19-dev (Next Release)
 
+  - Fixed 65C02 opcode $D2: CMP Zero Page, Indirect.
+
   - Blocking character input at $F005 has been removed.  The I/O area
     was designed to be compatible with Michal Kowalski's simulator,
     and it uses this address for another purpose.  Examples that depended

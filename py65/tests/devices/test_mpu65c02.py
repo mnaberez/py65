@@ -13,7 +13,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     # ADC Indirect, Indexed (X)
 
-    def test_adc_ind_indexed_has_page_wrap_bug(self):
+    def test_adc_ind_indexed_does_not_have_wrap_bug(self):
         mpu = self._make_mpu()
         mpu.a = 0x01
         mpu.x = 0xFF
@@ -476,9 +476,41 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
         self.assertEqual(0, mpu.p & mpu.DECIMAL)
 
+    # CMP Zero Page, Indirect
+
+    def test_cmp_zpi_sets_z_flag_if_equal(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x42
+        # $0000 AND ($10)
+        # $0010 Vector to $ABCD
+        self._write(mpu.memory, 0x0000, (0xd2, 0x10))
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB))
+        mpu.memory[0xABCD] = 0x42
+        mpu.step()
+        self.assertEqual(0x0002, mpu.pc)
+        self.assertEqual(5, mpu.processorCycles)
+        self.assertEqual(0x42, mpu.a)
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
+    def test_cmp_zpi_resets_z_flag_if_unequal(self):
+        mpu = self._make_mpu()
+        mpu.a = 0x43
+        # $0000 AND ($10)
+        # $0010 Vector to $ABCD
+        self._write(mpu.memory, 0x0000, (0xd2, 0x10))
+        self._write(mpu.memory, 0x0010, (0xCD, 0xAB))
+        mpu.memory[0xABCD] = 0x42
+        mpu.step()
+        self.assertEqual(0x0002, mpu.pc)
+        self.assertEqual(5, mpu.processorCycles)
+        self.assertEqual(0x43, mpu.a)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
     # CMP Indirect, Indexed (X)
 
-    def test_cmp_ind_x_has_page_wrap_bug(self):
+    def test_cmp_ind_x_does_not_have_page_wrap_bug(self):
         mpu = self._make_mpu()
         mpu.p = 0
         mpu.a = 0x42
@@ -944,7 +976,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     # SBC Indirect, Indexed (X)
 
-    def test_sbc_ind_x_has_page_wrap_bug(self):
+    def test_sbc_ind_x_does_not_have_page_wrap_bug(self):
         mpu = self._make_mpu()
         mpu.p = mpu.CARRY
         mpu.a = 0x03
