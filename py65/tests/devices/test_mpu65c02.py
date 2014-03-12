@@ -545,6 +545,38 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)
 
+    # INC Accumulator
+
+    def test_inc_acc_increments_accum(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0000] = 0x1A
+        mpu.a = 0x42
+        mpu.step()
+        self.assertEqual(0x0001, mpu.pc)
+        self.assertEqual(0x43, mpu.a)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
+    def test_inc_acc_increments_accum_rolls_over_and_sets_zero_flag(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0000] = 0x1A
+        mpu.a = 0xFF
+        mpu.step()
+        self.assertEqual(0x0001, mpu.pc)
+        self.assertEqual(0x00, mpu.a)
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+
+    def test_inc_acc_sets_negative_flag_when_incrementing_above_7F(self):
+        mpu = self._make_mpu()
+        mpu.memory[0x0000] = 0x1A
+        mpu.a = 0x7F
+        mpu.step()
+        self.assertEqual(0x0001, mpu.pc)
+        self.assertEqual(0x80, mpu.a)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE)
+
     # JMP Indirect
 
     def test_jmp_ind_does_not_have_page_wrap_bug(self):
