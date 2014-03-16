@@ -840,6 +840,22 @@ class MonitorTests(unittest.TestCase):
         expected = "~ <number>"
         self.assertTrue(out.startswith(expected))
 
+    def test_do_tilde_with_bad_label_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_tilde('bad_label')
+        out = stdout.getvalue()
+        expected = "Bad label: bad_label"
+        self.assertTrue(out.startswith(expected))
+
+    def test_do_tilde_with_overflow_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_tilde('$FFFFFFFFFFFF')
+        out = stdout.getvalue()
+        expected = "Overflow error: $FFFFFFFFFFFF"
+        self.assertTrue(out.startswith(expected))
+
     def test_help_tilde(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
