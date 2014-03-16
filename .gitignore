@@ -10,4 +10,5 @@ nosetests.xml
 build/
 dist/
 env*/
+htmlcov/
 py65.egg-info/
