@@ -906,6 +906,44 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("version\t"))
 
+    # width
+
+    def test_do_width_with_no_args_shows_current_width(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_width('')
+        out = stdout.getvalue()
+        self.assertEqual("Terminal width is 78\n", out)
+
+    def test_do_width_with_arg_changes_width(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_width('38')
+        out = stdout.getvalue()
+        self.assertEqual("Terminal width is 38\n", out)
+
+    def test_do_width_with_less_than_min_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_width('3')
+        out = stdout.getvalue()
+        expected = "Minimum terminal width is 10\nTerminal width is 78\n"
+        self.assertEqual(expected, out)
+
+    def test_do_width_with_bad_arg_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_width('bad')
+        out = stdout.getvalue()
+        expected = "Illegal width: bad\nTerminal width is 78\n"
+        self.assertEqual(expected, out)
+
+    def test_help_width(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_width()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("width <columns>"))
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
