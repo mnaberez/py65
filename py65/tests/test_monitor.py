@@ -550,6 +550,16 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertEqual('c000:  aa  bb  cc\n', out)
 
+    def test_do_mem_wraps_at_terminal_width(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._width = 14
+        mon.do_mem('c000:c003')
+
+        out = stdout.getvalue()
+        self.assertEqual('c000:  00  00\n'
+                         'c002:  00  00\n', out)
+
     # mpu
 
     def test_mpu_with_no_args_prints_current_lists_available_mpus(self):
