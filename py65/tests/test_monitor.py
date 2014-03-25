@@ -670,6 +670,13 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('radix'))
 
+    def test_help_radix(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.help_radix()
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("radix [H|D|O|B]"))
+
     # registers
 
     def test_shortcut_for_registers(self):
