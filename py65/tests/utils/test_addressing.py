@@ -20,6 +20,8 @@ class AddressParserTests(unittest.TestCase):
         self.assertEqual(24, parser.maxwidth)
         self.assertEqual(0xFFFFFF, parser._maxaddr)
 
+    # number
+
     def test_number_hex_literal(self):
         parser = AddressParser()
         self.assertEqual(49152, parser.number('$c000'))
@@ -122,6 +124,8 @@ class AddressParserTests(unittest.TestCase):
         parser.labels = {'foo': 0xFFFFFF}
         self.assertRaises(OverflowError, parser.number, 'foo+5')
 
+    # label_for
+
     def test_label_for_returns_label(self):
         parser = AddressParser(labels={'chrout': 0xFFD2})
         self.assertEqual('chrout', parser.label_for(0xFFD2))
@@ -134,6 +138,27 @@ class AddressParserTests(unittest.TestCase):
         parser = AddressParser(labels={})
         self.assertEqual('foo', parser.label_for(0xFFD2, 'foo'))
 
+    # range
+
+    def test_range_one_number(self):
+        parser = AddressParser(labels={})
+        self.assertEqual((0xFFD2, 0xFFD2), parser.range('ffd2'))
+
+    def test_range_one_label(self):
+        parser = AddressParser(labels={'chrout':0xFFD2})
+        self.assertEqual((0xFFD2, 0xFFD2), parser.range('chrout'))
+
+    def test_range_two_numbers(self):
+        parser = AddressParser(labels={})
+        self.assertEqual((0xFFD2, 0xFFD4), parser.range('ffd2:ffd4'))
+
+    def test_range_mixed(self):
+        parser = AddressParser(labels={'chrout':0xFFD2})
+        self.assertEqual((0xFFD2, 0xFFD4), parser.range('chrout:ffd4'))
+
+    def test_range_start_exceeds_end(self):
+        parser = AddressParser(labels={})
+        self.assertEqual((0xFFD2, 0xFFD4), parser.range('ffd4:ffd2'))
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
