@@ -677,6 +677,48 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("radix [H|D|O|B]"))
 
+    def test_radix_no_arg_displays_radix(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_radix('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Default radix is Hexadecimal"))
+
+    def test_radix_invalid_radix_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_radix('f')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Illegal radix: f"))
+
+    def test_radix_sets_binary(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_radix('b')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Default radix is Binary"))
+
+    def test_radix_sets_decimal(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_radix('d')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Default radix is Decimal"))
+
+    def test_radix_sets_hexadecimal(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_radix('h')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Default radix is Hexadecimal"))
+
+    def test_radix_sets_octal(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_radix('o')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Default radix is Octal"))
+
     # registers
 
     def test_shortcut_for_registers(self):
