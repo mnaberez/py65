@@ -5,7 +5,7 @@ env:
   - TOXENV=pypy
   - TOXENV=py32
   - TOXENV=py33
-  # - TOXENV=py34  # Travis-CI does not support 3.4 yet
+  - TOXENV=py34
 install:
   - travis_retry pip install tox==1.6.1
 script:
