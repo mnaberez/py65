@@ -5645,21 +5645,17 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.step()
         self.assertEqual(0x84, mpu.a)
 
-    # AND Indirect, Indexed (X)
+    # LDA Zero Page, X-Indexed
 
-    def test_and_ind_indexed_x_has_page_wrap_bug(self):
+    def test_lda_zp_x_indexed_page_wraps(self):
         mpu = self._make_mpu()
-        mpu.a = 0x42
+        mpu.a = 0x00
         mpu.x = 0xFF
-        # $0000 AND ($80,X)
-        # $007f Vector to $BBBB (read if page wrapped)
-        # $017f Vector to $ABCD (read if no page wrap)
-        self._write(mpu.memory, 0x0000, (0x21, 0x80))
-        self._write(mpu.memory, 0x007f, (0xBB, 0xBB))
-        self._write(mpu.memory, 0x017f, (0xCD, 0xAB))
-        mpu.memory[0xABCD] = 0
-        mpu.memory[0xBBBB] = 0xFF
+        # $0000 LDA $80,X
+        self._write(mpu.memory, 0x0000, (0xB5, 0x80))
+        mpu.memory[0x007F] = 0x42
         mpu.step()
+        self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(0x42, mpu.a)
 
     # AND Indexed, Indirect (Y)
@@ -5829,7 +5825,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
 
     # JMP Indirect
 
-    def test_jmp_indirect_has_page_wrap_bug(self):
+    def test_jmp_jumps_to_address_with_page_wrap_bug(self):
         mpu = self._make_mpu()
         mpu.memory[0x00ff] = 0
         # $0000 JMP ($00)
@@ -5837,23 +5833,6 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.step()
         self.assertEqual(0x6c00, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
-
-    # ORA Indirect, Indexed (X)
-
-    def test_ora_ind_indexed_x_has_page_wrap_bug(self):
-        mpu = self._make_mpu()
-        mpu.a = 0
-        mpu.x = 0xFF
-        # $0000 ORA ($80,X)
-        # $007f Vector to $BBBB (read if page wrapped)
-        # $017f Vector to $ABCD (read if no page wrap)
-        self._write(mpu.memory, 0x0000, (0x01, 0x80))
-        self._write(mpu.memory, 0x007f, (0xBB, 0xBB))
-        self._write(mpu.memory, 0x017f, (0xCD, 0xAB))
-        mpu.memory[0xABCD] = 0
-        mpu.memory[0xBBBB] = 0x42
-        mpu.step()
-        self.assertEqual(0x42, mpu.a)
 
     # ORA Indexed, Indirect (Y)
 
@@ -5874,24 +5853,6 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.step()
         self.assertEqual(0x42, mpu.a)
 
-    # SBC Indirect, Indexed (X)
-
-    def test_sbc_ind_x_has_page_wrap_bug(self):
-        mpu = self._make_mpu()
-        mpu.p = mpu.CARRY
-        mpu.a = 0x03
-        mpu.x = 0xFF
-        # $0000 SBC ($80,X)
-        # $007f Vector to $BBBB (read if page wrapped)
-        # $017f Vector to $ABCD (read if no page wrap)
-        self._write(mpu.memory, 0x0000, (0xE1, 0x80))
-        self._write(mpu.memory, 0x007f, (0xBB, 0xBB))
-        self._write(mpu.memory, 0x017f, (0xCD, 0xAB))
-        mpu.memory[0xABCD] = 0x01
-        mpu.memory[0xBBBB] = 0x02
-        mpu.step()
-        self.assertEqual(0x01, mpu.a)
-
     # SBC Indexed, Indirect (Y)
 
     def test_sbc_indexed_ind_y_has_page_wrap_bug(self):
@@ -5911,43 +5872,6 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0x0012] = 0x03 # read if page wrapped
         mpu.step()
         self.assertEqual(0x3f, mpu.a)
-
-    # STA Indirect, Indexed (X)
-
-    def test_sta_ind_indexed_x_has_page_wrap_bug(self):
-        mpu = self._make_mpu()
-        mpu.a = 0x42
-        mpu.x = 0xFF
-        # $0000 STA ($80,X)
-        # $007f Vector to $BBBB (read if page wrapped)
-        # $017f Vector to $ABCD (read if no page wrap)
-        self._write(mpu.memory, 0x0000, (0x81, 0x80))
-        self._write(mpu.memory, 0x007f, (0xBB, 0xBB))
-        self._write(mpu.memory, 0x017f, (0xCD, 0xAB))
-        mpu.memory[0xABCD] = 0
-        mpu.memory[0xBBBB] = 0
-        mpu.step()
-        self.assertEqual(0x00, mpu.memory[0xABCD])
-        self.assertEqual(0x42, mpu.memory[0xBBBB])
-
-    # STA Indexed, Indirect (Y)
-
-    def test_sta_indexed_ind_y_stores_a_leaves_a_and_n_flag_unchanged(self):
-        mpu = self._make_mpu()
-        mpu.pc = 0x1000
-        mpu.a = 0x42
-        mpu.y = 0x02
-        # $1000 STA ($FF),Y
-        self._write(mpu.memory, 0x1000, (0x91, 0xff))
-        # Vector
-        mpu.memory[0x00ff] = 0x10 # low byte
-        mpu.memory[0x0100] = 0x20 # high byte if no page wrap
-        mpu.memory[0x0000] = 0x00 # high byte if page wrapped
-        # Data
-        mpu.memory[0x2012] = 0x00 # written if no page wrap
-        mpu.memory[0x0012] = 0x00 # written if page wrapped
-        mpu.step()
-        self.assertEqual(0x42, mpu.memory[0x0012])
 
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU

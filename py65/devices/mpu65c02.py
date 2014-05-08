@@ -26,14 +26,11 @@ class MPU(mpu6502.MPU):
 
     # addressing modes
 
-    def IndirectXAddr(self):
-        return self.WordAt(self.ByteAt(self.pc) + self.x)
-
     def ZeroPageIndirectAddr(self):
-        return self.WordAt(self.ByteAt(self.pc))
+        return self.WordAt(255 & (self.ByteAt(self.pc)))
 
     def IndirectAbsXAddr(self):
-        return self.addrMask & (self.WordAt(self.pc) + self.x)
+        return (self.WordAt(self.pc) + self.x) & self.addrMask
 
     # operations
 
