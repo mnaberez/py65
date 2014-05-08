@@ -1,5 +1,9 @@
 0.20-dev (Next Release)
 
+  - Page wrapping for indexed indirect (X) operations on 65C02 has been
+    restored.  This reverts the change introduced in 0.18.  We now believe
+    that this mode works the same on the 65C02 as it does on the 6502.
+
 0.19 (2014-03-12)
 
   - Fixed 65C02 opcode $D2: CMP Zero Page, Indirect.
