@@ -5,7 +5,7 @@ class AddressParser(object):
     """Parse user input into addresses or ranges of addresses.
     """
 
-    def __init__(self, maxwidth=16, radix=16, labels={}):
+    def __init__(self, maxwidth=16, radix=16, labels={}, breakpoints=[]):
         """Maxwidth is the maximum width of an address in bits.
         Radix is the default radix to use when one is not specified
         as a prefix of any input.  Labels are a dictionary of label
@@ -17,6 +17,12 @@ class AddressParser(object):
         self.labels = {}
         for k, v in labels.items():
             self.labels[k] = self._constrain(v)
+
+        self.breakpoints = []
+        for v in breakpoints:
+            address = self._constrain(v)
+            if address not in self.breakpoints:
+                self.breakpoints.append(address)
 
     def _get_maxwidth(self):
         return self._maxwidth
@@ -34,6 +40,10 @@ class AddressParser(object):
             if label_address == address:
                 return label
         return default
+
+    def address_for(self, label):
+        """Given a label, return the corresponding address or None."""
+        return self.labels.get(label, None)
 
     def number(self, num):
         """Parse a string containing a label or number into an address.

@@ -135,8 +135,10 @@ class Monitor(cmd.Cmd):
         self._shortcuts = {'EOF':  'quit',
                            '~':    'tilde',
                            'a':    'assemble',
+                           'ab':   'add_breakpoint',
                            'al':   'add_label',
                            'd':    'disassemble',
+                           'db':   'delete_breakpoint',
                            'dl':   'delete_label',
                            'exit': 'quit',
                            'f':    'fill',
@@ -145,6 +147,7 @@ class Monitor(cmd.Cmd):
                            'h':    'help',
                            '?':    'help',
                            'l':    'load',
+                           'lb':   'list_breakpoints',
                            'm':    'mem',
                            'q':    'quit',
                            'r':    'registers',
@@ -434,9 +437,20 @@ class Monitor(cmd.Cmd):
 
     def _run(self, stopcodes=[]):
         last_instruct = None
-        while last_instruct not in stopcodes:
-            self._mpu.step()
-            last_instruct = self._mpu.memory[self._mpu.pc]
+        if not self._address_parser.breakpoints:
+            while last_instruct not in stopcodes:
+                self._mpu.step()
+                last_instruct = self._mpu.memory[self._mpu.pc]
+        else:
+            # Slows things down quite a bit, unfortunately.
+            breakpoint = False
+            while last_instruct not in stopcodes and not breakpoint:
+                self._mpu.step()
+                last_instruct = self._mpu.memory[self._mpu.pc]
+                if self._mpu.pc in self._address_parser.breakpoints:
+                    self._output("Breakpoint %d reached." % self._address_parser.breakpoints.index(self._mpu.pc))
+                    breakpoint = True
+
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
@@ -739,6 +753,63 @@ class Monitor(cmd.Cmd):
         self._output("Set the width used by some commands to wrap output.")
         self._output("With no argument, the current width is printed.")
 
+    def do_add_breakpoint(self, args):
+        split = shlex.split(args)
+        if len(split) != 1:
+            self._output("Syntax error: %s" % args)
+            return self.help_add_breakpoint()
+
+        address = self._address_parser.address_for(split[0])
+        if not address:
+            address = self._address_parser.number(split[0])
+
+        if address not in self._address_parser.breakpoints:
+            self._output("Breakpoint %d added at $%04X" % (len(self._address_parser.breakpoints), address))
+            self._address_parser.breakpoints.append(address)
+        else:
+            self._output("Breakpoint already present at $%04X" % address)
+
+    def help_add_breakpoint(self):
+        self._output("add_breakpoint <address|label>")
+        self._output("Add a breakpoint on execution at the given address or label")
+
+    def do_delete_breakpoint(self, args):
+        split = shlex.split(args)
+        if len(split) != 1:
+            self._output("Syntax error: %s" % args)
+            return self.help_delete_breakpoint()
+
+        number = None
+        try:
+            number = int(split[0])
+            if number < 0 or number > len(self._address_parser.breakpoints):
+                self._output("Invalid breakpoint number %d", number)
+                return
+        except ValueError:
+            self._output("Illegal number: %s" % args)
+            return
+
+        if self._address_parser.breakpoints[number] is not None:
+            self._address_parser.breakpoints[number] = None
+            self._output("Breakpoint %d removed" % number)
+        else:
+            self._output("Breakpoint %d already removed" % number)
+
+    def help_delete_breakpoint(self):
+        self._output("delete_breakpoint <number>")
+        self._output("Delete the breakpoint on execution marked by the given number")
+
+    def do_list_breakpoints(self, args):
+        for (index, bp) in enumerate(self._address_parser.breakpoints):
+            if bp is None:
+                continue
+            label = self._address_parser.label_for(bp, '')
+            output_string = "Breakpoint %d : $%04X %s" % (index, bp, label)
+            self._output(output_string.strip())
+
+    def help_list_breakpoints(self):
+        self._output("list_breakpoints")
+        self._output("Lists the currently assigned breakpoints")
 
 def main(args=None):
     c = Monitor()

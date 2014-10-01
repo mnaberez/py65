@@ -103,8 +103,69 @@ Offsets are interpreted like any other numbers.  In the example above,
 ``start+4`` implies that the offset (``4``) uses the default radix.  This
 could also be written as ``start+$04`` for explicit hexadecimal.
 
+Breakpoints
+-----------
+
+It is possible to set breakpoints to stop execution when reaching a
+given address or label.  Breakpoints are added using the
+``add_breakpoint`` command::
+
+  .disassemble start:start+4
+  $ff80  d8        CLD
+  $ff81  a2 ff     LDX #$ff
+  $ff83  9a        TXS
+  $ff84  a0 1c     LDY #$1c
+  .add_breakpoint $ff84
+  Breakpoint 0 added at $FF84
+  .goto $ff80
+  Breakpoint 0 reached.
+         PC  AC XR YR SP NV-BDIZC
+  6502: ff84 00 ff 00 ff 10110000
+  
+Note that a number is assigned to each breakpoint, similar to how
+VICE operates.  Deleting a breakpoint can be done via the
+``delete_breakpoint`` command using the breakpoint identifier given
+by ``add_breakpoint``::
+
+  .add_breakpoint $ff84
+  Breakpoint 0 added at $FF84
+  .delete_breakpoint 0
+  Breakpoint 0 removed
+
+Breakpoint can be listed using the ``list_breakpoint`` command::
+
+  .add_breakpoint $1234
+  Breakpoint 0 added at $1234
+  .add_breakpoint $5678
+  Breakpoint 1 added at $5678
+  .add_breakpoint $9ABC
+  Breakpoint 2 added at $9ABC
+  .list_breakpoints
+  Breakpoint 0 : $1234
+  Breakpoint 1 : $5678
+  Breakpoint 2 : $9ABC
+
+Keep in mind that breakpoint identifiers are not recycled throughout
+a session, this means that if you add three breakpoints (#0, #1, #2)
+and then delete breakpoint #1, the next breakpoint you add will be
+breakpoint #3, not #1.  Also, invoking ``reset`` clears breakpoints
+too, not just labels.
+
 Command Reference
 =================
+
+.. describe:: add_breakpoint <address|label>
+
+  Sets a breakpoint on execution at the given address or at the
+  address represented by the given label::
+
+    .add_breakpoint $1234
+    .add_label f000 start
+    .add_breakpoint start
+
+  Breakpoints get a numeric identifier to be used with
+  ``delete_breakpoint``, the list of identifiers can be retrieved
+  with ``list_breakpoints``.
 
 .. describe:: add_label <address> <label>
 
@@ -154,6 +215,21 @@ Command Reference
 
     .cycles
     12
+
+.. describe:: delete_breakpoint <breakpoint_id>
+
+  Removes the breakpoint associated with the given identifier::
+
+    .add_breakpoint $1234
+    Breakpoint 0 added at $1234
+    .add_label f000 start
+    .add_breakpoint start
+    Breakpoint 1 added at $F000
+    .delete_breakpoint 0
+    Breakpoint 0 removed
+
+  The list of identifiers added with ``add_breakpoint`` can be
+  retrieved with ``list_breakpoints``.
 
 .. describe:: delete_label <label>
 
@@ -212,6 +288,21 @@ Command Reference
     .help disassemble
     disassemble <address_range>
     Disassemble instructions in the address range.
+
+.. describe:: list_breakpoints
+
+  Lists all the breakpoints that have been set so far::
+
+    .add_breakpoint $1234
+    Breakpoint 0 added at $1234
+    .add_breakpoint $5678
+    Breakpoint 1 added at $5678
+    .add_breakpoint $9ABC
+    Breakpoint 2 added at $9ABC
+    .list_breakpoints
+    Breakpoint 0 : $1234
+    Breakpoint 1 : $5678
+    Breakpoint 2 : $9ABC
 
 .. describe:: load <filename> <address>
 
