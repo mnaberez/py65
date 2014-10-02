@@ -83,3 +83,6 @@ These people are responsible for Py65:
 
 - `David Beazley <https://github.com/dabeaz>`_ did the initial port of Py65
   to Python 3.
+
+- `Alessandro Gatti <https://github.com/agatti>`_ added support for
+  breakpoints in the monitor.
