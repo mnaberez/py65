@@ -1,5 +1,8 @@
 0.21-dev (Next Release)
 
+ - Added support for breakpoints in the monitor.  Contributed by
+   Alessandro Gatti.
+
 0.20 (2014-05-08)
 
   - Page wrapping for indexed indirect (X) operations on 65C02 has been
