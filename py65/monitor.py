@@ -782,7 +782,7 @@ class Monitor(cmd.Cmd):
         number = None
         try:
             number = int(split[0])
-            if number < 0 or number > len(self._address_parser.breakpoints):
+            if number < 0 or number > len(self._breakpoints):
                 self._output("Invalid breakpoint number %d", number)
                 return
         except ValueError:
