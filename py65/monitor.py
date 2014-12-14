@@ -439,17 +439,19 @@ class Monitor(cmd.Cmd):
     def _run(self, stopcodes):
         stopcodes = set(stopcodes)
         breakpoints = set(self._breakpoints)
+        mpu = self._mpu
+        mem = self._mpu.memory
 
-        if not breakpoints: # optimization
+        if not breakpoints:
             while True:
-                self._mpu.step()
-                if self._mpu.memory[self._mpu.pc] in stopcodes:
+                mpu.step()
+                if mem[mpu.pc] in stopcodes:
                     break
         else:
             while True:
-                self._mpu.step()
-                pc = self._mpu.pc
-                if self._mpu.memory[pc] in stopcodes:
+                mpu.step()
+                pc = mpu.pc
+                if mem[pc] in stopcodes:
                     break
                 if pc in breakpoints:
                     msg = "Breakpoint %d reached."
