@@ -436,22 +436,25 @@ class Monitor(cmd.Cmd):
         brks = [0x00]  # BRK
         self._run(stopcodes=brks)
 
-    def _run(self, stopcodes=[]):
-        last_instruct = None
-        if not self._breakpoints:
-            while last_instruct not in stopcodes:
+    def _run(self, stopcodes):
+        stopcodes = set(stopcodes)
+        breakpoints = set(self._breakpoints)
+
+        if not breakpoints: # optimization
+            while True:
                 self._mpu.step()
-                last_instruct = self._mpu.memory[self._mpu.pc]
+                if self._mpu.memory[self._mpu.pc] in stopcodes:
+                    break
         else:
-            # Slows things down quite a bit, unfortunately.
-            breakpoint = False
-            while last_instruct not in stopcodes and not breakpoint:
+            while True:
                 self._mpu.step()
-                last_instruct = self._mpu.memory[self._mpu.pc]
-                if self._mpu.pc in self._breakpoints:
+                pc = self._mpu.pc
+                if self._mpu.memory[pc] in stopcodes:
+                    break
+                if pc in breakpoints:
                     msg = "Breakpoint %d reached."
-                    self._output(msg % self._breakpoints.index(self._mpu.pc))
-                    breakpoint = True
+                    self._output(msg % self._breakpoints.index(pc))
+                    break
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
