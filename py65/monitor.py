@@ -759,9 +759,7 @@ class Monitor(cmd.Cmd):
             self._output("Syntax error: %s" % args)
             return self.help_add_breakpoint()
 
-        address = self._address_parser.address_for(split[0])
-        if not address:
-            address = self._address_parser.number(split[0])
+        address = self._address_parser.number(split[0])
 
         if address not in self._address_parser.breakpoints:
             self._output("Breakpoint %d added at $%04X" % (len(self._address_parser.breakpoints), address))
