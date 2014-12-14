@@ -66,16 +66,17 @@ class MonitorTests(unittest.TestCase):
         mon = Monitor(stdout=stdout)
         mon.do_add_breakpoint('ffd2')
         out = stdout.getvalue()
-        address_parser = mon._address_parser
+        self.assertTrue(out.startswith("Breakpoint 0 added at $FFD2"))
         self.assertTrue(0xffd2 in mon._breakpoints)
 
-    def test_do_add_breakpoint_adds_number(self):
+    def test_do_add_breakpoint_adds_label(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         address_parser = mon._address_parser
         address_parser.labels['chrout'] = 0xffd2
         mon.do_add_breakpoint('chrout')
         out = stdout.getvalue()
+        self.assertTrue(out.startswith("Breakpoint 0 added at $FFD2"))
         self.assertTrue(0xffd2 in mon._breakpoints)
 
     # add_label

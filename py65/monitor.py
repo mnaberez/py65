@@ -767,7 +767,7 @@ class Monitor(cmd.Cmd):
         else:
             self._breakpoints.append(address)
             msg = "Breakpoint %d added at $%04X"
-            self._output(msg % (len(self._breakpoints), address))
+            self._output(msg % (len(self._breakpoints) - 1, address))
 
     def help_add_breakpoint(self):
         self._output("add_breakpoint <address|label>")
