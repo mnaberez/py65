@@ -507,6 +507,30 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("*** No help on foo"))
 
+    def test_shortcut_for_list_breakpoints(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('lb')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('list_breakpoints'))
+
+    def test_list_breakpoints_shows_breakpoints(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._breakpoints = [0xffd2]
+        mon._address_parser.labels = {'chrout': 0xffd2}
+        mon.do_list_breakpoints('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Breakpoint 0: $FFD2 chrout"))
+
+    def test_list_breakpoints_ignores_deleted_breakpoints(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._breakpoints = [None, 0xffd2]
+        mon.do_list_breakpoints('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Breakpoint 1: $FFD2"))
+
     # load
 
     def test_shortcut_for_load(self):

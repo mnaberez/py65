@@ -800,12 +800,13 @@ class Monitor(cmd.Cmd):
         self._output("Delete the breakpoint on execution marked by the given number")
 
     def do_list_breakpoints(self, args):
-        for (index, bp) in enumerate(self._breakpoints):
-            if bp is None:
-                continue
-            label = self._address_parser.label_for(bp, '')
-            output_string = "Breakpoint %d : $%04X %s" % (index, bp, label)
-            self._output(output_string.strip())
+        for i, address in enumerate(self._breakpoints):
+            if address is not None:
+                bpinfo = "Breakpoint %d: $%04X" % (i, address)
+                label = self._address_parser.label_for(address)
+                if label is not None:
+                    bpinfo += " " + label
+                self._output(bpinfo)
 
     def help_list_breakpoints(self):
         self._output("list_breakpoints")
