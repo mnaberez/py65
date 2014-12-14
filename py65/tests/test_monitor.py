@@ -458,6 +458,16 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue("goto <address>" in out)
 
+    def test_goto_stops_execution_at_breakpoint(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._address_parser.breakpoints = [ 0x02 ]
+        mon._mpu.memory = [ 0xEA, 0xEA, 0xEA, 0xEA ]
+        mon.do_goto('0')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Breakpoint 0 reached"))
+        self.assertEqual(0x02, mon._mpu.pc)
+
     # help
 
     def test_help_without_args_shows_documented_commands(self):
