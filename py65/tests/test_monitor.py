@@ -44,6 +44,40 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual("assemble lda #$';'",
                          mon._preprocess_line("assemble lda #$';' ;comment"))
 
+    # add_breakpoint
+
+    def test_shortcut_for_add_breakpoint(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('ab')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('add_breakpoint'))
+
+    def test_do_add_breakpoint_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_breakpoint('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Syntax error:"))
+
+    def test_do_add_breakpoint_adds_number(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_breakpoint('ffd2')
+        out = stdout.getvalue()
+        address_parser = mon._address_parser
+        self.assertTrue(0xffd2 in address_parser.breakpoints)
+
+    def test_do_add_breakpoint_adds_number(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        address_parser = mon._address_parser
+        address_parser.labels['chrout'] = 0xffd2
+        mon.do_add_breakpoint('chrout')
+        out = stdout.getvalue()
+        self.assertTrue(0xffd2 in address_parser.breakpoints)
+
     # add_label
 
     def test_shortcut_for_add_label(self):
