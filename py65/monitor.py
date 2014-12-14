@@ -560,7 +560,7 @@ class Monitor(cmd.Cmd):
 
     def do_load(self, args):
         split = shlex.split(args)
-        if len(split) > 2:
+        if len(split) not in (1, 2):
             self._output("Syntax error: %s" % args)
             return
 

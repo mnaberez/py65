@@ -541,6 +541,13 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith('load'))
 
+    def test_load_with_less_than_two_args_syntax_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_load('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('Syntax error'))
+
     def test_load_with_more_than_two_args_syntax_error(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
