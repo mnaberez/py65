@@ -67,7 +67,7 @@ class MonitorTests(unittest.TestCase):
         mon.do_add_breakpoint('ffd2')
         out = stdout.getvalue()
         address_parser = mon._address_parser
-        self.assertTrue(0xffd2 in address_parser.breakpoints)
+        self.assertTrue(0xffd2 in mon._breakpoints)
 
     def test_do_add_breakpoint_adds_number(self):
         stdout = StringIO()
@@ -76,7 +76,7 @@ class MonitorTests(unittest.TestCase):
         address_parser.labels['chrout'] = 0xffd2
         mon.do_add_breakpoint('chrout')
         out = stdout.getvalue()
-        self.assertTrue(0xffd2 in address_parser.breakpoints)
+        self.assertTrue(0xffd2 in mon._breakpoints)
 
     # add_label
 
@@ -461,7 +461,7 @@ class MonitorTests(unittest.TestCase):
     def test_goto_stops_execution_at_breakpoint(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon._address_parser.breakpoints = [ 0x02 ]
+        mon._breakpoints = [ 0x02 ]
         mon._mpu.memory = [ 0xEA, 0xEA, 0xEA, 0xEA ]
         mon.do_goto('0')
         out = stdout.getvalue()

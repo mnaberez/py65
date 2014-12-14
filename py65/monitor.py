@@ -46,6 +46,7 @@ class Monitor(cmd.Cmd):
         if argv is None:
             argv = sys.argv
         self._reset(self.mpu_type)
+        self._breakpoints = []
         self._width = 78
         self.prompt = "."
         self._add_shortcuts()
@@ -437,7 +438,7 @@ class Monitor(cmd.Cmd):
 
     def _run(self, stopcodes=[]):
         last_instruct = None
-        if not self._address_parser.breakpoints:
+        if not self._breakpoints:
             while last_instruct not in stopcodes:
                 self._mpu.step()
                 last_instruct = self._mpu.memory[self._mpu.pc]
@@ -447,10 +448,10 @@ class Monitor(cmd.Cmd):
             while last_instruct not in stopcodes and not breakpoint:
                 self._mpu.step()
                 last_instruct = self._mpu.memory[self._mpu.pc]
-                if self._mpu.pc in self._address_parser.breakpoints:
-                    self._output("Breakpoint %d reached." % self._address_parser.breakpoints.index(self._mpu.pc))
+                if self._mpu.pc in self._breakpoints:
+                    msg = "Breakpoint %d reached."
+                    self._output(msg % self._breakpoints.index(self._mpu.pc))
                     breakpoint = True
-
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
@@ -761,11 +762,12 @@ class Monitor(cmd.Cmd):
 
         address = self._address_parser.number(split[0])
 
-        if address not in self._address_parser.breakpoints:
-            self._output("Breakpoint %d added at $%04X" % (len(self._address_parser.breakpoints), address))
-            self._address_parser.breakpoints.append(address)
-        else:
+        if address in self._breakpoints:
             self._output("Breakpoint already present at $%04X" % address)
+        else:
+            self._breakpoints.append(address)
+            msg = "Breakpoint %d added at $%04X"
+            self._output(msg % (len(self._breakpoints), address))
 
     def help_add_breakpoint(self):
         self._output("add_breakpoint <address|label>")
@@ -787,8 +789,8 @@ class Monitor(cmd.Cmd):
             self._output("Illegal number: %s" % args)
             return
 
-        if self._address_parser.breakpoints[number] is not None:
-            self._address_parser.breakpoints[number] = None
+        if self._breakpoints[number] is not None:
+            self._breakpoints[number] = None
             self._output("Breakpoint %d removed" % number)
         else:
             self._output("Breakpoint %d already removed" % number)
@@ -798,7 +800,7 @@ class Monitor(cmd.Cmd):
         self._output("Delete the breakpoint on execution marked by the given number")
 
     def do_list_breakpoints(self, args):
-        for (index, bp) in enumerate(self._address_parser.breakpoints):
+        for (index, bp) in enumerate(self._breakpoints):
             if bp is None:
                 continue
             label = self._address_parser.label_for(bp, '')
