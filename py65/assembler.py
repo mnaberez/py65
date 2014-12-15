@@ -55,6 +55,7 @@ class Assembler:
             match = pattern.match(operand)
 
             if match:
+                # check if opcode supports this addressing mode
                 try:
                     bytes = [self._mpu.disassemble.index((opcode, mode))]
                 except ValueError:
@@ -98,9 +99,16 @@ class Assembler:
         if match:
             before, target, after = match.groups()
 
-            # target is an immediate number
+            # target is an immediate value
             if target.startswith('#'):
-                number = self._address_parser.number(target[1:])
+                if target[1] in ("'", '"'): # quoted ascii character
+                    try:
+                        number = ord(target[2])
+                    except IndexError:
+                        raise SyntaxError(statement)
+                else:
+                    number = self._address_parser.number(target[1:])
+
                 if (number < 0x00) or (number > self._mpu.byteMask):
                     raise OverflowError
                 statement = before + '#$' + self._mpu.BYTE_FORMAT % number

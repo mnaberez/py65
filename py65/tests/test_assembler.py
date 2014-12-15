@@ -22,6 +22,8 @@ class AssemblerTests(unittest.TestCase):
     def test_assemble_bad_syntax_raises_syntaxerror(self):
         self.assertRaises(SyntaxError,
                           self.assemble, 'foo')
+        self.assertRaises(SyntaxError,
+                          self.assemble, 'lda #"')
 
     def test_assemble_bad_label_raises_keyerror(self):
         self.assertRaises(KeyError,
@@ -819,6 +821,12 @@ class AssemblerTests(unittest.TestCase):
     def test_assembles_a9(self):
         self.assertEqual([0xa9, 0x44],
                          self.assemble('LDA #$44'))
+
+    def test_assembles_a9_ascii(self):
+        self.assertEqual([0xa9, 0x48],
+                         self.assemble("LDA #'H"))
+        self.assertEqual([0xa9, 0x49],
+                         self.assemble('LDA #"I'))
 
     def test_assembles_aa(self):
         self.assertEqual([0xaa],
