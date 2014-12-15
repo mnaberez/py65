@@ -20,12 +20,6 @@ class AssemblerTests(unittest.TestCase):
         asm = Assembler(mpu)
         self.assertFalse(asm._address_parser is None)
 
-    def test_ctor_uses_bus_width_from_mpu(self):
-        asm = Assembler(MPU())
-        self.assertEqual(16, asm.addrWidth)
-        asm = Assembler(MPU65Org16())
-        self.assertEqual(32, asm.addrWidth)
-
     def test_assemble_bad_syntax_raises_syntaxerror(self):
         self.assertRaises(SyntaxError,
                           self.assemble, 'foo')

@@ -7,96 +7,56 @@ class Assembler:
                            r'\(?\s*)([^,\s\)]+)(\s*[,xXyY\s]*\)?'
                            r'[,xXyY\s]*)$')
 
-    Addressing8 = [
+    Addressing = [
         ['zpi',  # "($0012)"
-         re.compile(r'^\(\$00([0-9A-F]{2})\)$')],
+         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\)$'],
         ['zpx',  # "$0012,X"
-         re.compile(r'^\$00([0-9A-F]{2}),X$')],
+         r'^\$0{BYTE}([0-9A-F]{BYTE}),X$'],
         ['zpy',  # "$0012,Y"
-         re.compile(r'^\$00([0-9A-F]{2}),Y$')],
+         r'^\$0{BYTE}([0-9A-F]{BYTE}),Y$'],
         ['zpg',  # "$0012"
-         re.compile(r'^\$00([0-9A-F]{2})$')],
+         r'^\$0{BYTE}([0-9A-F]{BYTE})$'],
         ['inx',  # "($0012,X)
-         re.compile(r'^\(\$00([0-9A-F]{2}),X\)$')],
+         r'^\(\$0{BYTE}([0-9A-F]{BYTE}),X\)$'],
         ['iax',  # "($1234,X)
-         re.compile(r'^\(\$([0-9A-F]{2})([0-9A-F]{2}),X\)$')],
+         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X\)$'],
         ['iny',  # "($0012),Y"
-         re.compile(r'^\(\$00([0-9A-F]{2})\),Y$')],
+         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\),Y$'],
         ['ind',  # "($1234)"
-         re.compile(r'^\(\$([0-9A-F]{2})([0-9A-F]{2})\)$')],
+         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})\)$'],
         ['abx',  # "$1234,X"
-         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2}),X$')],
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X$'],
         ['aby',  # "$1234,Y"
-         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2}),Y$')],
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),Y$'],
         ['abs',  # "$1234"
-         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2})$')],
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'],
         ['rel',  # "$1234"
-         re.compile(r'^\$([0-9A-F]{2})([0-9A-F]{2})$')],
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'],
         ['imp',  # ""
-         re.compile(r'^$')],
+         r'^$'],
         ['acc',  # ""
-         re.compile(r'^$')],
+         r'^$'],
         ['acc',  # "A"
-         re.compile(r'^A$')],
+         r'^A$'],
         ['imm',  # "#$12"
-         re.compile(r'^#\$([0-9A-F]{2})$')]
+         r'^#\$([0-9A-F]{BYTE})$']
     ]
-
-    Addressing16 = [
-        ['zpi',  # "($00001234)"
-         re.compile(r'^\(\$0000([0-9A-F]{4})\)$')],
-        ['zpx',  # "$00001234,X"
-         re.compile(r'^\$0000([0-9A-F]{4}),X$')],
-        ['zpy',  # "$00001234,Y"
-         re.compile(r'^\$0000([0-9A-F]{4}),Y$')],
-        ['zpg',  # "$00001234"
-         re.compile(r'^\$0000([0-9A-F]{4})$')],
-        ['inx',  # "($00001234,X)"
-         re.compile(r'^\(\$0000([0-9A-F]{4}),X\)$')],
-        ['iny',  # "($00001234),Y"
-         re.compile(r'^\(\$0000([0-9A-F]{4})\),Y$')],
-        ['ind',  # "($12345678)"
-         re.compile(r'^\(\$([0-9A-F]{4})([0-9A-F]{4})\)$')],
-        ['abx',  # "$12345678,X"
-         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4}),X$')],
-        ['aby',  # "$12345678,Y"
-         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4}),Y$')],
-        ['abs',  # "$12345678"
-         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4})$')],
-        ['rel',  # "$12345678"
-         re.compile(r'^\$([0-9A-F]{4})([0-9A-F]{4})$')],
-        ['imp',  # ""
-         re.compile(r'^$')],
-        ['acc',  # ""
-         re.compile(r'^$')],
-        ['acc',  # "A"
-         re.compile(r'^A$')],
-        ['imm',  # "#$1234"
-         re.compile(r'^#\$([0-9A-F]{4})$')]
-    ]
-    Addressing = Addressing8
 
     def __init__(self, mpu, address_parser=None):
         """ If a configured AddressParser is passed, symbolic addresses
         may be used in the assembly statements.
         """
+        self._mpu = mpu
+
         if address_parser is None:
             address_parser = AddressParser()
-
-        self._mpu = mpu
         self._address_parser = address_parser
 
-        self.addrWidth = mpu.ADDR_WIDTH
-        self.byteWidth = mpu.BYTE_WIDTH
-        self.addrFmt = mpu.ADDR_FORMAT
-        self.byteFmt = mpu.BYTE_FORMAT
-        self.addrMask = mpu.addrMask
-        self.byteMask = mpu.byteMask
-
-        if self.byteWidth == 8:
-            self.Addressing = self.Addressing8
-        else:
-            self.Addressing = self.Addressing16
+        self._addressing = []
+        numchars = mpu.BYTE_WIDTH / 4  # 1 byte = 2 chars in hex
+        for mode, pattern in self.Addressing:
+            pattern = pattern.replace('BYTE', '%d' % numchars)
+            self._addressing.append([mode, re.compile(pattern)])
 
     def assemble(self, statement, pc=0000):
         """ Assemble the given assembly language statement.  If the statement
@@ -105,7 +65,7 @@ class Assembler:
         """
         opcode, operand = self.normalize_and_split(statement)
 
-        for mode, pattern in self.Addressing:
+        for mode, pattern in self._addressing:
             match = pattern.match(operand)
 
             if match:
@@ -120,8 +80,8 @@ class Assembler:
                     # relative branch
                     absolute = int(''.join(operands), 16)
                     relative = (absolute - pc) - 2
-                    relative = relative & self.byteMask
-                    operands = [(self.byteFmt % relative)]
+                    relative = relative & self._mpu.byteMask
+                    operands = [(self._mpu.BYTE_FORMAT % relative)]
 
                 elif len(operands) == 2:
                     # swap bytes
@@ -155,9 +115,9 @@ class Assembler:
             # target is an immediate number
             if target.startswith('#'):
                 number = self._address_parser.number(target[1:])
-                if (number < 0x00) or (number > self.byteMask):
+                if (number < 0x00) or (number > self._mpu.byteMask):
                     raise OverflowError
-                statement = before + '#$' + self.byteFmt % number
+                statement = before + '#$' + self._mpu.BYTE_FORMAT % number
 
             # target is the accumulator
             elif target in ('a', 'A'):
@@ -166,7 +126,7 @@ class Assembler:
             # target is an address or label
             else:
                 address = self._address_parser.number(target)
-                statement = before + '$' + self.addrFmt % address + after
+                statement = before + '$' + self._mpu.ADDR_FORMAT % address + after
 
         # separate opcode and operand
         splitted = statement.split(" ", 2)
