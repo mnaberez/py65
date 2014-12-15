@@ -23,6 +23,8 @@ class AssemblerTests(unittest.TestCase):
         self.assertRaises(SyntaxError,
                           self.assemble, 'foo')
         self.assertRaises(SyntaxError,
+                          self.assemble, 'lda #')
+        self.assertRaises(SyntaxError,
                           self.assemble, 'lda #"')
 
     def test_assemble_bad_label_raises_keyerror(self):

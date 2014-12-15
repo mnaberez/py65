@@ -101,15 +101,15 @@ class Assembler:
 
             # target is an immediate value
             if target.startswith('#'):
-                if target[1] in ("'", '"'): # quoted ascii character
-                    try:
+                try:
+                    if target[1] in ("'", '"'): # quoted ascii character
                         number = ord(target[2])
-                    except IndexError:
-                        raise SyntaxError(statement)
-                else:
-                    number = self._address_parser.number(target[1:])
+                    else:
+                        number = self._address_parser.number(target[1:])
+                except IndexError:
+                    raise SyntaxError(statement)
 
-                if (number < 0x00) or (number > self._mpu.byteMask):
+                if (number < 0) or (number > self._mpu.byteMask):
                     raise OverflowError
                 statement = before + '#$' + self._mpu.BYTE_FORMAT % number
 
