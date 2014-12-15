@@ -223,8 +223,7 @@ class Monitor(cmd.Cmd):
         self._output("\n" + repr(self._mpu))
 
     def _output(self, stuff):
-        if stuff is not None:
-            self.stdout.write(stuff + "\n")
+        self.stdout.write("%s\n" % stuff)
 
     def _exit(self, exitcode=0):
         sys.exit(exitcode)
@@ -523,12 +522,23 @@ class Monitor(cmd.Cmd):
                 self._output("Invalid register: %s" % register)
             else:
                 try:
-                    intval = self._address_parser.number(value) & self.addrMask
-                    if len(register) == 1:
-                        intval &= self.byteMask
-                    setattr(self._mpu, register, intval)
-                except KeyError as exc:
+                    intval = self._address_parser.number(value)
+                except KeyError as exc: # label not found
                     self._output(exc.args[0])
+                    continue
+                except OverflowError as exc: # wider than address space
+                    overflow = True
+                    msg = "Overflow: %r too wide for register %r"
+                    self._output(msg % (value, register))
+                    continue
+
+                if register != 'pc':
+                    if intval != (intval & self.byteMask):
+                        msg = "Overflow: %r too wide for register %r"
+                        self._output(msg % (value, register))
+                        continue
+
+                setattr(self._mpu, register, intval)
 
     def help_cd(self):
         self._output("cd <directory>")

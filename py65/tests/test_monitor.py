@@ -854,6 +854,22 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(0x46, mon._mpu.sp)
         self.assertEqual(0x4600, mon._mpu.pc)
 
+    def test_registers_pc_overflow(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_registers('pc=10000')
+        out = stdout.getvalue()
+        expected = "Overflow: '10000' too wide for register 'pc'"
+        self.assertTrue(out.startswith(expected))
+
+    def test_registers_a_overflow(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_registers('a=100')
+        out = stdout.getvalue()
+        expected = "Overflow: '100' too wide for register 'a'"
+        self.assertTrue(out.startswith(expected))
+
     def test_help_registers(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
