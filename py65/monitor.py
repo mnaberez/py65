@@ -527,7 +527,6 @@ class Monitor(cmd.Cmd):
                     self._output(exc.args[0])
                     continue
                 except OverflowError as exc: # wider than address space
-                    overflow = True
                     msg = "Overflow: %r too wide for register %r"
                     self._output(msg % (value, register))
                     continue
