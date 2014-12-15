@@ -75,7 +75,7 @@ class MPU(mpu6502.MPU):
         self.stPush(self.p | self.BREAK | self.UNUSED)
 
         self.p |= self.INTERRUPT
-        self.pc = self.WordAt(self.IrqTo)
+        self.pc = self.WordAt(self.IRQ)
 
         # 65C02 clears decimal flag, NMOS 6502 does not
         self.p &= ~self.DECIMAL

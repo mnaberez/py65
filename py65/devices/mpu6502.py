@@ -4,15 +4,15 @@ from py65.utils.devices import make_instruction_decorator
 
 class MPU:
     # vectors
-    ResetTo = 0xfffc
-    IrqTo = 0xfffe
-    NMITo = 0xfffa
+    RESET = 0xfffc
+    NMI = 0xfffa
+    IRQ = 0xfffe
 
     # processor flags
     NEGATIVE = 128
     OVERFLOW = 64
     UNUSED = 32
-    BREAK = 16  # there is no actual BREAK flag but this indicates BREAK
+    BREAK = 16
     DECIMAL = 8
     INTERRUPT = 4
     ZERO = 2
@@ -511,7 +511,7 @@ class MPU:
         self.stPush(self.p | self.BREAK | self.UNUSED)
 
         self.p |= self.INTERRUPT
-        self.pc = self.WordAt(self.IrqTo)
+        self.pc = self.WordAt(self.IRQ)
 
     @instruction(name="ORA", mode="inx", cycles=6)
     def inst_0x01(self):
