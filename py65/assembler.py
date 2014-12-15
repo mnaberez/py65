@@ -7,40 +7,40 @@ class Assembler:
                            r'\(?\s*)([^,\s\)]+)(\s*[,xXyY\s]*\)?'
                            r'[,xXyY\s]*)$')
 
-    Addressing = [
-        ['zpi',  # "($0012)"
-         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\)$'],
-        ['zpx',  # "$0012,X"
-         r'^\$0{BYTE}([0-9A-F]{BYTE}),X$'],
-        ['zpy',  # "$0012,Y"
-         r'^\$0{BYTE}([0-9A-F]{BYTE}),Y$'],
-        ['zpg',  # "$0012"
-         r'^\$0{BYTE}([0-9A-F]{BYTE})$'],
-        ['inx',  # "($0012,X)
-         r'^\(\$0{BYTE}([0-9A-F]{BYTE}),X\)$'],
-        ['iax',  # "($1234,X)
-         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X\)$'],
-        ['iny',  # "($0012),Y"
-         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\),Y$'],
-        ['ind',  # "($1234)"
-         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})\)$'],
-        ['abx',  # "$1234,X"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X$'],
-        ['aby',  # "$1234,Y"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),Y$'],
-        ['abs',  # "$1234"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'],
-        ['rel',  # "$1234"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'],
-        ['imp',  # ""
-         r'^$'],
-        ['acc',  # ""
-         r'^$'],
-        ['acc',  # "A"
-         r'^A$'],
-        ['imm',  # "#$12"
-         r'^#\$([0-9A-F]{BYTE})$']
-    ]
+    Addressing = (
+        ('zpi',  # "($0012)"
+         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\)$'),
+        ('zpx',  # "$0012,X"
+         r'^\$0{BYTE}([0-9A-F]{BYTE}),X$'),
+        ('zpy',  # "$0012,Y"
+         r'^\$0{BYTE}([0-9A-F]{BYTE}),Y$'),
+        ('zpg',  # "$0012"
+         r'^\$0{BYTE}([0-9A-F]{BYTE})$'),
+        ('inx',  # "($0012,X)
+         r'^\(\$0{BYTE}([0-9A-F]{BYTE}),X\)$'),
+        ('iax',  # "($1234,X)
+         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X\)$'),
+        ('iny',  # "($0012),Y"
+         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\),Y$'),
+        ('ind',  # "($1234)"
+         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})\)$'),
+        ('abx',  # "$1234,X"
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X$'),
+        ('aby',  # "$1234,Y"
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),Y$'),
+        ('abs',  # "$1234"
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'),
+        ('rel',  # "$1234"
+         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'),
+        ('imp',  # ""
+         r'^$'),
+        ('acc',  # ""
+         r'^$'),
+        ('acc',  # "A"
+         r'^A$'),
+        ('imm',  # "#$12"
+         r'^#\$([0-9A-F]{BYTE})$')
+    )
 
     def __init__(self, mpu, address_parser=None):
         """ If a configured AddressParser is passed, symbolic addresses
