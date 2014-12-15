@@ -70,10 +70,10 @@ class Monitor(cmd.Cmd):
 
             if opt in ('-r', '--rom'):
                 # load a ROM and run from the reset vector
-                cmd = "load %s %d" % (value, -1)
+                cmd = "load '%s' top" % value
                 self.onecmd(cmd)
                 physMask = self._mpu.memory.physMask
-                reset = self._mpu.ResetTo & physMask
+                reset = self._mpu.RESET & physMask
                 dest = self._mpu.memory[reset] + \
                     (self._mpu.memory[reset + 1] << self.byteWidth)
                 cmd = "goto %08x" % dest
@@ -563,8 +563,9 @@ class Monitor(cmd.Cmd):
         self._output(cwd)
 
     def help_load(self):
-        self._output("load \"filename\" <address>")
+        self._output("load <filename|url> <address|top>")
         self._output("Load a file into memory at the specified address.")
+        self._output('An address of "top" loads into the top of memory.')
         self._output("Commodore-style load address bytes are ignored.")
 
     def do_load(self, args):
@@ -595,7 +596,7 @@ class Monitor(cmd.Cmd):
                 return
 
         if len(split) == 2:
-            if split[1] == "-1":
+            if split[1] == "top":
                 # load a ROM to top of memory
                 start = self.addrMask - len(bytes) / int(self.byteWidth / 8) + 1
             else:
