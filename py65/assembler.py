@@ -8,38 +8,22 @@ class Assembler:
                            r'[,xXyY\s]*)$')
 
     Addressing = (
-        ('zpi',  # "($0012)"
-         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\)$'),
-        ('zpx',  # "$0012,X"
-         r'^\$0{BYTE}([0-9A-F]{BYTE}),X$'),
-        ('zpy',  # "$0012,Y"
-         r'^\$0{BYTE}([0-9A-F]{BYTE}),Y$'),
-        ('zpg',  # "$0012"
-         r'^\$0{BYTE}([0-9A-F]{BYTE})$'),
-        ('inx',  # "($0012,X)
-         r'^\(\$0{BYTE}([0-9A-F]{BYTE}),X\)$'),
-        ('iax',  # "($1234,X)
-         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X\)$'),
-        ('iny',  # "($0012),Y"
-         r'^\(\$0{BYTE}([0-9A-F]{BYTE})\),Y$'),
-        ('ind',  # "($1234)"
-         r'^\(\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})\)$'),
-        ('abx',  # "$1234,X"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),X$'),
-        ('aby',  # "$1234,Y"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE}),Y$'),
-        ('abs',  # "$1234"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'),
-        ('rel',  # "$1234"
-         r'^\$([0-9A-F]{BYTE})([0-9A-F]{BYTE})$'),
-        ('imp',  # ""
-         r'^$'),
-        ('acc',  # ""
-         r'^$'),
-        ('acc',  # "A"
-         r'^A$'),
-        ('imm',  # "#$12"
-         r'^#\$([0-9A-F]{BYTE})$')
+        ('zpi', "($00FF)"),
+        ('zpx', "$00FF,X"),
+        ('zpy', "$00FF,Y"),
+        ('zpg', "$00FF"),
+        ('inx', "($00FF,X)"),
+        ('iax', "($FFFF,X)"),
+        ('iny', "($00FF),Y"),
+        ('ind', "($FFFF)"),
+        ('abx', "$FFFF,X"),
+        ('aby', "$FFFF,Y"),
+        ('abs', "$FFFF"),
+        ('rel', "$FFFF"),
+        ('imp', ""),
+        ('acc', ""),
+        ('acc', "A"),
+        ('imm', "#$FF")
     )
 
     def __init__(self, mpu, address_parser=None):
@@ -54,9 +38,11 @@ class Assembler:
 
         self._addressing = []
         numchars = mpu.BYTE_WIDTH / 4  # 1 byte = 2 chars in hex
-        for mode, pattern in self.Addressing:
-            pattern = pattern.replace('BYTE', '%d' % numchars)
-            self._addressing.append([mode, re.compile(pattern)])
+        for mode, format in self.Addressing:
+            pat = "^" + re.escape(format) + "$"
+            pat = pat.replace('00', '0{%d}' % numchars)
+            pat = pat.replace('FF', '([0-9A-F]{%d})' % numchars)
+            self._addressing.append([mode, re.compile(pat)])
 
     def assemble(self, statement, pc=0000):
         """ Assemble the given assembly language statement.  If the statement
