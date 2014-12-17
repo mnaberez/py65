@@ -27,6 +27,11 @@ class AddressParser(object):
 
     maxwidth = property(_get_maxwidth, _set_maxwidth)
 
+    def address_for(self, label, default=None):
+        """Given a label, return the corresponding address or a default.
+        """
+        return self.labels.get(label, default)
+
     def label_for(self, address, default=None):
         """Given an address, return the corresponding label or a default.
         """
@@ -34,10 +39,6 @@ class AddressParser(object):
             if label_address == address:
                 return label
         return default
-
-    def address_for(self, label):
-        """Given a label, return the corresponding address or None."""
-        return self.labels.get(label, None)
 
     def number(self, num):
         """Parse a string containing a label or number into an address.

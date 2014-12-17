@@ -124,6 +124,20 @@ class AddressParserTests(unittest.TestCase):
         parser.labels = {'foo': 0xFFFFFF}
         self.assertRaises(OverflowError, parser.number, 'foo+5')
 
+    # address_for
+
+    def test_address_for_returns_label(self):
+        parser = AddressParser(labels={'chrout': 0xFFD2})
+        self.assertEqual(0xffd2, parser.address_for('chrout'))
+
+    def test_address_for_returns_none_by_default(self):
+        parser = AddressParser(labels={})
+        self.assertEqual(None, parser.address_for('chrout'))
+
+    def test_adderss_for_returns_alternate_default(self):
+        parser = AddressParser(labels={})
+        self.assertEqual('foo', parser.address_for('chrout', 'foo'))
+
     # label_for
 
     def test_label_for_returns_label(self):
