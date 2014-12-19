@@ -1375,6 +1375,19 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x1F6, mpu.pc)
         self.assertEqual(3, mpu.processorCycles)  # Crossed boundry
 
+    # WAI
+
+    def test_wai_sets_waiting(self):
+        mpu = self._make_mpu()
+        self.assertFalse(mpu.waiting)
+        # $0240 WAI
+        self._write(mpu.memory, 0x0204, [0xCB])
+        mpu.pc = 0x0204
+        mpu.step()
+        self.assertTrue(mpu.waiting)
+        self.assertEqual(0x0205, mpu.pc)
+        self.assertEqual(3, mpu.processorCycles)
+
     # Test Helpers
 
     def _get_target_class(self):
