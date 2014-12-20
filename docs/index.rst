@@ -121,7 +121,7 @@ given address or label.  Breakpoints are added using the
   Breakpoint 0 reached.
          PC  AC XR YR SP NV-BDIZC
   6502: ff84 00 ff 00 ff 10110000
-  
+
 Note that a number is assigned to each breakpoint, similar to how
 VICE operates.  Deleting a breakpoint can be done via the
 ``delete_breakpoint`` command using the breakpoint identifier given
@@ -140,7 +140,7 @@ Breakpoint can be listed using the ``list_breakpoint`` command::
   Breakpoint 1 added at $5678
   .add_breakpoint $9ABC
   Breakpoint 2 added at $9ABC
-  .list_breakpoints
+  .show_breakpoints
   Breakpoint 0 : $1234
   Breakpoint 1 : $5678
   Breakpoint 2 : $9ABC
@@ -165,7 +165,7 @@ Command Reference
 
   Breakpoints get a numeric identifier to be used with
   ``delete_breakpoint``, the list of identifiers can be retrieved
-  with ``list_breakpoints``.
+  with ``show_breakpoints``.
 
 .. describe:: add_label <address> <label>
 
@@ -229,7 +229,7 @@ Command Reference
     Breakpoint 0 removed
 
   The list of identifiers added with ``add_breakpoint`` can be
-  retrieved with ``list_breakpoints``.
+  retrieved with ``show_breakpoints``.
 
 .. describe:: delete_label <label>
 
@@ -289,7 +289,7 @@ Command Reference
     disassemble <address_range>
     Disassemble instructions in the address range.
 
-.. describe:: list_breakpoints
+.. describe:: show_breakpoints
 
   Lists all the breakpoints that have been set so far::
 
@@ -299,7 +299,7 @@ Command Reference
     Breakpoint 1 added at $5678
     .add_breakpoint $9ABC
     Breakpoint 2 added at $9ABC
-    .list_breakpoints
+    .show_breakpoints
     Breakpoint 0 : $1234
     Breakpoint 1 : $5678
     Breakpoint 2 : $9ABC

@@ -148,13 +148,13 @@ class Monitor(cmd.Cmd):
                            'h':    'help',
                            '?':    'help',
                            'l':    'load',
-                           'lb':   'list_breakpoints',
                            'm':    'mem',
                            'q':    'quit',
                            'r':    'registers',
                            'ret':  'return',
                            'rad':  'radix',
                            's':    'save',
+                           'shb':  'show_breakpoints',
                            'shl':  'show_labels',
                            'x':    'quit',
                            'z':    'step'}
@@ -814,7 +814,7 @@ class Monitor(cmd.Cmd):
         self._output("delete_breakpoint <number>")
         self._output("Delete the breakpoint on execution marked by the given number")
 
-    def do_list_breakpoints(self, args):
+    def do_show_breakpoints(self, args):
         for i, address in enumerate(self._breakpoints):
             if address is not None:
                 bpinfo = "Breakpoint %d: $%04X" % (i, address)
@@ -823,8 +823,8 @@ class Monitor(cmd.Cmd):
                     bpinfo += " " + label
                 self._output(bpinfo)
 
-    def help_list_breakpoints(self):
-        self._output("list_breakpoints")
+    def help_show_breakpoints(self):
+        self._output("show_breakpoints")
         self._output("Lists the currently assigned breakpoints")
 
 def main(args=None):
