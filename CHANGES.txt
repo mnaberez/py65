@@ -3,6 +3,9 @@
  - Added support for breakpoints in the monitor.  Contributed by
    Alessandro Gatti.
 
+ - ASCII literals are now supported by the assembler.  The statement
+   "LDA #'A'" is equivalent to "LDA #$41".
+
 0.20 (2014-05-08)
 
   - Page wrapping for indexed indirect (X) operations on 65C02 has been
