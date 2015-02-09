@@ -8,15 +8,19 @@ if sys.platform[:3] == "win":
         is available.  Does not echo the character.  The stdin argument is
         for function signature compatibility and is ignored.
         """
-        return msvcrt.getch()
+        c = msvcrt.getch()
+        if isinstance(c, bytes): # Python 3
+            c = c.decode('latin-1')
+        return c
 
     def getch_noblock(stdin):
         """ Read one character from the Windows console without blocking.
-        Does not echo the character.  If no character is available, an
-        emptry string is returned.
+        Does not echo the character.  The stdin argument is for function
+        signature compatibility and is ignored.  If no character is
+        available, an emptry string is returned.
         """
         if msvcrt.kbhit():
-            return msvcrt.getch()
+            return getch(stdin)
         return ''
 
 else:
