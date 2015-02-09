@@ -17,7 +17,7 @@ if sys.platform[:3] == "win":
         """ Read one character from the Windows console without blocking.
         Does not echo the character.  The stdin argument is for function
         signature compatibility and is ignored.  If no character is
-        available, an emptry string is returned.
+        available, an empty string is returned.
         """
         if msvcrt.kbhit():
             return getch(stdin)
