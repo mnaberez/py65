@@ -1,4 +1,4 @@
-0.21-dev (Next Release)
+0.21 (2015-02-09)
 
  - Added support for breakpoints in the monitor.  Contributed by
    Alessandro Gatti.
