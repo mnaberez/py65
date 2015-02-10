@@ -598,7 +598,9 @@ class Monitor(cmd.Cmd):
         if len(split) == 2:
             if split[1] == "top":
                 # load a ROM to top of memory
-                start = self.addrMask - len(bytes) / int(self.byteWidth / 8) + 1
+                top_address = self.addrMask
+                program_size = len(bytes) // (self.byteWidth // 8)
+                start = top_address - program_size + 1
             else:
                 start = self._address_parser.number(split[1])
         else:

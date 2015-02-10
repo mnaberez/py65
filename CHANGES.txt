@@ -1,5 +1,7 @@
 0.22 (Next Release)
 
+ - Fixed a bug where ``py65mon --rom`` would raise an exception
+   on Python 3.
 
 0.21 (2015-02-09)
 
