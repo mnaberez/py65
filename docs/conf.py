@@ -51,7 +51,7 @@ copyright = u'2008-%d, Mike Naberezny and contributors' % year
 # built documents.
 #
 # The short X.Y version.
-version = '0.22'
+version = '0.23-dev'
 # The full version, including alpha/beta/rc tags.
 release = version
 
