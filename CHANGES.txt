@@ -1,4 +1,4 @@
-0.23-dev (Next Release)
+0.23 (2015-02-10)
 
  - Added a workaround to $F001 output to catch encoding errors and
    display a "?" instead of crashing.  This condition can occur if
