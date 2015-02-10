@@ -202,7 +202,10 @@ class Monitor(cmd.Cmd):
 
     def _install_mpu_observers(self):
         def putc(address, value):
-            self.stdout.write(chr(value))
+            try:
+                self.stdout.write(chr(value))
+            except UnicodeEncodeError: # Python 3
+                self.stdout.write("?")
             self.stdout.flush()
 
         def getc(address):
