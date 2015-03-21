@@ -625,6 +625,11 @@ class Monitor(cmd.Cmd):
 
         self._fill(start, start, bytes)
 
+    def help_save(self):
+        self._output("save \"filename\" <start> <end>")
+        self._output("Save the specified memory range as a binary file.")
+        self._output("Commodore-style load address bytes are not written.")
+
     def do_save(self, args):
         split = shlex.split(args)
         if len(split) != 3:
@@ -649,11 +654,6 @@ class Monitor(cmd.Cmd):
             return
 
         self._output("Saved +%d bytes to %s" % (len(mem), filename))
-
-    def help_save(self):
-        self._output("save \"filename\" <start> <end>")
-        self._output("Save the specified memory range as a binary file.")
-        self._output("Commodore-style load address bytes are not written.")
 
     def help_fill(self):
         self._output("fill <address_range> <data_list>")
