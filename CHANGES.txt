@@ -1,4 +1,6 @@
-0.24-dev (Next Release)
+0.24 (2015-03-31)
+
+ - Released as a universal wheel.
 
 0.23 (2015-02-10)
 
