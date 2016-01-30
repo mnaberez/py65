@@ -1,6 +1,5 @@
 __version__ = '0.25.dev0'
 
-import os
 import sys
 
 py_version = sys.version_info[:2]
@@ -14,7 +13,6 @@ else:
         raise RuntimeError('On Python 2, Py65 requires Python 2.6 or later')
 
 from setuptools import setup, find_packages
-here = os.path.abspath(os.path.dirname(__file__))
 
 DESC = """\
 Simulate 6502-based microcomputer systems in Python."""
