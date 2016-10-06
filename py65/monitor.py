@@ -103,10 +103,6 @@ class Monitor(cmd.Cmd):
                 self._usage()
                 self._exit(1)
 
-        if flag_load == True:
-            cmd = "load %s" % load_value
-            self.onecmd(cmd)
-
         if (flag_mpu == True) or (flag_rom == True):
             if mpu_value == "":
                 mpu_value = "6502"
@@ -117,6 +113,10 @@ class Monitor(cmd.Cmd):
                 self._output(msg % ', '.join(mpus))
                 sys.exit(1)
             cmd = "mpu %s" % mpu_value
+            self.onecmd(cmd)
+
+        if flag_load == True:
+            cmd = "load %s" % load_value
             self.onecmd(cmd)
 
         if flag_goto == True:
