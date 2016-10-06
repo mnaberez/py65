@@ -107,15 +107,15 @@ class Monitor(cmd.Cmd):
             cmd = "load %s" % load_value
             self.onecmd(cmd)
 
-        # mpu should set everytime (default ist 6502)
-        if self._get_mpu(mpu_value) is None:
-            mpus = list(self.Microprocessors.keys())
-            mpus.sort()
-            msg = "Fatal: no such MPU. Available MPUs: %s"
-            self._output(msg % ', '.join(mpus))
-            sys.exit(1)
-        cmd = "mpu %s" % mpu_value
-        self.onecmd(cmd)
+        if flag_mpu == True:
+            if self._get_mpu(mpu_value) is None:
+                mpus = list(self.Microprocessors.keys())
+                mpus.sort()
+                msg = "Fatal: no such MPU. Available MPUs: %s"
+                self._output(msg % ', '.join(mpus))
+                sys.exit(1)
+            cmd = "mpu %s" % mpu_value
+            self.onecmd(cmd)
 
         if flag_goto == True:
             cmd = "goto %s" % goto_value
