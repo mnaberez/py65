@@ -45,8 +45,8 @@ class Monitor(cmd.Cmd):
     def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None,
                  stdout=None, argv=None):
         self.mpu_type = mpu_type
-	self.putc_addr = 0xF001
-	self.getc_addr = 0xF004
+        self.putc_addr = 0xF001
+        self.getc_addr = 0xF004
         if argv is None:
             argv = sys.argv
         self._breakpoints = []
@@ -69,11 +69,11 @@ class Monitor(cmd.Cmd):
 
         for opt, value in options:
 
-	    if opt in ('-i', '--input'):
-		self.getc_addr = int(value.upper(), 16)
+            if opt in ('-i', '--input'):
+                self.getc_addr = int(value.upper(), 16)
 
-	    if opt in ('-o', '--output'):
-		self.putc_addr = int(value.upper(), 16)
+            if opt in ('-o', '--output'):
+                self.putc_addr = int(value.upper(), 16)
 
             if opt in ('-l', '--load'):
                 cmd = "load %s" % value
