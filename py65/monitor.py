@@ -62,6 +62,14 @@ class Monitor(cmd.Cmd):
             shortopts = 'hi:o:m:l:r:g:'
             longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
+            flag_load  = False
+            load_value = ""
+            flag_rom   = False
+            rom_value  = ""
+            flag_goto  = False
+            goto_value = ""
+            flag_mpu   = False
+            mpu_value  = "6502"
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
             self._usage()
@@ -76,37 +84,53 @@ class Monitor(cmd.Cmd):
                 self.putc_addr = int(value.upper(), 16)
 
             if opt in ('-l', '--load'):
-                cmd = "load %s" % value
-                self.onecmd(cmd)
+                flag_load = True
+                load_value = value
 
             if opt in ('-r', '--rom'):
-                # load a ROM and run from the reset vector
-                cmd = "load '%s' top" % value
-                self.onecmd(cmd)
-                physMask = self._mpu.memory.physMask
-                reset = self._mpu.RESET & physMask
-                dest = self._mpu.memory[reset] + \
-                    (self._mpu.memory[reset + 1] << self.byteWidth)
-                cmd = "goto %08x" % dest
-                self.onecmd(cmd)
+                flag_rom = True
+                rom_value = value
 
             if opt in ('-g', '--goto'):
-                cmd = "goto %s" % value
-                self.onecmd(cmd)
+                flag_goto = True
+                goto_value = value
 
             if opt in ('-m', '--mpu'):
-                if self._get_mpu(value) is None:
-                    mpus = list(self.Microprocessors.keys())
-                    mpus.sort()
-                    msg = "Fatal: no such MPU. Available MPUs: %s"
-                    self._output(msg % ', '.join(mpus))
-                    sys.exit(1)
-                cmd = "mpu %s" % value
-                self.onecmd(cmd)
+                flag_mpu = True
+                mpu_value = value
 
             elif opt in ("-h", "--help"):
                 self._usage()
                 self._exit(1)
+
+        if flag_load == True:
+            cmd = "load %s" % load_value
+            self.onecmd(cmd)
+
+        # mpu should set everytime (default ist 6502)
+        if self._get_mpu(mpu_value) is None:
+            mpus = list(self.Microprocessors.keys())
+            mpus.sort()
+            msg = "Fatal: no such MPU. Available MPUs: %s"
+            self._output(msg % ', '.join(mpus))
+            sys.exit(1)
+        cmd = "mpu %s" % mpu_value
+        self.onecmd(cmd)
+
+        if flag_goto == True:
+            cmd = "goto %s" % goto_value
+            self.onecmd(cmd)
+
+        if flag_rom == True:
+            # load a ROM and run from the reset vector
+            cmd = "load '%s' top" % rom_value
+            self.onecmd(cmd)
+            physMask = self._mpu.memory.physMask
+            reset = self._mpu.RESET & physMask
+            dest = self._mpu.memory[reset] + \
+                (self._mpu.memory[reset + 1] << self.byteWidth)
+            cmd = "goto %08x" % dest
+            self.onecmd(cmd)
 
     def _usage(self):
         usage = __doc__ % sys.argv[0]
