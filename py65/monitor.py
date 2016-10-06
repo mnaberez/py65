@@ -5,11 +5,13 @@
 Usage: %s [options]
 
 Options:
--h, --help           : Show this message
--m, --mpu <device>   : Choose which MPU device (default is 6502)
--l, --load <file>    : Load a file at address 0
--r, --rom <file>     : Load a rom at the top of address space and reset into it
--g, --goto <address> : Perform a goto command after loading any files
+-h, --help             : Show this message
+-m, --mpu <device>     : Choose which MPU device (default is 6502)
+-l, --load <file>      : Load a file at address 0
+-r, --rom <file>       : Load a rom at the top of address space and reset into it
+-g, --goto <address>   : Perform a goto command after loading any files
+-i, --input <address>  : define location of getc (default $f004)
+-o, --output <address> : define location of putc (default $f001)
 """
 
 import cmd
@@ -43,20 +45,22 @@ class Monitor(cmd.Cmd):
     def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None,
                  stdout=None, argv=None):
         self.mpu_type = mpu_type
+	self.putc_addr = 0xF001
+	self.getc_addr = 0xF004
         if argv is None:
             argv = sys.argv
-        self._reset(self.mpu_type)
         self._breakpoints = []
         self._width = 78
         self.prompt = "."
         self._add_shortcuts()
         cmd.Cmd.__init__(self, completekey, stdin, stdout)
         self._parse_args(argv)
+        self._reset(self.mpu_type,self.getc_addr,self.putc_addr)
 
     def _parse_args(self, argv):
         try:
-            shortopts = 'hm:l:r:g:'
-            longopts = ['help', 'mpu=', 'load=', 'rom=', 'goto=']
+            shortopts = 'hi:o:m:l:r:g:'
+            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
@@ -64,6 +68,13 @@ class Monitor(cmd.Cmd):
             self._exit(1)
 
         for opt, value in options:
+
+	    if opt in ('-i', '--input'):
+		self.getc_addr = int(value.upper(), 16)
+
+	    if opt in ('-o', '--output'):
+		self.putc_addr = int(value.upper(), 16)
+
             if opt in ('-l', '--load'):
                 cmd = "load %s" % value
                 self.onecmd(cmd)
@@ -119,7 +130,7 @@ class Monitor(cmd.Cmd):
 
         return result
 
-    def _reset(self, mpu_type):
+    def _reset(self, mpu_type,getc_addr=0xF004,putc_addr=0xF001):
         self._mpu = mpu_type()
         self.addrWidth = self._mpu.ADDR_WIDTH
         self.byteWidth = self._mpu.BYTE_WIDTH
@@ -127,7 +138,7 @@ class Monitor(cmd.Cmd):
         self.byteFmt = self._mpu.BYTE_FORMAT
         self.addrMask = self._mpu.addrMask
         self.byteMask = self._mpu.byteMask
-        self._install_mpu_observers()
+        self._install_mpu_observers(getc_addr,putc_addr)
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
         self._assembler = Assembler(self._mpu, self._address_parser)
@@ -200,7 +211,7 @@ class Monitor(cmd.Cmd):
                 break
         return mpu
 
-    def _install_mpu_observers(self):
+    def _install_mpu_observers(self,getc_addr,putc_addr):
         def putc(address, value):
             try:
                 self.stdout.write(chr(value))
@@ -217,8 +228,8 @@ class Monitor(cmd.Cmd):
             return byte
 
         m = ObservableMemory(addrWidth=self.addrWidth)
-        m.subscribe_to_write([0xF001], putc)
-        m.subscribe_to_read([0xF004], getc)
+        m.subscribe_to_write([self.putc_addr], putc)
+        m.subscribe_to_read([self.getc_addr], getc)
 
         self._mpu.memory = m
 
@@ -267,7 +278,7 @@ class Monitor(cmd.Cmd):
                 self._output("Unknown MPU: %s" % args)
                 available_mpus()
             else:
-                self._reset(new_mpu)
+                self._reset(new_mpu,self.getc_addr,self.putc_addr)
                 self._output("Reset with new MPU %s" % self._mpu.name)
 
     def help_mpu(self):
