@@ -62,21 +62,21 @@ class Monitor(cmd.Cmd):
             shortopts = 'hi:o:m:l:r:g:'
             longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
-            flag_load  = False
-            load_value = ""
-            flag_rom   = False
-            rom_value  = ""
-            flag_goto  = False
-            goto_value = ""
-            flag_mpu   = False
-            mpu_value  = "6502"
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
             self._usage()
             self._exit(1)
 
-        for opt, value in options:
+        flag_load  = False
+        load_value = ""
+        flag_rom   = False
+        rom_value  = ""
+        flag_goto  = False
+        goto_value = ""
+        flag_mpu   = False
+        mpu_value  = "6502"
 
+        for opt, value in options:
             if opt in ('-i', '--input'):
                 self.getc_addr = int(value, 16)
 
