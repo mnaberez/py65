@@ -67,14 +67,10 @@ class Monitor(cmd.Cmd):
             self._usage()
             self._exit(1)
 
-        flag_load  = False
-        load_value = ""
-        flag_rom   = False
-        rom_value  = ""
-        flag_goto  = False
-        goto_value = ""
-        flag_mpu   = False
-        mpu_value  = "6502"
+        load = None
+        rom  = None
+        goto = None
+        mpu  = None
 
         for opt, value in options:
             if opt in ('-i', '--input'):
@@ -84,48 +80,44 @@ class Monitor(cmd.Cmd):
                 self.putc_addr = int(value, 16)
 
             if opt in ('-l', '--load'):
-                flag_load = True
-                load_value = value
+                load = value
 
             if opt in ('-r', '--rom'):
-                flag_rom = True
-                rom_value = value
+                rom = value
 
             if opt in ('-g', '--goto'):
-                flag_goto = True
-                goto_value = value
+                goto = value
 
             if opt in ('-m', '--mpu'):
-                flag_mpu = True
-                mpu_value = value
+                mpu = value
 
             elif opt in ("-h", "--help"):
                 self._usage()
                 self._exit(0)
 
-        if (flag_mpu == True) or (flag_rom == True):
-            if mpu_value == "":
-                mpu_value = "6502"
-            if self._get_mpu(mpu_value) is None:
+        if (mpu is not None) or (rom is not None):
+            if mpu is None:
+                mpu = "6502"
+            if self._get_mpu(mpu) is None:
                 mpus = list(self.Microprocessors.keys())
                 mpus.sort()
                 msg = "Fatal: no such MPU. Available MPUs: %s"
                 self._output(msg % ', '.join(mpus))
                 sys.exit(1)
-            cmd = "mpu %s" % mpu_value
+            cmd = "mpu %s" % mpu
             self.onecmd(cmd)
 
-        if flag_load == True:
-            cmd = "load %s" % load_value
+        if load is not None:
+            cmd = "load %s" % load
             self.onecmd(cmd)
 
-        if flag_goto == True:
-            cmd = "goto %s" % goto_value
+        if goto is not None:
+            cmd = "goto %s" % goto
             self.onecmd(cmd)
 
-        if flag_rom == True:
+        if rom is not None:
             # load a ROM and run from the reset vector
-            cmd = "load '%s' top" % rom_value
+            cmd = "load '%s' top" % rom
             self.onecmd(cmd)
             physMask = self._mpu.memory.physMask
             reset = self._mpu.RESET & physMask
