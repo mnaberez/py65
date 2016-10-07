@@ -101,7 +101,7 @@ class Monitor(cmd.Cmd):
 
             elif opt in ("-h", "--help"):
                 self._usage()
-                self._exit(1)
+                self._exit(0)
 
         if (flag_mpu == True) or (flag_rom == True):
             if mpu_value == "":
