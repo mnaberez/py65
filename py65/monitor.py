@@ -78,10 +78,10 @@ class Monitor(cmd.Cmd):
         for opt, value in options:
 
             if opt in ('-i', '--input'):
-                self.getc_addr = int(value.upper(), 16)
+                self.getc_addr = int(value, 16)
 
             if opt in ('-o', '--output'):
-                self.putc_addr = int(value.upper(), 16)
+                self.putc_addr = int(value, 16)
 
             if opt in ('-l', '--load'):
                 flag_load = True
