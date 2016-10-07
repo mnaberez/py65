@@ -1,6 +1,10 @@
 0.25.dev0 (Next Release)
 ------------------------
 
+ - Fixed a bug where the ordering of ``py65mon`` command line arguments
+   produced different results.  Arguments can now be specified in any
+   order.  Patch by Mario Keller.
+
 0.24 (2015-03-31)
 
  - Released as a universal wheel.
