@@ -5,6 +5,10 @@
    produced different results.  Arguments can now be specified in any
    order.  Patch by Mario Keller.
 
+ - Added new ``--input`` and ``--output`` arguments to ``py65mon`` that
+   allow the addresses of the ``getc`` and ``putc`` handlers to be
+   changed.  Patch by Mario Keller.
+
 0.24 (2015-03-31)
 
  - Released as a universal wheel.
