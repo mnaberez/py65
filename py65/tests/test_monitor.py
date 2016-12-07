@@ -150,10 +150,10 @@ class MonitorTests(unittest.TestCase):
     def test_do_assemble_shows_bad_label_error(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_assemble('nonexistant rts')
+        mon.do_assemble('nonexistent rts')
 
         out = stdout.getvalue()
-        self.assertEqual("Bad label: nonexistant rts\n", out)
+        self.assertEqual("Label not found: nonexistent\n", out)
 
     def test_do_assemble_shows_bad_syntax_error(self):
         stdout = StringIO()
@@ -226,7 +226,7 @@ class MonitorTests(unittest.TestCase):
     def test_do_cd_with_bad_dir_shows_error(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_cd("/path/to/a/nonexistant/directory")
+        mon.do_cd("/path/to/a/nonexistent/directory")
 
         out = stdout.getvalue()
         self.assertTrue(out.startswith("Cannot change directory"))
@@ -441,6 +441,22 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(0xBB, mon._mpu.memory[0xc003])
         out = stdout.getvalue()
         self.assertTrue(out.startswith('Wrote +4 bytes from $c000 to $c003'))
+
+    def test_do_fill_bad_label_in_address_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_fill('nonexistent 0')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Label not found: nonexistent"))
+
+    def test_do_fill_bad_label_in_value_shows_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_fill('0 nonexistent')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Label not found: nonexistent"))
 
     # goto
 

@@ -322,8 +322,8 @@ class Monitor(cmd.Cmd):
             end = start + len(bytes)
             self._mpu.memory[start:end] = bytes
             self.do_disassemble(self.addrFmt % start)
-        except KeyError:
-            self._output("Bad label: %s" % args)
+        except KeyError as exc:
+            self._output(exc.args[0]) # "Label not found: foo"
         except OverflowError:
             self._output("Overflow error: %s" % args)
         except SyntaxError:
@@ -343,8 +343,8 @@ class Monitor(cmd.Cmd):
         else:
             try:
                 start = self._address_parser.number(args)
-            except KeyError:
-                self._output("Bad label: %s" % args)
+            except KeyError as exc:
+                self._output(exc.args[0]) # "Label not found: foo"
                 return
 
         while True:
@@ -696,10 +696,13 @@ class Monitor(cmd.Cmd):
         if len(split) < 2:
             return self.help_fill()
 
-        start, end = self._address_parser.range(split[0])
-        filler = list(map(self._address_parser.number, split[1:]))
-
-        self._fill(start, end, filler)
+        try:
+            start, end = self._address_parser.range(split[0])
+            filler = list(map(self._address_parser.number, split[1:]))
+        except KeyError as exc:
+            self._output(exc.args[0])  # "Label not found: foo"
+        else:
+            self._fill(start, end, filler)
 
     def _fill(self, start, end, filler):
         address = start
