@@ -759,10 +759,15 @@ class Monitor(cmd.Cmd):
             self._output("Syntax error: %s" % args)
             return self.help_add_label()
 
-        address = self._address_parser.number(split[0])
-        label = split[1]
-
-        self._address_parser.labels[label] = address
+        try:
+            address = self._address_parser.number(split[0])
+        except KeyError as exc:
+            self._output(exc.args[0]) # "Label not found: foo"
+        except OverflowError:
+            self._output("Overflow error: %s" % args)
+        else:
+            label = split[1]
+            self._address_parser.labels[label] = address
 
     def help_show_labels(self):
         self._output("show_labels")

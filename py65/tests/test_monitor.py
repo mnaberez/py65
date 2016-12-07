@@ -92,9 +92,25 @@ class MonitorTests(unittest.TestCase):
     def test_do_add_label_syntax_error(self):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
-        mon.do_add_label('should be label space value')
+        mon.do_add_label('should be address space label')
         out = stdout.getvalue()
-        err = "Syntax error: should be label space value\n"
+        err = "Syntax error: should be address space label\n"
+        self.assertTrue(out.startswith(err))
+
+    def test_do_add_label_overflow_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('$10000 toobig')
+        out = stdout.getvalue()
+        err = "Overflow error: $10000 toobig\n"
+        self.assertTrue(out.startswith(err))
+
+    def test_do_add_label_label_error(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_add_label('nonexistent foo')
+        out = stdout.getvalue()
+        err = "Label not found: nonexistent\n"
         self.assertTrue(out.startswith(err))
 
     def test_do_add_label_adds_label(self):
