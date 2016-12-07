@@ -86,3 +86,6 @@ These people are responsible for Py65:
 
 - `Alessandro Gatti <https://github.com/agatti>`_ added support for
   breakpoints in the monitor.
+
+- `Mario Keller <https://github.com/mkeller0815>`_ added support for
+  configuring ``getc``/``putc`` and fixed bugs in command line option parsing.
