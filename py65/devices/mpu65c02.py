@@ -50,7 +50,7 @@ class MPU(mpu6502.MPU):
         m = self.memory[address]
         self.p &= ~self.ZERO
         z = m & self.a
-        if z != 0:
+        if z == 0:
             self.p |= self.ZERO
         self.memory[address] = m | self.a
 
@@ -59,7 +59,7 @@ class MPU(mpu6502.MPU):
         m = self.memory[address]
         self.p &= ~self.ZERO
         z = m & self.a
-        if z != 0:
+        if z == 0:
             self.p |= self.ZERO
         self.memory[address] = m & ~self.a
 

@@ -1227,7 +1227,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xE0, mpu.memory[0x00BB])
         mpu.step()
         self.assertEqual(0xF0, mpu.memory[0x00BB])
-        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
 
@@ -1240,7 +1240,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x80, mpu.memory[0x00BB])
         mpu.step()
         self.assertEqual(0xE0, mpu.memory[0x00BB])
-        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
 
@@ -1255,7 +1255,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xE0, mpu.memory[0xFEED])
         mpu.step()
         self.assertEqual(0xF0, mpu.memory[0xFEED])
-        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(0x0003, mpu.pc)
         self.assertEqual(6, mpu.processorCycles)
 
@@ -1268,7 +1268,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x80, mpu.memory[0xFEED])
         mpu.step()
         self.assertEqual(0xE0, mpu.memory[0xFEED])
-        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0x0003, mpu.pc)
         self.assertEqual(6, mpu.processorCycles)
 
@@ -1283,7 +1283,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xE0, mpu.memory[0x00BB])
         mpu.step()
         self.assertEqual(0x80, mpu.memory[0x00BB])
-        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
 
@@ -1296,7 +1296,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x80, mpu.memory[0x00BB])
         mpu.step()
         self.assertEqual(0x80, mpu.memory[0x00BB])
-        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(5, mpu.processorCycles)
 
@@ -1311,7 +1311,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0xE0, mpu.memory[0xFEED])
         mpu.step()
         self.assertEqual(0x80, mpu.memory[0xFEED])
-        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(0x0003, mpu.pc)
         self.assertEqual(6, mpu.processorCycles)
 
@@ -1324,7 +1324,7 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(0x80, mpu.memory[0xFEED])
         mpu.step()
         self.assertEqual(0x80, mpu.memory[0xFEED])
-        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.ZERO, mpu.p & mpu.ZERO)
         self.assertEqual(0x0003, mpu.pc)
         self.assertEqual(6, mpu.processorCycles)
 
