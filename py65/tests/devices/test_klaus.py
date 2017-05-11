@@ -5,26 +5,31 @@ import py65.devices.mpu65c02
 class KlausDormannTests(unittest.TestCase):
     """Runs Klaus Dormann's 6502-based test suites"""
 
-    def klausTestCase(self, filename, load_addr, pc, success_addr):
+    def klausTestCase(self, filename, load_addr, pc, success_addr, should_trace=None):
         mpu = self._make_mpu()
         mpu.pc = pc
 
         object_code = bytearray(open(filename, "r").read())
         self._write(mpu.memory, load_addr, object_code)
 
+        if not should_trace:
+            should_trace = lambda pc: False
+
         while True:
             old_pc = mpu.pc
-            mpu.step()
+            mpu.step(trace=should_trace(mpu.pc))
             if mpu.pc == old_pc:
                 break
 
-        assert mpu.pc == success_addr, mpu
+        assert mpu.pc == success_addr, "%s 0xb=%02x 0xc=%02x 0xd=%02x 0xf=%02x" % (
+            mpu, mpu.memory[0xb], mpu.memory[0xc], mpu.memory[0xd], mpu.memory[0xf])
 
     def test6502FunctionalTest(self):
         self.klausTestCase("6502_functional_test.bin", 0x0, 0x400, 0x3399)
 
     def test65C02ExtendedOpcodesTest(self):
-        self.klausTestCase("65C02_extended_opcodes_test.bin", 0x0, 0x400, 0x24a8)
+        tracer = lambda pc: (0x1484 <= pc <= 0x16cc)
+        self.klausTestCase("65C02_extended_opcodes_test_modified.bin", 0xa, 0x400, 0x24a8, tracer)
 
     def test6502DecimalTest(self):
         mpu = self._make_mpu()
