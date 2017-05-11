@@ -315,11 +315,14 @@ class MPU:
             # the ALU outputs are not decimally adjusted
             nibble0 = nibble0 & 0xf
             nibble1 = nibble1 & 0xf
-            aluresult = (nibble1 << 4) + nibble0
 
             # the final A contents will be decimally adjusted
             nibble0 = (nibble0 + adjust0) & 0xf
             nibble1 = (nibble1 + adjust1) & 0xf
+
+            # Update result for use in setting flags below
+            aluresult = (nibble1 << 4) + nibble0
+            
             self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
             if aluresult == 0:
                 self.p |= self.ZERO
@@ -419,6 +422,9 @@ class MPU:
             # but the final result will be adjusted
             nibble0 = (aluresult + adjust0) & 0xf
             nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+
+            # Update result for use in setting flags below
+            aluresult = (nibble1 << 4) + nibble0
 
             self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
             if aluresult == 0:
