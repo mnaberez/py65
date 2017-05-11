@@ -1,4 +1,4 @@
-__version__ = '1.0.0'
+__version__ = '1.0.1.dev0'
 
 import sys
 
@@ -59,7 +59,6 @@ setup(
     tests_require=[],
     include_package_data=True,
     zip_safe=False,
-    namespace_packages=['py65'],
     test_suite="py65.tests",
     entry_points={
         'console_scripts': [
