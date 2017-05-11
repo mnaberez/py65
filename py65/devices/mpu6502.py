@@ -1,6 +1,6 @@
 from py65.utils.conversions import itoa
 from py65.utils.devices import make_instruction_decorator
-
+from py65 import disassembler
 
 class MPU:
     # vectors
@@ -41,6 +41,8 @@ class MPU:
         self.memory = memory
         self.start_pc = pc
 
+        self.disassembler = disassembler.Disassembler(self)
+
         # init
         self.reset()
 
@@ -55,8 +57,11 @@ class MPU:
         return self.reprformat() % (indent, self.name, self.pc, self.a,
                                     self.x, self.y, self.sp, flags)
 
-    def step(self):
+    def step(self, trace=False):
         instructCode = self.memory[self.pc]
+        if trace:
+            print self, "$%04X: %s" % (
+                self.pc, self.disassembler.instruction_at(self.pc)[1])
         self.pc = (self.pc + 1) & self.addrMask
         self.excycles = 0
         self.addcycles = self.extracycles[instructCode]
