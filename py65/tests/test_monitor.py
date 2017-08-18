@@ -1144,6 +1144,18 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("width <columns>"))
 
+    def test_external_memory(self):
+        stdout = StringIO()
+        memory = bytearray(65536)
+        memory[10] = 0xff
+        mon = Monitor(memory=memory, stdout=stdout, putc_addr=None, getc_addr=None)
+        self.assertEqual(0xff, memory[10], "memory must remain untouched")
+        mon.do_mem('0008:000c')
+        mon.do_fill('0000:0020 ab')
+        self.assertEqual(0xab, memory[10], "memory must have been modified")
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('0008:  00  00  ff  00  00'), "monitor must see pre-initialized memory")
+
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
 
