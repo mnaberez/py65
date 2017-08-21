@@ -43,10 +43,11 @@ class Monitor(cmd.Cmd):
                        '65Org16': V65Org16}
 
     def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None,
-                 stdout=None, argv=None):
+                 stdout=None, argv=None, memory=None, putc_addr=0xF001, getc_addr=0xF004):
         self.mpu_type = mpu_type
-        self.putc_addr = 0xF001
-        self.getc_addr = 0xF004
+        self.memory = memory
+        self.putc_addr = putc_addr
+        self.getc_addr = getc_addr
         if argv is None:
             argv = sys.argv
         self._breakpoints = []
@@ -149,14 +150,15 @@ class Monitor(cmd.Cmd):
         return result
 
     def _reset(self, mpu_type,getc_addr=0xF004,putc_addr=0xF001):
-        self._mpu = mpu_type()
+        self._mpu = mpu_type(memory=self.memory)
         self.addrWidth = self._mpu.ADDR_WIDTH
         self.byteWidth = self._mpu.BYTE_WIDTH
         self.addrFmt = self._mpu.ADDR_FORMAT
         self.byteFmt = self._mpu.BYTE_FORMAT
         self.addrMask = self._mpu.addrMask
         self.byteMask = self._mpu.byteMask
-        self._install_mpu_observers(getc_addr,putc_addr)
+        if getc_addr and putc_addr:
+            self._install_mpu_observers(getc_addr,putc_addr)
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
         self._assembler = Assembler(self._mpu, self._address_parser)
@@ -245,7 +247,7 @@ class Monitor(cmd.Cmd):
                 byte = 0
             return byte
 
-        m = ObservableMemory(addrWidth=self.addrWidth)
+        m = ObservableMemory(subject=self.memory, addrWidth=self.addrWidth)
         m.subscribe_to_write([self.putc_addr], putc)
         m.subscribe_to_read([self.getc_addr], getc)
 
