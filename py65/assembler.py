@@ -66,7 +66,7 @@ class Assembler:
                 if mode == 'rel':
                     # relative branch
                     absolute = int(''.join(operands), 16)
-                    relative = (absolute - pc) - 2
+                    relative = (absolute - pc) 
                     relative = relative & self._mpu.byteMask
                     operands = [(self._mpu.BYTE_FORMAT % relative)]
 
