@@ -1,20 +1,19 @@
-
-
 def itoa(num, base=10):
-    """ Convert a decimal number to its equivalent in another base.
-    This is essentially the inverse of int(num, base).
+    """Convert a decimal number to its equivalent in base 2 or 16; base 10
+    is silently passed through. Other bases raise a ValueError. Returns a
+    string with hex digits lowercase.
     """
-    negative = num < 0
-    if negative:
-        num = -num
-    digits = []
-    while num > 0:
-        num, last_digit = divmod(num, base)
-        digits.append('0123456789abcdefghijklmnopqrstuvwxyz'[last_digit])
-    if negative:
-        digits.append('-')
-    digits.reverse()
-    return ''.join(digits)
+    if base == 2:
+        newnum = "{0:b}".format(num)
+    elif base == 16:
+        newnum = "{0:x}".format(num)
+    elif base == 10:
+        newnum = "{0}".format(num)
+    else:
+        msg = 'Could not convert number "{0}" to base "{1}"'.format(num, base)
+        raise ValueError(msg)
+
+    return newnum
 
 
 def convert_to_bin(bcd):
