@@ -3,17 +3,10 @@ def itoa(num, base=10):
     is silently passed through. Other bases raise a ValueError. Returns a
     string with hex digits lowercase.
     """
-    if base == 2:
-        newnum = "{0:b}".format(num)
-    elif base == 16:
-        newnum = "{0:x}".format(num)
-    elif base == 10:
-        newnum = "{0}".format(num)
-    else:
-        msg = 'Could not convert number "{0}" to base "{1}"'.format(num, base)
-        raise ValueError(msg)
-
-    return newnum
+    fmt = _itoa_fmts.get(base)
+    if fmt is None:
+        raise ValueError("Unsupported base: %r" % base)
+    return fmt.format(num)
 
 
 def convert_to_bin(bcd):
@@ -22,6 +15,13 @@ def convert_to_bin(bcd):
 
 def convert_to_bcd(bin):
     return _bin2bcd[bin]
+
+
+_itoa_fmts = {
+    2: "{0:b}",
+    10: "{0}",
+    16: "{0:x}"
+}
 
 
 _bcd2bin = (
