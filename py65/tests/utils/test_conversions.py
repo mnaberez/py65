@@ -16,6 +16,9 @@ class ConversionsTopLevelTests(unittest.TestCase):
         self.assertEqual('1010', itoa(10, base=2))
         self.assertEqual('-1010', itoa(-10, base=2))
 
+    def test_itoa_unsupported_base(self):
+        self.assertRaises(ValueError, itoa, 0, base=17)
+
     def test_convert_to_bin(self):
         self.assertEqual(0, convert_to_bin(0))
         self.assertEqual(99, convert_to_bin(0x99))
