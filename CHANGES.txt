@@ -1,6 +1,8 @@
 1.0.1.dev0 (Next Release)
 -------------------------
 
+ - The unused hexdump loader utility has been removed.
+
 1.0.0 (2017-05-11)
 ------------------
 
