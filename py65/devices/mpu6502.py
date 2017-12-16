@@ -71,7 +71,7 @@ class MPU:
         self.a = 0
         self.x = 0
         self.y = 0
-        self.p = self.p = self.BREAK | self.UNUSED
+        self.p = self.BREAK | self.UNUSED
         self.processorCycles = 0
 
     # Helpers for addressing modes
