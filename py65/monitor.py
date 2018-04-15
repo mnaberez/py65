@@ -105,7 +105,7 @@ class Monitor(cmd.Cmd):
                 msg = "Fatal: no such MPU. Available MPUs: %s"
                 self._output(msg % ', '.join(mpus))
                 sys.exit(1)
-             self.mpu_type = self._get_mpu(mpu)
+            self.mpu_type = self._get_mpu(mpu)
 
         if load is not None:
             cmd = "load %s" % load
