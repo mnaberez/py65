@@ -42,21 +42,39 @@ class Monitor(cmd.Cmd):
     Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02,
                        '65Org16': V65Org16}
 
-    def __init__(self, mpu_type=NMOS6502, completekey='tab', stdin=None,
-                 stdout=None, argv=None, memory=None, putc_addr=0xF001, getc_addr=0xF004):
+    def __init__(self, argv=None, stdin=None, stdout=None,
+                       mpu_type=NMOS6502, memory=None,
+                       putc_addr=0xF001, getc_addr=0xF004):
         self.mpu_type = mpu_type
         self.memory = memory
         self.putc_addr = putc_addr
         self.getc_addr = getc_addr
-        if argv is None:
-            argv = sys.argv
         self._breakpoints = []
         self._width = 78
         self.prompt = "."
         self._add_shortcuts()
-        cmd.Cmd.__init__(self, completekey, stdin, stdout)
-        self._parse_args(argv)
-        self._reset(self.mpu_type,self.getc_addr,self.putc_addr)
+        cmd.Cmd.__init__(self, stdin=stdin, stdout=stdout)
+
+        if argv is None:
+            argv = sys.argv
+        load, rom, goto = self._parse_args(argv)
+
+        self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
+
+        if load is not None:
+            self.do_load(load)
+
+        if goto is not None:
+            self.do_goto(goto)
+
+        if rom is not None:
+            # load a ROM and run from the reset vector
+            self.do_load("%r top" % rom)
+            physMask = self._mpu.memory.physMask
+            reset = self._mpu.RESET & physMask
+            dest = self._mpu.memory[reset] + \
+                (self._mpu.memory[reset + 1] << self.byteWidth)
+            self.do_goto("$%x" % dest)
 
     def _parse_args(self, argv):
         try:
@@ -68,10 +86,7 @@ class Monitor(cmd.Cmd):
             self._usage()
             self._exit(1)
 
-        load = None
-        rom  = None
-        goto = None
-        mpu  = None
+        load, rom, goto = None, None, None
 
         for opt, value in options:
             if opt in ('-i', '--input'):
@@ -79,6 +94,19 @@ class Monitor(cmd.Cmd):
 
             if opt in ('-o', '--output'):
                 self.putc_addr = int(value, 16)
+
+            if opt in ('-m', '--mpu'):
+                mpu_type = self._get_mpu(value)
+                if mpu_type is None:
+                    mpus = sorted(self.Microprocessors.keys())
+                    msg = "Fatal: no such MPU. Available MPUs: %s"
+                    self._output(msg % ', '.join(mpus))
+                    sys.exit(1)
+                self.mpu_type = mpu_type
+
+            if opt in ("-h", "--help"):
+                self._usage()
+                self._exit(0)
 
             if opt in ('-l', '--load'):
                 load = value
@@ -89,42 +117,7 @@ class Monitor(cmd.Cmd):
             if opt in ('-g', '--goto'):
                 goto = value
 
-            if opt in ('-m', '--mpu'):
-                mpu = value
-
-            elif opt in ("-h", "--help"):
-                self._usage()
-                self._exit(0)
-
-        if (mpu is not None) or (rom is not None):
-            if mpu is None:
-                mpu = "6502"
-            if self._get_mpu(mpu) is None:
-                mpus = list(self.Microprocessors.keys())
-                mpus.sort()
-                msg = "Fatal: no such MPU. Available MPUs: %s"
-                self._output(msg % ', '.join(mpus))
-                sys.exit(1)
-            self.mpu_type = self._get_mpu(mpu)
-
-        if load is not None:
-            cmd = "load %s" % load
-            self.onecmd(cmd)
-
-        if goto is not None:
-            cmd = "goto %s" % goto
-            self.onecmd(cmd)
-
-        if rom is not None:
-            # load a ROM and run from the reset vector
-            cmd = "load '%s' top" % rom
-            self.onecmd(cmd)
-            physMask = self._mpu.memory.physMask
-            reset = self._mpu.RESET & physMask
-            dest = self._mpu.memory[reset] + \
-                (self._mpu.memory[reset + 1] << self.byteWidth)
-            cmd = "goto %08x" % dest
-            self.onecmd(cmd)
+        return load, rom, goto
 
     def _usage(self):
         usage = __doc__ % sys.argv[0]
@@ -148,7 +141,7 @@ class Monitor(cmd.Cmd):
 
         return result
 
-    def _reset(self, mpu_type,getc_addr=0xF004,putc_addr=0xF001):
+    def _reset(self, mpu_type, getc_addr=0xF004, putc_addr=0xF001):
         self._mpu = mpu_type(memory=self.memory)
         self.addrWidth = self._mpu.ADDR_WIDTH
         self.byteWidth = self._mpu.BYTE_WIDTH
@@ -157,7 +150,7 @@ class Monitor(cmd.Cmd):
         self.addrMask = self._mpu.addrMask
         self.byteMask = self._mpu.byteMask
         if getc_addr and putc_addr:
-            self._install_mpu_observers(getc_addr,putc_addr)
+            self._install_mpu_observers(getc_addr, putc_addr)
         self._address_parser = AddressParser()
         self._disassembler = Disassembler(self._mpu, self._address_parser)
         self._assembler = Assembler(self._mpu, self._address_parser)
@@ -230,7 +223,7 @@ class Monitor(cmd.Cmd):
                 break
         return mpu
 
-    def _install_mpu_observers(self,getc_addr,putc_addr):
+    def _install_mpu_observers(self, getc_addr, putc_addr):
         def putc(address, value):
             try:
                 self.stdout.write(chr(value))
