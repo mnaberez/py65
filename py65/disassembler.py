@@ -127,4 +127,8 @@ class Disassembler:
             disasm += ' %s,Y' % address_or_label
             length = 2
 
+        else:
+            msg = "Addressing mode: %r" % addressing
+            raise NotImplementedError(msg)
+
         return (length, disasm)
