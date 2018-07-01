@@ -1,5 +1,5 @@
-1.1.0.dev0 (Next Release)
--------------------------
+1.1.0 (2018-07-01)
+------------------
 
  - The ``Monitor`` class now allows the default memory to be supplied in
    the constructor.  Patch by Irmen de Jong.
