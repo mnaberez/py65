@@ -158,7 +158,7 @@ class MonitorTests(unittest.TestCase):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon.do_add_label('c000 base')
-        mon.do_assemble('c000 rts')
+        mon.do_assemble('base rts')
 
         mpu = mon._mpu
         self.assertEqual(0x60, mpu.memory[0xC000])
