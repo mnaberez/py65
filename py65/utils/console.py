@@ -49,9 +49,14 @@ else:
         character.  If no character is available, an empty string is returned.
         """
 
+        char = ''
         fd = stdin.fileno()
 
-        oldterm = termios.tcgetattr(fd)
+        try:
+            oldterm = termios.tcgetattr(fd)
+        except termios.error:  # https://github.com/mnaberez/py65/issues/46
+            return char
+
         newattr = oldterm[:]
         newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
         termios.tcsetattr(fd, termios.TCSANOW, newattr)
@@ -60,7 +65,6 @@ else:
         fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
 
         try:
-            char = ''
             r, w, e = select.select([fd], [], [], 0.1)
             if r:
                 char = stdin.read(1)

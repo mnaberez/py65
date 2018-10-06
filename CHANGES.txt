@@ -1,6 +1,10 @@
 1.1.0.dev0 (Next Release)
 -------------------------
 
+ - Added a workaround to ignore an error ``Error: <class 'termios.error'>,
+   (25, 'Inappropriate ioctl for device')`` that may occur on some systems
+   when reading character input.  Based on a patch by Marko Lauke.
+
 1.1.0 (2018-07-01)
 ------------------
 
