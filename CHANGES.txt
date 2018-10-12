@@ -5,10 +5,6 @@
    Py65 now requires Python 3.4 or later.  On Python 2, Py65 now requires
    Python 2.7.
 
- - Added a workaround to ignore an error ``Error: <class 'termios.error'>,
-   (25, 'Inappropriate ioctl for device')`` that may occur on some systems
-   when reading character input.  Based on a patch by Marko Lauke.
-
 1.1.0 (2018-07-01)
 ------------------
 
