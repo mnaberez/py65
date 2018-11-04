@@ -1,4 +1,5 @@
 import sys
+import time
 
 if sys.platform[:3] == "win":
     import msvcrt
@@ -33,42 +34,26 @@ else:
         """ Read one character from stdin, blocking until one is available.
         Does not echo the character.
         """
-        fd = stdin.fileno()
-        oldattr = termios.tcgetattr(fd)
-        newattr = oldattr[:]
-        newattr[3] &= ~termios.ICANON & ~termios.ECHO
-        try:
-            termios.tcsetattr(fd, termios.TCSANOW, newattr)
+        # Try to get a character with a non-blocking read.
+        char = stdin.read(1)
+        while char == '':
+            # If we don't get one right away, wait a bit and try again.
+            time.sleep(0.001)
             char = stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSAFLUSH, oldattr)
         return char
 
     def getch_noblock(stdin):
         """ Read one character from stdin without blocking.  Does not echo the
         character.  If no character is available, an empty string is returned.
         """
-
-        fd = stdin.fileno()
-
-        oldterm = termios.tcgetattr(fd)
-        newattr = oldterm[:]
-        newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
-        termios.tcsetattr(fd, termios.TCSANOW, newattr)
-
-        oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
-
-        try:
-            char = ''
-            r, w, e = select.select([fd], [], [], 0.1)
-            if r:
-                char = stdin.read(1)
-                if char == "\n":
-                    char = "\r"
-        finally:
-            termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
-            fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+        char = ''
+        # Using non-blocking read as set up in Monitor._run
+        char = stdin.read(1)
+        if char == '':
+            # Don't use 100% CPU while waiting for input.
+            time.sleep(0.001)
+        if char == "\n":
+            char = "\r"
         return char
 
 

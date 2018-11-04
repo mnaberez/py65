@@ -467,6 +467,25 @@ class Monitor(cmd.Cmd):
         mpu = self._mpu
         mem = self._mpu.memory
 
+        if sys.platform[:3] != "win":
+            # For non-windows systems, switch to non-canonical
+            # and no-echo non-blocking-read mode.
+            import termios
+
+            # Save the current terminal setup.
+            fd = self.stdin.fileno()
+            self.oldattr = termios.tcgetattr(fd)
+
+            # Switch to noncanonical (instant) mode with no echo.
+            newattr = self.oldattr[:]
+            newattr[3] &= ~termios.ICANON & ~termios.ECHO
+
+            # Switch to non-blocking reads.
+            newattr[6][termios.VMIN] = 0
+            newattr[6][termios.VTIME] = 0
+            termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+
         if not breakpoints:
             while True:
                 mpu.step()
@@ -482,6 +501,15 @@ class Monitor(cmd.Cmd):
                     msg = "Breakpoint %d reached."
                     self._output(msg % self._breakpoints.index(pc))
                     break
+
+        if sys.platform[:3] != "win":
+            # For non-windows systems, switch back to canonical/echo
+            # mode.
+            import termios
+            # Restore the old input settings.
+            fd = self.stdin.fileno()
+            termios.tcsetattr(fd, termios.TCSANOW, self.oldattr)
+
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
