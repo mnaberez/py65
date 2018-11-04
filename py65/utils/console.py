@@ -35,10 +35,8 @@ else:
         Does not echo the character.
         """
         # Try to get a character with a non-blocking read.
-        char = stdin.read(1)
+        char = ''
         while char == '':
-            # If we don't get one right away, wait a bit and try again.
-            time.sleep(0.001)
             char = stdin.read(1)
         return char
 
@@ -49,9 +47,7 @@ else:
         char = ''
         # Using non-blocking read as set up in Monitor._run
         char = stdin.read(1)
-        if char == '':
-            # Don't use 100% CPU while waiting for input.
-            time.sleep(0.001)
+
         if char == "\n":
             char = "\r"
         return char
