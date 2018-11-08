@@ -1,9 +1,6 @@
 import sys
 import time
 
-
-
-
 if sys.platform[:3] == "win":
     import msvcrt
 
@@ -49,7 +46,7 @@ else:
         mode.  In this mode, characters are given immediately to the
         program and no processing of editing characters (like backspace)
         is performed.  Echo is also turned off in this mode.  The
-        previous input behavior can be restored with 
+        previous input behavior can be restored with restore_mode.
         """
         # For non-windows systems, switch to non-canonical
         # and no-echo non-blocking-read mode.
@@ -72,9 +69,7 @@ else:
 
     def restore_mode(stdin):
         """For operating systems that support it, restore the previous 
-        input mode.  In this mode, a line can be entered and edited 
-        until Enter is pressed, and then the line is passed to the 
-        program for processing.
+        input mode.
         """
 
         # Restore the previous input setup.
