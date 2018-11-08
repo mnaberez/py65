@@ -1,8 +1,19 @@
 import sys
 import time
 
+
+
+
 if sys.platform[:3] == "win":
     import msvcrt
+
+    def noncanonical_mode(stdin):
+        """ noncanonical_mode is a no-op on Windows. """
+        return
+
+    def restore_mode(stdin):
+        """ restore_mode is a no-op on Windows. """
+        return
 
     def getch(stdin):
         """ Read one character from the Windows console, blocking until one
@@ -30,14 +41,61 @@ else:
     import termios
     import fcntl
 
+    oldattr_stack = [ ]
+
+
+    def noncanonical_mode(stdin):
+        """For operating systems that support it, switch to noncanonical
+        mode.  In this mode, characters are given immediately to the
+        program and no processing of editing characters (like backspace)
+        is performed.  Echo is also turned off in this mode.  The
+        previous input behavior can be restored with 
+        """
+        # For non-windows systems, switch to non-canonical
+        # and no-echo non-blocking-read mode.
+
+        global oldattr_stack
+
+        # Save the current terminal setup.
+        fd = stdin.fileno()
+        oldattr = termios.tcgetattr(fd)
+        oldattr_stack.append(oldattr)
+        
+        # Switch to noncanonical (instant) mode with no echo.
+        newattr = oldattr[:]
+        newattr[3] &= ~termios.ICANON & ~termios.ECHO
+
+        # Switch to non-blocking reads with 0.1 second timeout.
+        newattr[6][termios.VMIN] = 0
+        newattr[6][termios.VTIME] = 1
+        termios.tcsetattr(fd, termios.TCSANOW, newattr)
+
+    def restore_mode(stdin):
+        """For operating systems that support it, restore the previous 
+        input mode.  In this mode, a line can be entered and edited 
+        until Enter is pressed, and then the line is passed to the 
+        program for processing.
+        """
+
+        # Restore the previous input setup.
+        global oldattr_stack
+        fd = stdin.fileno()
+        # If there is a previous setting, restore it.
+        if oldattr_stack:
+            termios.tcsetattr(fd, termios.TCSANOW, oldattr_stack.pop())
+
+
+
     def getch(stdin):
         """ Read one character from stdin, blocking until one is available.
         Does not echo the character.
         """
         # Try to get a character with a non-blocking read.
         char = ''
+        noncanonical_mode(stdin)
         while char == '':
             char = stdin.read(1)
+        restore_mode(stdin)
         return char
 
     def getch_noblock(stdin):
@@ -45,8 +103,11 @@ else:
         character.  If no character is available, an empty string is returned.
         """
         char = ''
+
         # Using non-blocking read as set up in Monitor._run
+        noncanonical_mode(stdin)
         char = stdin.read(1)
+        restore_mode(stdin)
 
         if char == "\n":
             char = "\r"

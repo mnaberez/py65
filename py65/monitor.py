@@ -467,25 +467,10 @@ class Monitor(cmd.Cmd):
         mpu = self._mpu
         mem = self._mpu.memory
 
-        if sys.platform[:3] != "win":
-            # For non-windows systems, switch to non-canonical
-            # and no-echo non-blocking-read mode.
-            import termios
-
-            # Save the current terminal setup.
-            fd = self.stdin.fileno()
-            self.oldattr = termios.tcgetattr(fd)
-
-            # Switch to noncanonical (instant) mode with no echo.
-            newattr = self.oldattr[:]
-            newattr[3] &= ~termios.ICANON & ~termios.ECHO
-
-            # Switch to non-blocking reads with 0.1 second timeout.
-            newattr[6][termios.VMIN] = 0
-            newattr[6][termios.VTIME] = 1
-            termios.tcsetattr(fd, termios.TCSANOW, newattr)
-
-
+        # Switch to immediate (noncanonical) no-echo input mode on POSIX
+        # operating systems.  This has no effect on Windows.
+        console.noncanonical_mode(self.stdin)
+        
         if not breakpoints:
             while True:
                 mpu.step()
@@ -502,13 +487,8 @@ class Monitor(cmd.Cmd):
                     self._output(msg % self._breakpoints.index(pc))
                     break
 
-        if sys.platform[:3] != "win":
-            # For non-windows systems, switch back to canonical/echo
-            # mode.
-            import termios
-            # Restore the old input settings.
-            fd = self.stdin.fileno()
-            termios.tcsetattr(fd, termios.TCSANOW, self.oldattr)
+        # Switch back to the previous input mode.
+        console.restore_mode(self.stdin)    
 
 
     def help_radix(self):
