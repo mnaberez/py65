@@ -62,7 +62,7 @@ class Monitor(cmd.Cmd):
         self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
 
         if load is not None:
-            self.do_load(load)
+            self.do_load("%r" % load)
 
         if goto is not None:
             self.do_goto(goto)
