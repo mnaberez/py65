@@ -55,6 +55,8 @@ class Monitor(cmd.Cmd):
         self._add_shortcuts()
         cmd.Cmd.__init__(self, stdin=stdin, stdout=stdout)
 
+        console.save_mode(self.stdin)
+
         if argv is None:
             argv = sys.argv
         load, rom, goto = self._parse_args(argv)
@@ -131,6 +133,7 @@ class Monitor(cmd.Cmd):
             result = cmd.Cmd.onecmd(self, line)
         except KeyboardInterrupt:
             self._output("Interrupt")
+
         except Exception:
             (file, fun, line), t, v, tbinfo = compact_traceback()
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
@@ -138,6 +141,9 @@ class Monitor(cmd.Cmd):
 
         if not line.startswith("quit"):
             self._output_mpu_status()
+
+        # Switch back to the previous input mode.
+        console.restore_mode(self.stdin)    
 
         return result
 
@@ -885,6 +891,7 @@ def main(args=None):
         c.cmdloop()
     except KeyboardInterrupt:
         c._output('')
+        console.restore_mode(c.stdin)
 
 if __name__ == "__main__":
     main()

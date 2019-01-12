@@ -4,6 +4,10 @@ import time
 if sys.platform[:3] == "win":
     import msvcrt
 
+    def save_mode(stdin):
+        """ get_mode is a no-op on Windows. """
+        return
+
     def noncanonical_mode(stdin):
         """ noncanonical_mode is a no-op on Windows. """
         return
@@ -38,8 +42,30 @@ else:
     import termios
     import fcntl
 
-    oldattr_stack = [ ]
+    oldattr = None
 
+    def save_mode(stdin):
+        """ For operating systems that support it, save the original
+        input termios settings so they can be restored later.  This 
+        allows us to switch to noncanonical mode when software is
+        running in the simulator and back to the original mode when
+        accepting commands.
+        """
+        # For non-Windows systems, save the original input settings,
+        # which will typically be blocking reads with echo.
+        global oldattr
+
+        # When the input is not a pty/tty, this will fail.
+        # In that case, it's ok to ignore the failure.
+        try:
+            # Save the current terminal setup.
+            fd = stdin.fileno()
+            oldattr = termios.tcgetattr(fd)
+        except:
+            # Quietly ignore termios errors, such as stdin not being
+            # a tty.
+            print("DEBUG: Exception getting termios settings")
+            pass
 
     def noncanonical_mode(stdin):
         """For operating systems that support it, switch to noncanonical
@@ -50,36 +76,39 @@ else:
         """
         # For non-windows systems, switch to non-canonical
         # and no-echo non-blocking-read mode.
+        try:
+            # Save the current terminal setup.
+            fd = stdin.fileno()
+            currentattr = termios.tcgetattr(fd)
+            # Switch to noncanonical (instant) mode with no echo.
+            newattr = currentattr[:]
+            newattr[3] &= ~termios.ICANON & ~termios.ECHO
 
-        global oldattr_stack
-
-        # Save the current terminal setup.
-        fd = stdin.fileno()
-        oldattr = termios.tcgetattr(fd)
-        oldattr_stack.append(oldattr)
+            # Switch to non-blocking reads with 0.1 second timeout.
+            newattr[6][termios.VMIN] = 0
+            newattr[6][termios.VTIME] = 1
+            termios.tcsetattr(fd, termios.TCSANOW, newattr)
+        except:
+            # Quietly ignore termios errors, such as stdin not being
+            # a tty.
+            pass
         
-        # Switch to noncanonical (instant) mode with no echo.
-        newattr = oldattr[:]
-        newattr[3] &= ~termios.ICANON & ~termios.ECHO
-
-        # Switch to non-blocking reads with 0.1 second timeout.
-        newattr[6][termios.VMIN] = 0
-        newattr[6][termios.VTIME] = 1
-        termios.tcsetattr(fd, termios.TCSANOW, newattr)
-
     def restore_mode(stdin):
         """For operating systems that support it, restore the previous 
         input mode.
         """
 
         # Restore the previous input setup.
-        global oldattr_stack
-        fd = stdin.fileno()
-        # If there is a previous setting, restore it.
-        if oldattr_stack:
-            termios.tcsetattr(fd, termios.TCSANOW, oldattr_stack.pop())
+        global oldattr
 
-
+        try:
+            fd = stdin.fileno()
+            # If there is a previous setting, restore it.
+            if oldattr != None:
+                termios.tcsetattr(fd, termios.TCSANOW, oldattr)
+        except:
+            # Quietly ignore termios errors, such as stdin not being a tty.
+            pass
 
     def getch(stdin):
         """ Read one character from stdin, blocking until one is available.
@@ -88,9 +117,11 @@ else:
         # Try to get a character with a non-blocking read.
         char = ''
         noncanonical_mode(stdin)
+        # If we didn't get a character, ask again.
         while char == '':
             char = stdin.read(1)
-        restore_mode(stdin)
+            # stdin has already been set up with a 0.1s delay, so we
+            # don't need an additional delay here.
         return char
 
     def getch_noblock(stdin):
@@ -99,10 +130,9 @@ else:
         """
         char = ''
 
-        # Using non-blocking read as set up in Monitor._run
+        # Using non-blocking read
         noncanonical_mode(stdin)
         char = stdin.read(1)
-        restore_mode(stdin)
 
         if char == "\n":
             char = "\r"
