@@ -135,7 +135,6 @@ class Monitor(cmd.Cmd):
             result = cmd.Cmd.onecmd(self, line)
         except KeyboardInterrupt:
             self._output("Interrupt")
-
         except Exception:
             (file, fun, line), t, v, tbinfo = compact_traceback()
             error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
@@ -497,7 +496,6 @@ class Monitor(cmd.Cmd):
 
         # Switch back to the previous input mode.
         console.restore_mode(self.stdin)    
-
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")

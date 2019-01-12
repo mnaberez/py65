@@ -36,10 +36,7 @@ if sys.platform[:3] == "win":
         return ''
 
 else:
-    import select
-    import os
     import termios
-    import fcntl
 
     oldattr = None
 
