@@ -1,11 +1,10 @@
 import sys
-import time
 
 if sys.platform[:3] == "win":
     import msvcrt
 
     def save_mode(stdin):
-        """ get_mode is a no-op on Windows. """
+        """ save_mode is a no-op on Windows. """
         return
 
     def noncanonical_mode(stdin):

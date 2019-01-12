@@ -55,6 +55,8 @@ class Monitor(cmd.Cmd):
         self._add_shortcuts()
         cmd.Cmd.__init__(self, stdin=stdin, stdout=stdout)
 
+        # Save the current input mode so it can be restored after
+        # after processing commands and before exiting.
         console.save_mode(self.stdin)
 
         if argv is None:
