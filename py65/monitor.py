@@ -59,26 +59,35 @@ class Monitor(cmd.Cmd):
         # after processing commands and before exiting.
         console.save_mode(self.stdin)
 
-        if argv is None:
-            argv = sys.argv
-        load, rom, goto = self._parse_args(argv)
+        # Check for any exceptions thrown during __init__ while\
+        # processing the arguments.
+        try:
 
-        self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
+            if argv is None:
+                argv = sys.argv
+            load, rom, goto = self._parse_args(argv)
 
-        if load is not None:
-            self.do_load(load)
+            self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
 
-        if goto is not None:
-            self.do_goto(goto)
+            if load is not None:
+                self.do_load(load)
 
-        if rom is not None:
-            # load a ROM and run from the reset vector
-            self.do_load("%r top" % rom)
-            physMask = self._mpu.memory.physMask
-            reset = self._mpu.RESET & physMask
-            dest = self._mpu.memory[reset] + \
-                (self._mpu.memory[reset + 1] << self.byteWidth)
-            self.do_goto("$%x" % dest)
+            if goto is not None:
+                self.do_goto(goto)
+
+            if rom is not None:
+                # load a ROM and run from the reset vector
+                self.do_load("%r top" % rom)
+                physMask = self._mpu.memory.physMask
+                reset = self._mpu.RESET & physMask
+                dest = self._mpu.memory[reset] + \
+                       (self._mpu.memory[reset + 1] << self.byteWidth)
+                self.do_goto("$%x" % dest)
+        except:
+            # Restore input mode on any exception and then rethrow the
+            # exception.
+            console.restore_mode(self.stdin)
+            raise
 
     def _parse_args(self, argv):
         try:
