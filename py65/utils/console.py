@@ -60,7 +60,6 @@ else:
         except:
             # Quietly ignore termios errors, such as stdin not being
             # a tty.
-            print("DEBUG: Exception getting termios settings")
             pass
 
     def noncanonical_mode(stdin):
@@ -115,9 +114,15 @@ else:
         noncanonical_mode(stdin)
         # If we didn't get a character, ask again.
         while char == '':
-            char = stdin.read(1)
-            # stdin has already been set up with a 0.1s delay, so we
-            # don't need an additional delay here.
+            try:
+                char = stdin.read(1)
+                # stdin has already been set up with a 0.1s delay, so we
+                # don't need an additional delay here.
+            except KeyboardInterrupt:
+                # Pass along a CTRL-C interrupt.
+                raise
+            except:
+                pass
         return char
 
     def getch_noblock(stdin):
@@ -128,7 +133,13 @@ else:
 
         # Using non-blocking read
         noncanonical_mode(stdin)
-        char = stdin.read(1)
+        try:
+            char = stdin.read(1)
+        except KeyboardInterrupt:
+            # Pass along a CTRL-C interrupt.
+            raise
+        except:
+            pass
 
         if char == "\n":
             char = "\r"
