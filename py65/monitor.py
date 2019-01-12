@@ -59,7 +59,7 @@ class Monitor(cmd.Cmd):
         # after processing commands and before exiting.
         console.save_mode(self.stdin)
 
-        # Check for any exceptions thrown during __init__ while\
+        # Check for any exceptions thrown during __init__ while
         # processing the arguments.
         try:
 
@@ -81,7 +81,7 @@ class Monitor(cmd.Cmd):
                 physMask = self._mpu.memory.physMask
                 reset = self._mpu.RESET & physMask
                 dest = self._mpu.memory[reset] + \
-                       (self._mpu.memory[reset + 1] << self.byteWidth)
+                    (self._mpu.memory[reset + 1] << self.byteWidth)
                 self.do_goto("$%x" % dest)
         except:
             # Restore input mode on any exception and then rethrow the
