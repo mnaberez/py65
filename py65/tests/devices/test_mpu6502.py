@@ -2007,9 +2007,9 @@ class Common6502Tests:
 
     # Compare instructions
 
-    # See http://6502.org/tutorials/compare_instructions.html 
+    # See http://6502.org/tutorials/compare_instructions.html
     # and http://www.6502.org/tutorials/compare_beyond.html
-    # Cheat sheet: 
+    # Cheat sheet:
     #
     #    - Comparison is actually subtraction "register - memory"
     #    - Z contains equality result (1 equal, 0 not equal)
@@ -2017,9 +2017,9 @@ class Common6502Tests:
     #    - N holds MSB of subtraction result (*NOT* of signed subtraction)
     #    - V is not affected by comparison
     #    - D has no effect on comparison
-  
+
     # CMP Immediate
-    
+
     def test_cmp_imm_sets_zero_carry_clears_neg_flags_if_equal(self):
         """Comparison: A == m"""
         mpu = self._make_mpu()
@@ -2054,7 +2054,7 @@ class Common6502Tests:
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE) # 0xFF-0x01=0xFE
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY) # A>m unsigned 
+        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY) # A>m unsigned
 
     def test_cmp_imm_clears_zero_carry_takes_neg_if_less_signed_nega(self):
         """Comparison: A < m (signed), A and m both negative"""
@@ -2066,7 +2066,7 @@ class Common6502Tests:
         self.assertEqual(0x0002, mpu.pc)
         self.assertEqual(mpu.NEGATIVE, mpu.p & mpu.NEGATIVE) # 0xFE-0xFF=0xFF
         self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertEqual(0, mpu.p & mpu.CARRY) # A<m unsigned 
+        self.assertEqual(0, mpu.p & mpu.CARRY) # A<m unsigned
 
     def test_cmp_imm_clears_zero_sets_carry_takes_neg_if_more_unsigned(self):
         """Comparison: A > m (unsigned)"""
@@ -2076,7 +2076,7 @@ class Common6502Tests:
         mpu.a = 10
         mpu.step()
         self.assertEqual(0x0002, mpu.pc)
-        self.assertEqual(0, mpu.p & mpu.NEGATIVE) # 0x0A-0x01 = 0x0B
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE) # 0x0A-0x01 = 0x09
         self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY) # A>m unsigned
 
@@ -2108,7 +2108,7 @@ class Common6502Tests:
     # CPX Immediate
 
     def test_cpx_imm_sets_zero_carry_clears_neg_flags_if_equal(self):
-        """Comparison: X == #nn"""
+        """Comparison: X == m"""
         mpu = self._make_mpu()
         # $0000 CPX #$20
         self._write(mpu.memory, 0x0000, (0xE0, 0x20))
@@ -2119,11 +2119,11 @@ class Common6502Tests:
         self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
 
- 
+
     # CPY Immediate
 
     def test_cpy_imm_sets_zero_carry_clears_neg_flags_if_equal(self):
-        """Comparison: Y == #nn"""
+        """Comparison: Y == m"""
         mpu = self._make_mpu()
         # $0000 CPY #$30
         self._write(mpu.memory, 0x0000, (0xC0, 0x30))
