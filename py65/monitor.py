@@ -53,7 +53,32 @@ class Monitor(cmd.Cmd):
         self._width = 78
         self.prompt = "."
         self._add_shortcuts()
-        cmd.Cmd.__init__(self, stdin=stdin, stdout=stdout)
+
+        # Attempt to get a copy of stdin that is unbuffered.
+        # This allows for immediate response to typed input as well as
+        # pasted input.  If unable to get an unbuffered version of
+        # stdin, use the original version.
+        if stdin != None:
+            try:
+                # Reopen stdin with no buffer.
+                self.unbuffered_stdin = os.fdopen(stdin.fileno(), 'rb', 0)
+            except Exception as e:
+                print(e)
+                # Unable to reopen this file handle with no buffer.
+                # Just use the original file handle.
+                print("Error opening unbuffered stdin - using buffered version")
+                self.unbuffered_stdin = stdin
+        else:
+            # If stdin is None, try using sys.stdin for input.
+            try:
+                # Reopen the system's stdin with no buffer.
+                self.unbuffered_stdin = os.fdopen(sys.stdin.fileno(), 'rb', 0)
+            except Exception as e:
+                print(e)
+                print("Error opening default unbuffered stdin - using buffered version")
+                self.unbuffered_stdin = None
+
+        cmd.Cmd.__init__(self, stdin=self.unbuffered_stdin, stdout=stdout)
 
         # Save the current input mode so it can be restored after
         # after processing commands and before exiting.

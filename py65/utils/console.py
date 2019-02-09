@@ -80,9 +80,9 @@ else:
             newattr = currentattr[:]
             newattr[3] &= ~termios.ICANON & ~termios.ECHO
 
-            # Switch to non-blocking reads with 0.1 second timeout.
+            # Switch to non-blocking reads with no timeout.
             newattr[6][termios.VMIN] = 0
-            newattr[6][termios.VTIME] = 1
+            newattr[6][termios.VTIME] = 0
             termios.tcsetattr(fd, termios.TCSANOW, newattr)
         except:
             # Quietly ignore termios errors, such as stdin not being
