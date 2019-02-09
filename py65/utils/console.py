@@ -37,6 +37,7 @@ if sys.platform[:3] == "win":
 
 else:
     import termios
+    from select import select
 
     oldattr = None
 
@@ -115,9 +116,12 @@ else:
         # If we didn't get a character, ask again.
         while char == '':
             try:
-                char = stdin.read(1)
-                # stdin has already been set up with a 0.1s delay, so we
-                # don't need an additional delay here.
+                # On OSX, calling read when no data is available causes the
+                # file handle to never return any future data, so we need to
+                # use select to make sure there is at least one char to read.
+                rd,wr,er = select([stdin], [], [], 0.01)
+                if rd != []:
+                    char = stdin.read(1)
             except KeyboardInterrupt:
                 # Pass along a CTRL-C interrupt.
                 raise
@@ -133,8 +137,14 @@ else:
 
         # Using non-blocking read
         noncanonical_mode(stdin)
+
         try:
-            char = stdin.read(1)
+            # On OSX, calling read when no data is available causes the
+            # file handle to never return any future data, so we need to
+            # use select to make sure there is at least one char to read.
+            rd,wr,er = select([stdin], [], [], 0.01)
+            if rd != []:
+                char = stdin.read(1)
         except KeyboardInterrupt:
             # Pass along a CTRL-C interrupt.
             raise
