@@ -45,6 +45,7 @@ else:
     from select import select
 
     oldattr = None
+    oldstdin = None
 
     def get_unbuffered_stdin(stdin):
         """ Attempt to get and return a copy of stdin that is 
@@ -55,21 +56,20 @@ else:
         if stdin != None:
             try:
                 # Reopen stdin with no buffer.
-                return os.fdopen(stdin.fileno(), 'rb', 0)
+                return os.fdopen(os.dup(stdin.fileno()), 'rb', 0)
             except Exception as e:
                 print(e)
                 # Unable to reopen this file handle with no buffer.
                 # Just use the original file handle.
-                print("Error opening unbuffered stdin - using buffered version")
                 return stdin
         else:
             # If stdin is None, try using sys.stdin for input.
             try:
                 # Reopen the system's stdin with no buffer.
-                return os.fdopen(sys.stdin.fileno(), 'rb', 0)
-            except Exception as e:
-                print(e)
-                print("Error opening default unbuffered stdin - using buffered version")
+                return os.fdopen(os.dup(sys.stdin.fileno()), 'rb', 0)
+            except:
+                # If unable to get an unbuffered stdin, just return
+                # None, which is what we started with if we got here.
                 return None
 
     def save_mode(stdin):
@@ -82,11 +82,13 @@ else:
         # For non-Windows systems, save the original input settings,
         # which will typically be blocking reads with echo.
         global oldattr
+        global oldstdin
 
         # When the input is not a pty/tty, this will fail.
         # In that case, it's ok to ignore the failure.
         try:
             # Save the current terminal setup.
+            oldstdin = stdin
             fd = stdin.fileno()
             oldattr = termios.tcgetattr(fd)
         except:
@@ -120,19 +122,22 @@ else:
             # a tty.
             pass
         
-    def restore_mode(stdin):
+    def restore_mode():
         """For operating systems that support it, restore the previous 
         input mode.
         """
 
         # Restore the previous input setup.
         global oldattr
+        global oldstdin
 
         try:
-            fd = stdin.fileno()
+            # Restore the original system stdin.
+            oldfd = oldstdin.fileno()
             # If there is a previous setting, restore it.
             if oldattr != None:
-                termios.tcsetattr(fd, termios.TCSANOW, oldattr)
+                # Restore it on the original system stdin.
+                termios.tcsetattr(oldfd, termios.TCSANOW, oldattr)
         except:
             # Quietly ignore termios errors, such as stdin not being a tty.
             pass

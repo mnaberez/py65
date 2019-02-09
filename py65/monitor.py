@@ -54,17 +54,17 @@ class Monitor(cmd.Cmd):
         self.prompt = "."
         self._add_shortcuts()
 
+        # Save the current system input mode so it can be restored after
+        # after processing commands and before exiting.
+        console.save_mode(sys.stdin)
+
         # Attempt to get a copy of stdin that is unbuffered on systems
         # that support it.  This allows for immediate response to
         # typed input as well as pasted input.  If unable to get an
         # unbuffered version of stdin, the original version is returned.
-        stdin = console.get_unbuffered_stdin(stdin)
+        self.unbuffered_stdin = console.get_unbuffered_stdin(stdin)
 
-        cmd.Cmd.__init__(self, stdin=stdin, stdout=stdout)
-
-        # Save the current input mode so it can be restored after
-        # after processing commands and before exiting.
-        console.save_mode(self.stdin)
+        cmd.Cmd.__init__(self, stdin=self.unbuffered_stdin, stdout=stdout)
 
         # Check for any exceptions thrown during __init__ while
         # processing the arguments.
@@ -93,8 +93,20 @@ class Monitor(cmd.Cmd):
         except:
             # Restore input mode on any exception and then rethrow the
             # exception.
-            console.restore_mode(self.stdin)
+            console.restore_mode()
             raise
+
+    def __del__(self):
+        try:
+            # Restore the input mode.
+            console.restore_mode()
+            # Close the unbuffered input file handle, if it exists.
+            if self.unbuffered_stdin != None:
+                if self.unbuffered_stdin != sys.stdin:
+                    self.unbuffered_stdin.close()
+        except:
+            pass
+
 
     def _parse_args(self, argv):
         try:
@@ -160,7 +172,7 @@ class Monitor(cmd.Cmd):
             self._output_mpu_status()
 
         # Switch back to the previous input mode.
-        console.restore_mode(self.stdin)    
+        console.restore_mode()
 
         return result
 
@@ -511,7 +523,7 @@ class Monitor(cmd.Cmd):
                     break
 
         # Switch back to the previous input mode.
-        console.restore_mode(self.stdin)    
+        console.restore_mode()
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
@@ -907,7 +919,7 @@ def main(args=None):
         c.cmdloop()
     except KeyboardInterrupt:
         c._output('')
-        console.restore_mode(c.stdin)
+        console.restore_mode()
 
 if __name__ == "__main__":
     main()
