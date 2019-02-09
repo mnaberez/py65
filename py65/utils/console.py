@@ -3,6 +3,10 @@ import sys
 if sys.platform[:3] == "win":
     import msvcrt
 
+    def get_unbuffered_stdin(stdin):
+        """ get_unbuffered_stdin returns the given stdin on Windows. """
+        return stdin
+
     def save_mode(stdin):
         """ save_mode is a no-op on Windows. """
         return
@@ -37,9 +41,36 @@ if sys.platform[:3] == "win":
 
 else:
     import termios
+    import os
     from select import select
 
     oldattr = None
+
+    def get_unbuffered_stdin(stdin):
+        """ Attempt to get and return a copy of stdin that is 
+        unbuffered.  This allows for immediate response to typed input
+        as well as pasted input.  If unable to get an unbuffered
+        version of stdin, return the original version.
+        """
+        if stdin != None:
+            try:
+                # Reopen stdin with no buffer.
+                return os.fdopen(stdin.fileno(), 'rb', 0)
+            except Exception as e:
+                print(e)
+                # Unable to reopen this file handle with no buffer.
+                # Just use the original file handle.
+                print("Error opening unbuffered stdin - using buffered version")
+                return stdin
+        else:
+            # If stdin is None, try using sys.stdin for input.
+            try:
+                # Reopen the system's stdin with no buffer.
+                return os.fdopen(sys.stdin.fileno(), 'rb', 0)
+            except Exception as e:
+                print(e)
+                print("Error opening default unbuffered stdin - using buffered version")
+                return None
 
     def save_mode(stdin):
         """ For operating systems that support it, save the original
