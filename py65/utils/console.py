@@ -187,8 +187,9 @@ else:
         except:
             pass
 
-        if char == "\n":
-            char = "\r"
+        # Convert linefeeds to carriage returns.
+        if char != '' and ord(char) == 10:
+            char = '\r'
         return char
 
 
