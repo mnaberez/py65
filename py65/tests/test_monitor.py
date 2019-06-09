@@ -517,6 +517,46 @@ class MonitorTests(unittest.TestCase):
         mon.do_goto('0')
         self.assertEqual(0x02, mon._mpu.pc)
 
+    # go
+
+    def test_shortcut_for_go(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_help('go')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('go'))
+
+    def test_go_with_breakpoints_stops_execution_at_breakpoint(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._breakpoints = [ 0x03 ]
+        mon._mpu.memory = [ 0xEA, 0xEA, 0xEA, 0xEA ]
+        mon._mpu.pc = 0x00
+        mon.do_go('')
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Breakpoint 0 reached"))
+        self.assertEqual(0x03, mon._mpu.pc)
+
+    def test_go_with_breakpoints_stops_execution_at_brk(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._breakpoints = [ 0x02 ]
+        mon._mpu.memory = [ 0xEA, 0xEA, 0x00, 0xEA ]
+        mon._mpu.pc = 0x00
+        mon.do_go('')
+        self.assertEqual(0x02, mon._mpu.pc)
+
+    def test_go_without_breakpoints_stops_execution_at_brk(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon._breakpoints = []
+        mon._mpu.memory = [ 0xEA, 0xEA, 0x00, 0xEA ]
+        mon._mpu.pc = 0x00
+        mon.do_go('')
+        self.assertEqual(0x02, mon._mpu.pc)
+
+
     # help
 
     def test_help_without_args_shows_documented_commands(self):

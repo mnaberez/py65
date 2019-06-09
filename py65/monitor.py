@@ -168,6 +168,7 @@ class Monitor(cmd.Cmd):
                            'f':    'fill',
                            '>':    'fill',
                            'g':    'goto',
+                           'go':   'go',
                            'h':    'help',
                            '?':    'help',
                            'l':    'load',
@@ -458,6 +459,14 @@ class Monitor(cmd.Cmd):
             return self.help_goto()
 
         self._mpu.pc = self._address_parser.number(args)
+        brks = [0x00]  # BRK
+        self._run(stopcodes=brks)
+    
+    def help_go(self):
+        self._output("go")
+        self._output("Continue execution.")
+        
+    def do_go(self, args):
         brks = [0x00]  # BRK
         self._run(stopcodes=brks)
 
