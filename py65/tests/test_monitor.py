@@ -158,7 +158,7 @@ class MonitorTests(unittest.TestCase):
         stdout = StringIO()
         mon = Monitor(stdout=stdout)
         mon.do_add_label('c000 base')
-        mon.do_assemble('c000 rts')
+        mon.do_assemble('base rts')
 
         mpu = mon._mpu
         self.assertEqual(0x60, mpu.memory[0xC000])
@@ -1143,6 +1143,107 @@ class MonitorTests(unittest.TestCase):
         mon.help_width()
         out = stdout.getvalue()
         self.assertTrue(out.startswith("width <columns>"))
+
+    def test_external_memory(self):
+        stdout = StringIO()
+        memory = bytearray(65536)
+        memory[10] = 0xff
+        mon = Monitor(memory=memory, stdout=stdout, putc_addr=None, getc_addr=None)
+        self.assertEqual(0xff, memory[10], "memory must remain untouched")
+        mon.do_mem('0008:000c')
+        mon.do_fill('0000:0020 ab')
+        self.assertEqual(0xab, memory[10], "memory must have been modified")
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith('0008:  00  00  ff  00  00'), "monitor must see pre-initialized memory")
+
+    # command line options
+
+    def test_argv_mpu(self):
+        argv = ['py65mon', '--mpu', '65c02']
+        stdout = StringIO()
+        mon = Monitor(argv=argv, stdout=stdout)
+        self.assertEqual('65C02', mon._mpu.name)
+
+    def test_argv_mpu_invalid(self):
+        argv = ['py65mon', '--mpu', 'bad']
+        stdout = StringIO()
+        try:
+            Monitor(argv=argv, stdout=stdout)
+        except SystemExit as exc:
+            self.assertEqual(1, exc.code)
+        self.assertTrue("Fatal: no such MPU." in stdout.getvalue())
+
+    def test_argv_goto(self):
+        argv = ['py65mon', '--goto', 'c000']
+        stdout = StringIO()
+        memory = bytearray(0x10000)
+        memory[0xc000] = 0xea # c000 nop
+        memory[0xc001] = 0xea # c001 nop
+        memory[0xc002] = 0x00 # c002 brk
+        mon = Monitor(argv=argv, stdout=stdout, memory=memory)
+        self.assertEqual(0xc002, mon._mpu.pc)
+
+    def test_argv_load(self):
+        with tempfile.NamedTemporaryFile('wb+') as f:
+            data = bytearray([0xab, 0xcd])
+            f.write(data)
+            f.flush()
+
+            argv = ['py65mon', '--load', f.name]
+            stdout = StringIO()
+            mon = Monitor(argv=argv, stdout=stdout)
+            self.assertEqual(list(data), mon._mpu.memory[:len(data)])
+
+    def test_argv_rom(self):
+        with tempfile.NamedTemporaryFile('wb+') as f:
+            rom = bytearray(4096)
+            rom[0]  = 0xea          # f000 nop
+            rom[1]  = 0xea          # f001 nop
+            rom[2]  = 0x00          # f002 brk
+            rom[-2] = 0xf000 & 0xff # fffc reset vector low
+            rom[-3] = 0xf000 >> 8   # fffd reset vector high
+            f.write(rom)
+            f.flush()
+
+            argv = ['py65mon', '--rom', f.name]
+            stdout = StringIO()
+            mon = Monitor(argv=argv, stdout=stdout)
+            self.assertEqual(list(rom), mon._mpu.memory[-len(rom):])
+            self.assertEqual(0xf002, mon._mpu.pc)
+
+    def test_argv_input(self):
+        argv = ['py65mon', '--input', 'abcd']
+        stdout = StringIO()
+        mon = Monitor(argv=argv, stdout=stdout)
+        read_subscribers = mon._mpu.memory._read_subscribers
+        self.assertEqual(1, len(read_subscribers))
+        self.assertTrue('getc' in repr(read_subscribers[0xabcd]))
+
+    def test_argv_output(self):
+        argv = ['py65mon', '--output', 'dcba']
+        stdout = StringIO()
+        mon = Monitor(argv=argv, stdout=stdout)
+        write_subscribers = mon._mpu.memory._write_subscribers
+        self.assertEqual(1, len(write_subscribers))
+        self.assertTrue('putc' in repr(write_subscribers[0xdcba]))
+
+    def test_argv_combination_rom_mpu(self):
+        with tempfile.NamedTemporaryFile('wb+') as f:
+            rom = bytearray(4096)
+            rom[0]  = 0xea          # f000 nop
+            rom[1]  = 0xea          # f001 nop
+            rom[2]  = 0x00          # f002 brk
+            rom[-2] = 0xf000 & 0xff # fffc reset vector low
+            rom[-3] = 0xf000 >> 8   # fffd reset vector high
+            f.write(rom)
+            f.flush()
+
+            argv = ['py65mon', '--rom', f.name, '--mpu', '65c02',]
+            stdout = StringIO()
+            mon = Monitor(argv=argv, stdout=stdout)
+            self.assertEqual('65C02', mon._mpu.name)
+            self.assertEqual(list(rom), mon._mpu.memory[-len(rom):])
+            self.assertEqual(0xf002, mon._mpu.pc)
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])

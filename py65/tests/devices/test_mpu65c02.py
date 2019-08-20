@@ -11,6 +11,16 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu = self._make_mpu()
         self.assertTrue('65C02' in repr(mpu))
 
+    # Reset
+
+    def test_reset_clears_decimal_flag(self):
+        # W65C02S Datasheet, Apr 14 2009, Table 7-1 Operational Enhancements
+        # NMOS 6502 decimal flag = indetermine after reset, CMOS 65C02 = 0
+        mpu = self._make_mpu()
+        mpu.p = mpu.DECIMAL
+        mpu.reset()
+        self.assertEqual(0, mpu.p & mpu.DECIMAL)
+
     # ADC Zero Page, Indirect
 
     def test_adc_bcd_off_zp_ind_carry_clear_in_accumulator_zeroes(self):

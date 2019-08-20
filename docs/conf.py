@@ -13,8 +13,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
-import sys
 from datetime import date
 
 # If your extensions are in another directory, add it here. If the directory
@@ -51,7 +49,7 @@ copyright = u'2008-%d, Mike Naberezny and contributors' % year
 # built documents.
 #
 # The short X.Y version.
-version = '0.25.dev0'
+version = '1.1.0.dev0'
 # The full version, including alpha/beta/rc tags.
 release = version
 
