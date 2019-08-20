@@ -1,4 +1,4 @@
-These were compiled with the ca65 assembler available at http://cc65.org
+These .bin files were assembled with ca65 available at http://cc65.org
 
 $ ca65 --cpu 6502 6502_decimal_test.c65 --listing 6502_decimal_test.lst
 $ ld65 -t none -o 6502_decimal_test.bin 6502_decimal_test.o
