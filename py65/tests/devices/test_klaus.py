@@ -2,10 +2,14 @@ import unittest
 import sys
 import py65.devices.mpu65c02
 
+
 class KlausDormannTests(unittest.TestCase):
     """Runs Klaus Dormann's 6502-based test suites"""
 
-    def klausTestCase(self, filename, load_addr, pc, success_addr, should_trace=None):
+    MPU = py65.devices.mpu65c02.MPU
+
+    def klausTestCase(self, filename, load_addr, pc, completion_criteria,
+                      should_trace=None):
         mpu = self._make_mpu()
         mpu.pc = pc
 
@@ -18,20 +22,50 @@ class KlausDormannTests(unittest.TestCase):
         while True:
             old_pc = mpu.pc
             mpu.step(trace=should_trace(mpu.pc))
-            if mpu.pc == old_pc:
+            if completion_criteria(mpu, old_pc):
                 break
 
-        assert mpu.pc == success_addr, "%s 0xb=%02x 0xc=%02x 0xd=%02x 0xf=%02x" % (
-            mpu, mpu.memory[0xb], mpu.memory[0xc], mpu.memory[0xd], mpu.memory[0xf])
+        return mpu
+
+    def make_completion_criteria(self, success_addr):
+        def completion_criteria(mpu, old_pc):
+            return mpu.pc == old_pc or mpu.pc == success_addr
+
+        return completion_criteria
 
     def test6502FunctionalTest(self):
-        self.klausTestCase("devices/6502_functional_test.bin", 0x0, 0x400, 0x3399)
+        success_addr = 0x3399
+        completion_criteria = self.make_completion_criteria(success_addr)
 
-    # XXX fails
-    def Xtest65C02ExtendedOpcodesTest(self):
-        tracer = lambda pc: (0x1484 <= pc <= 0x16cc)
-        self.klausTestCase("devices/65C02_extended_opcodes_test_modified.bin"
-                           "", 0xa, 0x400, 0x24a8)  #, tracer)
+        mpu = self.klausTestCase(
+            "devices/6502_functional_test.bin", 0x0, 0x400,
+            completion_criteria
+        )
+
+        assert mpu.pc == success_addr, (
+                "%s 0xb=%02x 0xc=%02x 0xd=%02x 0xf=%02x" % (
+            mpu, mpu.memory[0xb], mpu.memory[0xc], mpu.memory[0xd],
+            mpu.memory[0xf])
+        )
+
+    def test65C02ExtendedOpcodesTest(self):
+        success_addr = 0x1570
+        completion_criteria = self.make_completion_criteria(success_addr)
+
+        # Modified version of 65C02_extended_opcodes_test that defines
+        # rkwl_wdc_op = 0 (don't test BBR/BBS instructions, which we do not
+        # implement) and many of the NOP tests for undefined opcodes which are
+        # not yet implemented here.
+        mpu = self.klausTestCase(
+            "devices/65C02_extended_opcodes_test_modified.bin", 0xa, 0x400,
+            completion_criteria
+        )
+
+        assert mpu.pc == success_addr, (
+                "%s 0xb=%02x 0xc=%02x 0xd=%02x 0xf=%02x" % (
+            mpu, mpu.memory[0xb], mpu.memory[0xc], mpu.memory[0xd],
+            mpu.memory[0xf])
+        )
 
     # Test Helpers
 
@@ -39,17 +73,15 @@ class KlausDormannTests(unittest.TestCase):
         memory[start_address:start_address + len(bytes)] = bytes
 
     def _make_mpu(self, *args, **kargs):
-        klass = self._get_target_class()
-        mpu = klass(*args, **kargs)
+        mpu = self.MPU(*args, **kargs)
         if 'memory' not in kargs:
             mpu.memory = 0x10000 * [0xAA]
         return mpu
 
-    def _get_target_class(self):
-        return py65.devices.mpu65c02.MPU
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
