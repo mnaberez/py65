@@ -1,3 +1,5 @@
+import sys
+
 from py65.utils.conversions import itoa
 from py65.utils.devices import make_instruction_decorator
 from py65 import disassembler
@@ -60,8 +62,9 @@ class MPU:
     def step(self, trace=False):
         instructCode = self.memory[self.pc]
         if trace:
-            print self, "$%04X: %s" % (
+            out = str(self) + "  $%04X: %s" % (
                 self.pc, self.disassembler.instruction_at(self.pc)[1])
+            print >> sys.stderr, "\n".join(out.split('\n'))
         self.pc = (self.pc + 1) & self.addrMask
         self.excycles = 0
         self.addcycles = self.extracycles[instructCode]
@@ -296,6 +299,9 @@ class MPU:
         self.FlagsNZ(self.a)
 
     def opADC(self, x):
+        return self._opADC(x, flags_use_adjusted_result=False)
+
+    def _opADC(self, x, flags_use_adjusted_result):
         data = self.ByteAt(x())
 
         if self.p & self.DECIMAL:
@@ -315,24 +321,35 @@ class MPU:
             # the ALU outputs are not decimally adjusted
             nibble0 = nibble0 & 0xf
             nibble1 = nibble1 & 0xf
+            aluresult = (nibble1 << 4) + nibble0
 
             # the final A contents will be decimally adjusted
             nibble0 = (nibble0 + adjust0) & 0xf
             nibble1 = (nibble1 + adjust1) & 0xf
+            adjresult = (nibble1 << 4) + nibble0
 
-            # Update result for use in setting flags below
-            aluresult = (nibble1 << 4) + nibble0
-            
             self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
-            if aluresult == 0:
-                self.p |= self.ZERO
+
+            if flags_use_adjusted_result:  # 65C02 and 65816
+                if adjresult == 0:
+                    self.p |= self.ZERO
+                else:
+                    self.p |= adjresult & self.NEGATIVE
+                if decimalcarry == 1:
+                    self.p |= self.CARRY
+                if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
+                    self.p |= self.OVERFLOW
             else:
-                self.p |= aluresult & self.NEGATIVE
-            if decimalcarry == 1:
-                self.p |= self.CARRY
-            if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
-                self.p |= self.OVERFLOW
-            self.a = (nibble1 << 4) + nibble0
+                if aluresult == 0:
+                    self.p |= self.ZERO
+                else:
+                    self.p |= aluresult & self.NEGATIVE
+                if decimalcarry == 1:
+                    self.p |= self.CARRY
+                if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
+                    self.p |= self.OVERFLOW
+
+            self.a = adjresult
         else:
             if self.p & self.CARRY:
                 tmp = 1
@@ -395,59 +412,70 @@ class MPU:
         self.p |= (register_value - tbyte) & self.NEGATIVE
 
     def opSBC(self, x):
+        if self.p & self.DECIMAL:
+            self._opSBCDecimal(x)
+            return
+
         data = self.ByteAt(x())
 
-        if self.p & self.DECIMAL:
-            halfcarry = 1
-            decimalcarry = 0
-            adjust0 = 0
-            adjust1 = 0
+        result = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
+        self.p &= ~(self.CARRY | self.ZERO | self.OVERFLOW | self.NEGATIVE)
+        if ((self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
+            self.p |= self.OVERFLOW
+        data = result & self.byteMask
+        if data == 0:
+            self.p |= self.ZERO
+        if result > self.byteMask:
+            self.p |= self.CARRY
+        self.p |= data & self.NEGATIVE
+        self.a = data
 
-            nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
-            if nibble0 <= 0xf:
-                halfcarry = 0
-                adjust0 = 10
-            nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
-            if nibble1 <= 0xf:
-                adjust1 = 10 << 4
+    def _opSBCDecimal(self, x):
+        """SBC opcode in BCD mode.
 
-            # the ALU outputs are not decimally adjusted
-            aluresult = self.a + (~data & self.byteMask) + \
-                (self.p & self.CARRY)
+        This is sufficiently different on 6502 and 65C02 to warrant a separate
+        implementation, see e.g. http://6502.org/tutorials/decimal_mode.html#A
+        """
+        data = self.ByteAt(x())
 
-            if aluresult > self.byteMask:
-                decimalcarry = 1
-            aluresult &= self.byteMask
+        halfcarry = 1
+        decimalcarry = 0
+        adjust0 = 0
+        adjust1 = 0
 
-            # but the final result will be adjusted
-            nibble0 = (aluresult + adjust0) & 0xf
-            nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+        nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
+        if nibble0 <= 0xf:
+            halfcarry = 0
+            adjust0 = 10
+        nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
+        if nibble1 <= 0xf:
+            adjust1 = 10 << 4
 
-            # Update result for use in setting flags below
-            aluresult = (nibble1 << 4) + nibble0
+        # the ALU outputs are not decimally adjusted
+        aluresult = self.a + (~data & self.byteMask) + \
+            (self.p & self.CARRY)
 
-            self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
-            if aluresult == 0:
-                self.p |= self.ZERO
-            else:
-                self.p |= aluresult & self.NEGATIVE
-            if decimalcarry == 1:
-                self.p |= self.CARRY
-            if ((self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
-                self.p |= self.OVERFLOW
-            self.a = (nibble1 << 4) + nibble0
+        if aluresult > self.byteMask:
+            decimalcarry = 1
+        aluresult &= self.byteMask
+
+        # but the final result will be adjusted
+        nibble0 = (aluresult + adjust0) & 0xf
+        nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+
+        # Update result for use in setting flags below
+        adjresult = (nibble1 << 4) + nibble0
+
+        self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
+        if aluresult == 0:
+            self.p |= self.ZERO
         else:
-            result = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
-            self.p &= ~(self.CARRY | self.ZERO | self.OVERFLOW | self.NEGATIVE)
-            if ((self.a ^ data) & (self.a ^ result)) & self.NEGATIVE:
-                self.p |= self.OVERFLOW
-            data = result & self.byteMask
-            if data == 0:
-                self.p |= self.ZERO
-            if result > self.byteMask:
-                self.p |= self.CARRY
-            self.p |= data & self.NEGATIVE
-            self.a = data
+            self.p |= aluresult & self.NEGATIVE
+        if decimalcarry == 1:
+            self.p |= self.CARRY
+        if ((self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
+            self.p |= self.OVERFLOW
+        self.a = adjresult
 
     def opDECR(self, x):
         if x is None:
