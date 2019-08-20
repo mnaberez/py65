@@ -8,11 +8,11 @@ class MPU(mpu6502.MPU):
         self.name = '65C02'
         self.waiting = False
 
-    def step(self, trace=False):
+    def step(self):
         if self.waiting:
             self.processorCycles += 1
         else:
-            mpu6502.MPU.step(self, trace)
+            mpu6502.MPU.step(self)
         return self
 
     # Make copies of the lists
