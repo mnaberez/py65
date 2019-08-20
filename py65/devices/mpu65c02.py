@@ -64,7 +64,7 @@ class MPU(mpu6502.MPU):
         self.memory[address] = m & ~self.a
 
     def opADC(self, x):
-        return self._opADC(x, flags_use_adjusted_result=True)
+        return self._opADC(x, decimal_flags_use_adjusted_result=True)
 
     def opSBC(self, x):
         return self._opSBC(x, decimal_flags_use_adjusted_result=True)

@@ -299,9 +299,9 @@ class MPU:
         self.FlagsNZ(self.a)
 
     def opADC(self, x):
-        return self._opADC(x, flags_use_adjusted_result=False)
+        return self._opADC(x, decimal_flags_use_adjusted_result=False)
 
-    def _opADC(self, x, flags_use_adjusted_result):
+    def _opADC(self, x, decimal_flags_use_adjusted_result):
         data = self.ByteAt(x())
 
         if self.p & self.DECIMAL:
@@ -333,7 +333,7 @@ class MPU:
 
             self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
 
-            if flags_use_adjusted_result:  # 65C02 and 65816
+            if decimal_flags_use_adjusted_result:  # 65C02 and 65816
                 # Z and N use adjusted (i.e. decimal) result
                 zerores = adjresult
                 negativeres = adjresult
