@@ -318,36 +318,43 @@ class MPU:
                 adjust1 = 6
                 decimalcarry = 1
 
-            # the ALU outputs are not decimally adjusted
+            # The ALU outputs are not yet decimally adjusted
             nibble0 = nibble0 & 0xf
             nibble1 = nibble1 & 0xf
             aluresult = (nibble1 << 4) + nibble0
 
-            # the final A contents will be decimally adjusted
+            # Partial result with only low nibble decimally adjusted
             nibble0 = (nibble0 + adjust0) & 0xf
+            halfadjresult = (nibble1 << 4) + nibble0
+
+            # the final A contents has both nibbles decimally adjusted
             nibble1 = (nibble1 + adjust1) & 0xf
             adjresult = (nibble1 << 4) + nibble0
 
             self.p &= ~(self.CARRY | self.OVERFLOW | self.NEGATIVE | self.ZERO)
 
             if flags_use_adjusted_result:  # 65C02 and 65816
-                if adjresult == 0:
-                    self.p |= self.ZERO
-                else:
-                    self.p |= adjresult & self.NEGATIVE
-                if decimalcarry == 1:
-                    self.p |= self.CARRY
-                if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
-                    self.p |= self.OVERFLOW
+                # Z and N use adjusted (i.e. decimal) result
+                zerores = adjresult
+                negativeres = adjresult
+            else:  # 6502
+                # Z uses unadjusted (i.e. binary) ALU result
+                zerores = aluresult
+                # N effectively uses ALU result with only low nibble
+                # decimally adjusted -  but see here for what is really going on
+                # https://atariage.com/forums/topic/163876-flags-on-decimal-mode-on-the-nmos-6502/
+                negativeres = halfadjresult
+
+            if zerores == 0:
+                self.p |= self.ZERO
             else:
-                if aluresult == 0:
-                    self.p |= self.ZERO
-                else:
-                    self.p |= aluresult & self.NEGATIVE
-                if decimalcarry == 1:
-                    self.p |= self.CARRY
-                if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
-                    self.p |= self.OVERFLOW
+                self.p |= negativeres & self.NEGATIVE
+
+            if decimalcarry == 1:
+                self.p |= self.CARRY
+
+            if (~(self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
+                self.p |= self.OVERFLOW
 
             self.a = adjresult
         else:
@@ -412,8 +419,11 @@ class MPU:
         self.p |= (register_value - tbyte) & self.NEGATIVE
 
     def opSBC(self, x):
+        self._opSBC(x, decimal_flags_use_adjusted_result=False)
+
+    def _opSBC(self, x, decimal_flags_use_adjusted_result):
         if self.p & self.DECIMAL:
-            self._opSBCDecimal(x)
+            self._opSBCDecimal(x, decimal_flags_use_adjusted_result)
             return
 
         data = self.ByteAt(x())
@@ -430,47 +440,68 @@ class MPU:
         self.p |= data & self.NEGATIVE
         self.a = data
 
-    def _opSBCDecimal(self, x):
+    def _opSBCDecimal(self, x, flags_use_adjusted_result=False):
         """SBC opcode in BCD mode.
 
-        This is sufficiently different on 6502 and 65C02 to warrant a separate
-        implementation, see e.g. http://6502.org/tutorials/decimal_mode.html#A
+        See e.g. http://6502.org/tutorials/decimal_mode.html#A for details
         """
         data = self.ByteAt(x())
-
-        halfcarry = 1
+        #
+        # halfcarry = 1
         decimalcarry = 0
-        adjust0 = 0
-        adjust1 = 0
+        # adjust0 = 0
+        # adjust1 = 0
+        #
+        # nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
+        # if nibble0 <= 0xf:
+        #     halfcarry = 0
+        #     adjust0 = 10  # -0x6
+        # nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
+        # if nibble1 <= 0xf:
+        #     adjust1 = 10 << 4  # -0x60
 
-        nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
-        if nibble0 <= 0xf:
-            halfcarry = 0
-            adjust0 = 10
-        nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
-        if nibble1 <= 0xf:
-            adjust1 = 10 << 4
-
-        # the ALU outputs are not decimally adjusted
-        aluresult = self.a + (~data & self.byteMask) + \
-            (self.p & self.CARRY)
+        # the ALU outputs are not yet decimally adjusted
+        aluresult = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
 
         if aluresult > self.byteMask:
             decimalcarry = 1
         aluresult &= self.byteMask
 
-        # but the final result will be adjusted
-        nibble0 = (aluresult + adjust0) & 0xf
-        nibble1 = ((aluresult + adjust1) >> 4) & 0xf
+        AL = (self.a & 0xf) - (data & 0xf) + (self.p & self.CARRY) - 1
 
-        # Update result for use in setting flags below
-        adjresult = (nibble1 << 4) + nibble0
+        if flags_use_adjusted_result:  # Note: 65C02 but not 65816
+            A = self.a - data + (self.p & self.CARRY) - 1
+            assert (A & self.byteMask) == aluresult
+
+            if A < 0:
+                A -= 0x60
+
+            if AL < 0:
+                A -= 0x6
+        else:
+            # Note: 65816 apparently uses this logic instead of 65C02
+            if AL < 0:
+                AL = ((AL - 0x6) & 0xf) - 0x10
+            A = (self.a & 0xf0) - (data & 0xf0) + AL
+            if A < 0:
+                A -= 0x60
+
+        adjresult = A & self.byteMask
+
+        if flags_use_adjusted_result:  # 65C02 and 65816
+            # Z and N use adjusted (i.e. decimal) result
+            zerores = adjresult
+            negativeres = adjresult
+        else:  # 6502
+            # Z and N uses unadjusted (i.e. binary) ALU result
+            zerores = aluresult
+            negativeres = aluresult
 
         self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
-        if aluresult == 0:
+        if zerores == 0:
             self.p |= self.ZERO
         else:
-            self.p |= aluresult & self.NEGATIVE
+            self.p |= negativeres & self.NEGATIVE
         if decimalcarry == 1:
             self.p |= self.CARRY
         if ((self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:

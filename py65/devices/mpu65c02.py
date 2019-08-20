@@ -66,73 +66,8 @@ class MPU(mpu6502.MPU):
     def opADC(self, x):
         return self._opADC(x, flags_use_adjusted_result=True)
 
-    def _opSBCDecimal(self, x):
-        """SBC opcode in binary mode (non-BCD)"""
-
-        data = self.ByteAt(x())
-
-        decimalcarry = 0
-        #adjust0 = 0
-        #adjust1 = 0
-
-        #nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
-        #if nibble0 <= 0xf:
-            #halfcarry = 0
-            #adjust0 = 10 # 0xa = -0x6
-        #nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
-        #if nibble1 <= 0xf:
-            #adjust1 = 10 << 4 # -0x60
-
-        # the ALU outputs are not decimally adjusted
-        aluresult = self.a + (~data & self.byteMask) + \
-                    (self.p & self.CARRY)
-
-        if aluresult > self.byteMask:
-            decimalcarry = 1
-        aluresult &= self.byteMask
-
-        #A2 = (self.a + ~data + (self.p & self.CARRY))
-        #print "A = %02X, %02X, A2 = %02X, a=%02X, data=%02X, alu=%02X" % (A, (A & self.byteMask), A2, self.a, data, aluresult)
-        #assert A == A2
-
-        # but the final result will be adjusted
-        #nibble0 = (aluresult + adjust0) & 0xf
-        #nibble1 = ((aluresult + adjust1) >> 4) & 0xf
-
-        # Update result for use in setting flags below
-        #adjresult = (nibble1 << 4) + nibble0
-
-        A = self.a - data + (self.p & self.CARRY) - 1
-        AL = (self.a & 0xf) - (data & 0xf) + (self.p & self.CARRY) - 1
-        assert (A & self.byteMask)  == aluresult
-
-        # XXX
-        if A < 0:
-            #print A, A2
-            #assert adjust1, (A, adjust1)
-            A -= 0x60
-
-        if AL < 0:
-            #assert adjust0, (AL, adjust0)
-            A -= 0x6
-
-        #if (A & self.byteMask) != adjresult:
-        #    print "a=%02X data=%02X carry=%02X, res=%02X, adj=%02X" % (
-        #        self.a, data, self.p & self.CARRY, A & self.byteMask, adjresult)
-            #assert False
-
-        adjresult = A & self.byteMask
-
-        self.p &= ~(self.CARRY | self.ZERO | self.NEGATIVE | self.OVERFLOW)
-        if adjresult == 0:
-            self.p |= self.ZERO
-        else:
-            self.p |= adjresult & self.NEGATIVE
-        if decimalcarry == 1:
-            self.p |= self.CARRY
-        if ((self.a ^ data) & (self.a ^ aluresult)) & self.NEGATIVE:
-            self.p |= self.OVERFLOW
-        self.a = adjresult
+    def opSBC(self, x):
+        return self._opSBC(x, decimal_flags_use_adjusted_result=True)
 
     # instructions
 
