@@ -1,0 +1,7 @@
+These were compiled with the ca65 assembler available at http://cc65.org
+
+$ ca65 --cpu 6502 6502_decimal_test.c65 --listing 6502_decimal_test.lst
+$ ld65 -t none -o 6502_decimal_test.bin 6502_decimal_test.o
+
+$ ca65 --cpu 65C02 65C02_decimal_test.c65 --listing 65C02_decimal_test.lst
+$ ld65 -t none -o 65C02_decimal_test.bin 65C02_decimal_test.o
