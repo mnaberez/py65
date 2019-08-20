@@ -446,47 +446,31 @@ class MPU:
         See e.g. http://6502.org/tutorials/decimal_mode.html#A for details
         """
         data = self.ByteAt(x())
-        #
-        # halfcarry = 1
-        decimalcarry = 0
-        # adjust0 = 0
-        # adjust1 = 0
-        #
-        # nibble0 = (self.a & 0xf) + (~data & 0xf) + (self.p & self.CARRY)
-        # if nibble0 <= 0xf:
-        #     halfcarry = 0
-        #     adjust0 = 10  # -0x6
-        # nibble1 = ((self.a >> 4) & 0xf) + ((~data >> 4) & 0xf) + halfcarry
-        # if nibble1 <= 0xf:
-        #     adjust1 = 10 << 4  # -0x60
 
         # the ALU outputs are not yet decimally adjusted
         aluresult = self.a + (~data & self.byteMask) + (self.p & self.CARRY)
 
-        if aluresult > self.byteMask:
-            decimalcarry = 1
+        decimalcarry = aluresult > self.byteMask
         aluresult &= self.byteMask
 
-        AL = (self.a & 0xf) - (data & 0xf) + (self.p & self.CARRY) - 1
+        al = (self.a & 0xf) - (data & 0xf) + (self.p & self.CARRY) - 1
 
-        if flags_use_adjusted_result:  # Note: 65C02 but not 65816
-            A = self.a - data + (self.p & self.CARRY) - 1
-            assert (A & self.byteMask) == aluresult
+        if flags_use_adjusted_result:  # 65C02 but not 65816
+            a = self.a - data + (self.p & self.CARRY) - 1
+            if a < 0:
+                a -= 0x60
+            if al < 0:
+                a -= 0x6
 
-            if A < 0:
-                A -= 0x60
+        else:  # 6502
+            # Note: 65816 apparently also uses this logic instead of 65C02
+            if al < 0:
+                al = ((al - 0x6) & 0xf) - 0x10
+            a = (self.a & 0xf0) - (data & 0xf0) + al
+            if a < 0:
+                a -= 0x60
 
-            if AL < 0:
-                A -= 0x6
-        else:
-            # Note: 65816 apparently uses this logic instead of 65C02
-            if AL < 0:
-                AL = ((AL - 0x6) & 0xf) - 0x10
-            A = (self.a & 0xf0) - (data & 0xf0) + AL
-            if A < 0:
-                A -= 0x60
-
-        adjresult = A & self.byteMask
+        adjresult = a & self.byteMask
 
         if flags_use_adjusted_result:  # 65C02 and 65816
             # Z and N use adjusted (i.e. decimal) result
