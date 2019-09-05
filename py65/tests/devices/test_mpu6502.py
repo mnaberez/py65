@@ -1562,11 +1562,11 @@ class Common6502Tests:
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.CARRY)
         mpu.pc = 0x0050
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         # $0000 BCC -6
         self._write(mpu.memory, 0x0050, (0x90, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bcc_carry_set_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1590,11 +1590,11 @@ class Common6502Tests:
         mpu = self._make_mpu()
         mpu.p |= mpu.CARRY
         mpu.pc = 0x0050
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         # $0000 BCS -6
         self._write(mpu.memory, 0x0050, (0xB0, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bcs_carry_clear_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1618,11 +1618,11 @@ class Common6502Tests:
         mpu = self._make_mpu()
         mpu.p |= mpu.ZERO
         mpu.pc = 0x0050
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         # $0000 BEQ -6
         self._write(mpu.memory, 0x0050, (0xF0, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_beq_zero_clear_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1817,10 +1817,10 @@ class Common6502Tests:
         mpu.p |= mpu.NEGATIVE
         mpu.pc = 0x0050
         # $0000 BMI -6
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         self._write(mpu.memory, 0x0050, (0x30, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bmi_negative_clear_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1845,10 +1845,10 @@ class Common6502Tests:
         mpu.p &= ~(mpu.ZERO)
         mpu.pc = 0x0050
         # $0050 BNE -6
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         self._write(mpu.memory, 0x0050, (0xD0, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bne_zero_set_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1873,10 +1873,10 @@ class Common6502Tests:
         mpu.p &= ~(mpu.NEGATIVE)
         mpu.pc = 0x0050
         # $0050 BPL -6
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         self._write(mpu.memory, 0x0050, (0x10, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bpl_negative_set_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1919,11 +1919,11 @@ class Common6502Tests:
         mpu = self._make_mpu()
         mpu.p &= ~(mpu.OVERFLOW)
         mpu.pc = 0x0050
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         # $0050 BVC -6
         self._write(mpu.memory, 0x0050, (0x50, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bvc_overflow_set_does_not_branch(self):
         mpu = self._make_mpu()
@@ -1947,11 +1947,11 @@ class Common6502Tests:
         mpu = self._make_mpu()
         mpu.p |= mpu.OVERFLOW
         mpu.pc = 0x0050
-        rel = (0x06 ^ 0xFF + 1)  # two's complement of 6
+        rel = (0x06 ^ 0xFF) + 1  # two's complement of 6
         # $0050 BVS -6
         self._write(mpu.memory, 0x0050, (0x70, rel))
         mpu.step()
-        self.assertEqual(0x0052 + rel, mpu.pc)
+        self.assertEqual(0x0052 - 0x06, mpu.pc)
 
     def test_bvs_overflow_clear_does_not_branch(self):
         mpu = self._make_mpu()
