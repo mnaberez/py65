@@ -33,10 +33,10 @@ The monitor is started using the ``py65mon`` command::
 Once the monitor has started, it will display a register dump and the
 dot prompt.  You can then enter commands for the monitor at this prompt.
 
-Py65Mon uses commands that are very similar to those used by the monitor
-included with the `VICE emulator <http://viceteam.org>`_ for Commodore
-computers.  You can get a list of available commands with ``help`` or
-help on a specific command with ``help command``.
+Py65Mon uses commands that are very similar to those used by the
+`VICE emulator's monitor <http://vice-emu.sourceforge.net/vice_12.html>`_
+for Commodore computers.  You can get a list of available commands
+with ``help`` or help on a specific command with ``help command``.
 
 Number Systems
 --------------
