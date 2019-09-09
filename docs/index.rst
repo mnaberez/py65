@@ -132,7 +132,7 @@ by ``add_breakpoint``::
   .delete_breakpoint 0
   Breakpoint 0 removed
 
-Breakpoint can be listed using the ``list_breakpoint`` command::
+Breakpoints can be listed using the ``show_breakpoints`` command::
 
   .add_breakpoint $1234
   Breakpoint 0 added at $1234
