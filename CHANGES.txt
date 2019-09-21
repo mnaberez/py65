@@ -9,6 +9,10 @@
    Py65 now requires Python 3.4 or later.  On Python 2, Py65 now requires
    Python 2.7.
 
+ - added ``irq()`` and ``nmi()`` methods to the ``MPU`` class, so that
+   interrupts can be simulated. Patch by Irmen de Jong.
+
+
 1.1.0 (2018-07-01)
 ------------------
 

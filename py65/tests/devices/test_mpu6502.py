@@ -1905,6 +1905,38 @@ class Common6502Tests:
 
         self.assertEqual(mpu.BREAK | mpu.UNUSED | mpu.INTERRUPT, mpu.p)
 
+    # IRQ and NMI handling (very similar to BRK)
+
+    def test_irq_pushes_pc_and_correct_status_then_sets_pc_to_irq_vector(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.UNUSED
+        self._write(mpu.memory, 0xFFFA, (0x88, 0x77))
+        self._write(mpu.memory, 0xFFFE, (0xCD, 0xAB))
+        mpu.pc = 0xC123
+        mpu.irq()
+        self.assertEqual(0xABCD, mpu.pc)
+        self.assertEqual(0xC1, mpu.memory[0x1FF])  # PCH
+        self.assertEqual(0x23, mpu.memory[0x1FE])  # PCL
+        self.assertEqual(mpu.UNUSED, mpu.memory[0x1FD])  # Status
+        self.assertEqual(0xFC, mpu.sp)
+        self.assertEqual(mpu.UNUSED | mpu.INTERRUPT, mpu.p)
+        self.assertEqual(7, mpu.processorCycles)
+
+    def test_nmi_pushes_pc_and_correct_status_then_sets_pc_to_nmi_vector(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.UNUSED
+        self._write(mpu.memory, 0xFFFA, (0x88, 0x77))
+        self._write(mpu.memory, 0xFFFE, (0xCD, 0xAB))
+        mpu.pc = 0xC123
+        mpu.nmi()
+        self.assertEqual(0x7788, mpu.pc)
+        self.assertEqual(0xC1, mpu.memory[0x1FF])  # PCH
+        self.assertEqual(0x23, mpu.memory[0x1FE])  # PCL
+        self.assertEqual(mpu.UNUSED, mpu.memory[0x1FD])  # Status
+        self.assertEqual(0xFC, mpu.sp)
+        self.assertEqual(mpu.UNUSED | mpu.INTERRUPT, mpu.p)
+        self.assertEqual(7, mpu.processorCycles)
+
     # BVC
 
     def test_bvc_overflow_clear_branches_relative_forward(self):
