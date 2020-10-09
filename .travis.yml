@@ -16,6 +16,7 @@ matrix:
     - python: pypy
       env: TOXENV=pypy
 install:
-  - travis_retry pip install virtualenv tox
+  # tox is pinned for python 3.4 support
+  - travis_retry pip install tox==3.14.0
 script:
   - travis_retry tox
