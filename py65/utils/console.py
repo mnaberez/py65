@@ -3,6 +3,22 @@ import sys
 if sys.platform[:3] == "win":
     import msvcrt
 
+    def get_unbuffered_stdin(stdin):
+        """ get_unbuffered_stdin returns the given stdin on Windows. """
+        return stdin
+
+    def save_mode(stdin):
+        """ save_mode is a no-op on Windows. """
+        return
+
+    def noncanonical_mode(stdin):
+        """ noncanonical_mode is a no-op on Windows. """
+        return
+
+    def restore_mode(stdin):
+        """ restore_mode is a no-op on Windows. """
+        return
+
     def getch(stdin):
         """ Read one character from the Windows console, blocking until one
         is available.  Does not echo the character.  The stdin argument is
@@ -24,51 +40,156 @@ if sys.platform[:3] == "win":
         return ''
 
 else:
-    import select
-    import os
     import termios
-    import fcntl
+    import os
+    from select import select
+
+    oldattr = None
+    oldstdin = None
+
+    def get_unbuffered_stdin(stdin):
+        """ Attempt to get and return a copy of stdin that is 
+        unbuffered.  This allows for immediate response to typed input
+        as well as pasted input.  If unable to get an unbuffered
+        version of stdin, return the original version.
+        """
+        if stdin != None:
+            try:
+                # Reopen stdin with no buffer.
+                return os.fdopen(os.dup(stdin.fileno()), 'rb', 0)
+            except Exception as e:
+                print(e)
+                # Unable to reopen this file handle with no buffer.
+                # Just use the original file handle.
+                return stdin
+        else:
+            # If stdin is None, try using sys.stdin for input.
+            try:
+                # Reopen the system's stdin with no buffer.
+                return os.fdopen(os.dup(sys.stdin.fileno()), 'rb', 0)
+            except:
+                # If unable to get an unbuffered stdin, just return
+                # None, which is what we started with if we got here.
+                return None
+
+    def save_mode(stdin):
+        """ For operating systems that support it, save the original
+        input termios settings so they can be restored later.  This 
+        allows us to switch to noncanonical mode when software is
+        running in the simulator and back to the original mode when
+        accepting commands.
+        """
+        # For non-Windows systems, save the original input settings,
+        # which will typically be blocking reads with echo.
+        global oldattr
+        global oldstdin
+
+        # When the input is not a pty/tty, this will fail.
+        # In that case, it's ok to ignore the failure.
+        try:
+            # Save the current terminal setup.
+            oldstdin = stdin
+            fd = stdin.fileno()
+            oldattr = termios.tcgetattr(fd)
+        except:
+            # Quietly ignore termios errors, such as stdin not being
+            # a tty.
+            pass
+
+    def noncanonical_mode(stdin):
+        """For operating systems that support it, switch to noncanonical
+        mode.  In this mode, characters are given immediately to the
+        program and no processing of editing characters (like backspace)
+        is performed.  Echo is also turned off in this mode.  The
+        previous input behavior can be restored with restore_mode.
+        """
+        # For non-windows systems, switch to non-canonical
+        # and no-echo non-blocking-read mode.
+        try:
+            # Save the current terminal setup.
+            fd = stdin.fileno()
+            currentattr = termios.tcgetattr(fd)
+            # Switch to noncanonical (instant) mode with no echo.
+            newattr = currentattr[:]
+            newattr[3] &= ~termios.ICANON & ~termios.ECHO
+
+            # Switch to non-blocking reads with no timeout.
+            newattr[6][termios.VMIN] = 0
+            newattr[6][termios.VTIME] = 0
+            termios.tcsetattr(fd, termios.TCSANOW, newattr)
+        except:
+            # Quietly ignore termios errors, such as stdin not being
+            # a tty.
+            pass
+        
+    def restore_mode():
+        """For operating systems that support it, restore the previous 
+        input mode.
+        """
+
+        # Restore the previous input setup.
+        global oldattr
+        global oldstdin
+
+        try:
+            # Restore the original system stdin.
+            oldfd = oldstdin.fileno()
+            # If there is a previous setting, restore it.
+            if oldattr != None:
+                # Restore it on the original system stdin.
+                termios.tcsetattr(oldfd, termios.TCSANOW, oldattr)
+        except:
+            # Quietly ignore termios errors, such as stdin not being a tty.
+            pass
 
     def getch(stdin):
         """ Read one character from stdin, blocking until one is available.
         Does not echo the character.
         """
-        fd = stdin.fileno()
-        oldattr = termios.tcgetattr(fd)
-        newattr = oldattr[:]
-        newattr[3] &= ~termios.ICANON & ~termios.ECHO
-        try:
-            termios.tcsetattr(fd, termios.TCSANOW, newattr)
-            char = stdin.read(1)
-        finally:
-            termios.tcsetattr(fd, termios.TCSAFLUSH, oldattr)
+        # Try to get a character with a non-blocking read.
+        char = ''
+        noncanonical_mode(stdin)
+        # If we didn't get a character, ask again.
+        while char == '':
+            try:
+                # On OSX, calling read when no data is available causes the
+                # file handle to never return any future data, so we need to
+                # use select to make sure there is at least one char to read.
+                rd,wr,er = select([stdin], [], [], 0.01)
+                if rd != []:
+                    char = stdin.read(1)
+            except KeyboardInterrupt:
+                # Pass along a CTRL-C interrupt.
+                raise
+            except:
+                pass
         return char
 
     def getch_noblock(stdin):
         """ Read one character from stdin without blocking.  Does not echo the
         character.  If no character is available, an empty string is returned.
         """
+        char = ''
 
-        fd = stdin.fileno()
-
-        oldterm = termios.tcgetattr(fd)
-        newattr = oldterm[:]
-        newattr[3] = newattr[3] & ~termios.ICANON & ~termios.ECHO
-        termios.tcsetattr(fd, termios.TCSANOW, newattr)
-
-        oldflags = fcntl.fcntl(fd, fcntl.F_GETFL)
-        fcntl.fcntl(fd, fcntl.F_SETFL, oldflags | os.O_NONBLOCK)
+        # Using non-blocking read
+        noncanonical_mode(stdin)
 
         try:
-            char = ''
-            r, w, e = select.select([fd], [], [], 0.1)
-            if r:
+            # On OSX, calling read when no data is available causes the
+            # file handle to never return any future data, so we need to
+            # use select to make sure there is at least one char to read.
+            rd,wr,er = select([stdin], [], [], 0.01)
+            if rd != []:
                 char = stdin.read(1)
-                if char == "\n":
-                    char = "\r"
-        finally:
-            termios.tcsetattr(fd, termios.TCSAFLUSH, oldterm)
-            fcntl.fcntl(fd, fcntl.F_SETFL, oldflags)
+        except KeyboardInterrupt:
+            # Pass along a CTRL-C interrupt.
+            raise
+        except:
+            pass
+
+        # Convert linefeeds to carriage returns.
+        if char != '' and ord(char) == 10:
+            char = '\r'
         return char
 
 

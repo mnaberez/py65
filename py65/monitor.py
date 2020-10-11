@@ -53,28 +53,60 @@ class Monitor(cmd.Cmd):
         self._width = 78
         self.prompt = "."
         self._add_shortcuts()
-        cmd.Cmd.__init__(self, stdin=stdin, stdout=stdout)
 
-        if argv is None:
-            argv = sys.argv
-        load, rom, goto = self._parse_args(argv)
+        # Save the current system input mode so it can be restored after
+        # after processing commands and before exiting.
+        console.save_mode(sys.stdin)
 
-        self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
+        # Attempt to get a copy of stdin that is unbuffered on systems
+        # that support it.  This allows for immediate response to
+        # typed input as well as pasted input.  If unable to get an
+        # unbuffered version of stdin, the original version is returned.
+        self.unbuffered_stdin = console.get_unbuffered_stdin(stdin)
 
-        if load is not None:
-            self.do_load("%r" % load)
+        cmd.Cmd.__init__(self, stdin=self.unbuffered_stdin, stdout=stdout)
 
-        if goto is not None:
-            self.do_goto(goto)
+        # Check for any exceptions thrown during __init__ while
+        # processing the arguments.
+        try:
 
-        if rom is not None:
-            # load a ROM and run from the reset vector
-            self.do_load("%r top" % rom)
-            physMask = self._mpu.memory.physMask
-            reset = self._mpu.RESET & physMask
-            dest = self._mpu.memory[reset] + \
-                (self._mpu.memory[reset + 1] << self.byteWidth)
-            self.do_goto("$%x" % dest)
+            if argv is None:
+                argv = sys.argv
+            load, rom, goto = self._parse_args(argv)
+
+            self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
+
+            if load is not None:
+                self.do_load("%r" % load)
+
+            if goto is not None:
+                self.do_goto(goto)
+
+            if rom is not None:
+                # load a ROM and run from the reset vector
+                self.do_load("%r top" % rom)
+                physMask = self._mpu.memory.physMask
+                reset = self._mpu.RESET & physMask
+                dest = self._mpu.memory[reset] + \
+                    (self._mpu.memory[reset + 1] << self.byteWidth)
+                self.do_goto("$%x" % dest)
+        except:
+            # Restore input mode on any exception and then rethrow the
+            # exception.
+            console.restore_mode()
+            raise
+
+    def __del__(self):
+        try:
+            # Restore the input mode.
+            console.restore_mode()
+            # Close the unbuffered input file handle, if it exists.
+            if self.unbuffered_stdin != None:
+                if self.unbuffered_stdin != sys.stdin:
+                    self.unbuffered_stdin.close()
+        except:
+            pass
+
 
     def _parse_args(self, argv):
         try:
@@ -138,6 +170,9 @@ class Monitor(cmd.Cmd):
 
         if not line.startswith("quit"):
             self._output_mpu_status()
+
+        # Switch back to the previous input mode.
+        console.restore_mode()
 
         return result
 
@@ -467,6 +502,10 @@ class Monitor(cmd.Cmd):
         mpu = self._mpu
         mem = self._mpu.memory
 
+        # Switch to immediate (noncanonical) no-echo input mode on POSIX
+        # operating systems.  This has no effect on Windows.
+        console.noncanonical_mode(self.stdin)
+        
         if not breakpoints:
             while True:
                 mpu.step()
@@ -482,6 +521,9 @@ class Monitor(cmd.Cmd):
                     msg = "Breakpoint %d reached."
                     self._output(msg % self._breakpoints.index(pc))
                     break
+
+        # Switch back to the previous input mode.
+        console.restore_mode()
 
     def help_radix(self):
         self._output("radix [H|D|O|B]")
@@ -877,6 +919,7 @@ def main(args=None):
         c.cmdloop()
     except KeyboardInterrupt:
         c._output('')
+        console.restore_mode()
 
 if __name__ == "__main__":
     main()
