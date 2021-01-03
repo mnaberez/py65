@@ -48,7 +48,7 @@ else:
     oldstdin = None
 
     def get_unbuffered_stdin(stdin):
-        """ Attempt to get and return a copy of stdin that is 
+        """ Attempt to get and return a copy of stdin that is
         unbuffered.  This allows for immediate response to typed input
         as well as pasted input.  If unable to get an unbuffered
         version of stdin, return the original version.
@@ -74,7 +74,7 @@ else:
 
     def save_mode(stdin):
         """ For operating systems that support it, save the original
-        input termios settings so they can be restored later.  This 
+        input termios settings so they can be restored later.  This
         allows us to switch to noncanonical mode when software is
         running in the simulator and back to the original mode when
         accepting commands.
@@ -121,9 +121,9 @@ else:
             # Quietly ignore termios errors, such as stdin not being
             # a tty.
             pass
-        
+
     def restore_mode():
-        """For operating systems that support it, restore the previous 
+        """For operating systems that support it, restore the previous
         input mode.
         """
 
@@ -188,7 +188,7 @@ else:
             pass
 
         # Convert linefeeds to carriage returns.
-        if char != '' and ord(char) == 10:
+        if len(char) and ord(char) == 10:
             char = '\r'
         return char
 
