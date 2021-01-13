@@ -25,8 +25,8 @@ if sys.platform[:3] == "win":
         for function signature compatibility and is ignored.
         """
         c = msvcrt.getch()
-        if isinstance(c, bytes): # Python 3
-            c = c.decode('latin-1')
+        # under python3 msvcrt.getch() returns bytes
+        return c.decode('latin-1') if isinstance(c, bytes) else c
         return c
 
     def getch_noblock(stdin):
@@ -163,7 +163,9 @@ else:
                 raise
             except:
                 pass
-        return char
+        # under python3 read returns bytes for files opened in binary
+        # mode
+        return char.decode() if isinstance(char, bytes) else char
 
     def getch_noblock(stdin):
         """ Read one character from stdin without blocking.  Does not echo the
@@ -190,7 +192,9 @@ else:
         # Convert linefeeds to carriage returns.
         if len(char) and ord(char) == 10:
             char = '\r'
-        return char
+        # under python3 read returns bytes for files opened in binary
+        # mode
+        return char.decode() if isinstance(char, bytes) else char
 
 
 def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
