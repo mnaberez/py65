@@ -1184,32 +1184,36 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(0xc002, mon._mpu.pc)
 
     def test_argv_load(self):
-        with tempfile.NamedTemporaryFile('wb+') as f:
-            data = bytearray([0xab, 0xcd])
-            f.write(data)
-            f.flush()
+        try:
+            with tempfile.NamedTemporaryFile('wb+', delete=False) as f:
+                data = bytearray([0xab, 0xcd])
+                f.write(data)
 
             argv = ['py65mon', '--load', f.name]
             stdout = StringIO()
             mon = Monitor(argv=argv, stdout=stdout)
             self.assertEqual(list(data), mon._mpu.memory[:len(data)])
+        finally:
+            os.unlink(f.name)
 
     def test_argv_rom(self):
-        with tempfile.NamedTemporaryFile('wb+') as f:
-            rom = bytearray(4096)
-            rom[0]  = 0xea          # f000 nop
-            rom[1]  = 0xea          # f001 nop
-            rom[2]  = 0x00          # f002 brk
-            rom[-2] = 0xf000 & 0xff # fffc reset vector low
-            rom[-3] = 0xf000 >> 8   # fffd reset vector high
-            f.write(rom)
-            f.flush()
+        try:
+            with tempfile.NamedTemporaryFile('wb+', delete=False) as f:
+                rom = bytearray(4096)
+                rom[0]  = 0xea          # f000 nop
+                rom[1]  = 0xea          # f001 nop
+                rom[2]  = 0x00          # f002 brk
+                rom[-2] = 0xf000 & 0xff # fffc reset vector low
+                rom[-3] = 0xf000 >> 8   # fffd reset vector high
+                f.write(rom)
 
             argv = ['py65mon', '--rom', f.name]
             stdout = StringIO()
             mon = Monitor(argv=argv, stdout=stdout)
             self.assertEqual(list(rom), mon._mpu.memory[-len(rom):])
             self.assertEqual(0xf002, mon._mpu.pc)
+        finally:
+            os.unlink(f.name)
 
     def test_argv_input(self):
         argv = ['py65mon', '--input', 'abcd']
@@ -1228,15 +1232,15 @@ class MonitorTests(unittest.TestCase):
         self.assertTrue('putc' in repr(write_subscribers[0xdcba]))
 
     def test_argv_combination_rom_mpu(self):
-        with tempfile.NamedTemporaryFile('wb+') as f:
-            rom = bytearray(4096)
-            rom[0]  = 0xea          # f000 nop
-            rom[1]  = 0xea          # f001 nop
-            rom[2]  = 0x00          # f002 brk
-            rom[-2] = 0xf000 & 0xff # fffc reset vector low
-            rom[-3] = 0xf000 >> 8   # fffd reset vector high
-            f.write(rom)
-            f.flush()
+        try:
+            with tempfile.NamedTemporaryFile('wb+', delete=False) as f:
+                rom = bytearray(4096)
+                rom[0]  = 0xea          # f000 nop
+                rom[1]  = 0xea          # f001 nop
+                rom[2]  = 0x00          # f002 brk
+                rom[-2] = 0xf000 & 0xff # fffc reset vector low
+                rom[-3] = 0xf000 >> 8   # fffd reset vector high
+                f.write(rom)
 
             argv = ['py65mon', '--rom', f.name, '--mpu', '65c02',]
             stdout = StringIO()
@@ -1244,6 +1248,8 @@ class MonitorTests(unittest.TestCase):
             self.assertEqual('65C02', mon._mpu.name)
             self.assertEqual(list(rom), mon._mpu.memory[-len(rom):])
             self.assertEqual(0xf002, mon._mpu.pc)
+        finally:
+            os.unlink(f.name)
 
 def test_suite():
     return unittest.findTestCases(sys.modules[__name__])
