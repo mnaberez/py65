@@ -12,7 +12,6 @@
  - added ``irq()`` and ``nmi()`` methods to the ``MPU`` class, so that
    interrupts can be simulated. Patch by Irmen de Jong.
 
-
 1.1.0 (2018-07-01)
 ------------------
 
