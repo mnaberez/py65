@@ -15,7 +15,7 @@ if sys.platform[:3] == "win":
         """ noncanonical_mode is a no-op on Windows. """
         return
 
-    def restore_mode(stdin):
+    def restore_mode():
         """ restore_mode is a no-op on Windows. """
         return
 
