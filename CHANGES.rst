@@ -1,13 +1,16 @@
 2.0.0.dev0 (Next Release)
 -------------------------
 
+- Support for some older Python versions has been dropped.  On Python 3,
+  Py65 now requires Python 3.4 or later.  On Python 2, Py65 now requires
+  Python 2.7.
+
 - Fixed a bug with character input that would cause characters to be
   dropped when pasting in larger amounts of text.  This makes it possible
   to paste programs into EhBASIC and Taliforth.  Patch by SamCoVT.
 
-- Support for some older Python versions has been dropped.  On Python 3,
-  Py65 now requires Python 3.4 or later.  On Python 2, Py65 now requires
-  Python 2.7.
+- The ``fill`` command in the monitor now shows an error message if an
+  address or value is out of range.
 
 - Added ``irq()`` and ``nmi()`` methods to the ``MPU`` class, so that
   interrupts can be simulated. Patch by Irmen de Jong.

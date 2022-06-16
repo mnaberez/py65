@@ -505,7 +505,7 @@ class Monitor(cmd.Cmd):
         # Switch to immediate (noncanonical) no-echo input mode on POSIX
         # operating systems.  This has no effect on Windows.
         console.noncanonical_mode(self.stdin)
-        
+
         if not breakpoints:
             while True:
                 mpu.step()
@@ -734,9 +734,18 @@ class Monitor(cmd.Cmd):
 
         try:
             start, end = self._address_parser.range(split[0])
-            filler = list(map(self._address_parser.number, split[1:]))
+            filler = []
+            for piece in split[1:]:
+                value = self._address_parser.number(piece)
+                if value > self.byteMask:
+                    raise OverflowError(value)
+                filler.append(value)
         except KeyError as exc:
-            self._output(exc.args[0])  # "Label not found: foo"
+            # "Label not found: foo"
+            self._output(exc.args[0])
+        except OverflowError as exc:
+            # "Overflow: $10000"
+            self._output("Overflow: $%x" % exc.args[0])
         else:
             self._fill(start, end, filler)
 

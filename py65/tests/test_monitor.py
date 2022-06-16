@@ -474,6 +474,30 @@ class MonitorTests(unittest.TestCase):
         out = stdout.getvalue()
         self.assertTrue(out.startswith("Label not found: nonexistent"))
 
+    def test_do_fill_bad_start_address(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_fill('10000 00')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Overflow: $10000"))
+
+    def test_do_fill_bad_end_address(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_fill('ffff:10000 00 00')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Overflow: $10000"))
+
+    def test_do_fill_bad_data(self):
+        stdout = StringIO()
+        mon = Monitor(stdout=stdout)
+        mon.do_fill('0 100')
+
+        out = stdout.getvalue()
+        self.assertTrue(out.startswith("Overflow: $100"))
+
     # goto
 
     def test_shortcut_for_goto(self):
