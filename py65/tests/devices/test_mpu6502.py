@@ -18,6 +18,24 @@ class Common6502Tests:
         self.assertEqual(0, mpu.y)
         self.assertEqual(mpu.BREAK | mpu.UNUSED, mpu.p)
 
+    def test_reset_sets_pc_to_0_by_default(self):
+        mpu = self._make_mpu()
+        mpu.reset()
+        self.assertEqual(mpu.pc, 0)
+
+    def test_reset_sets_pc_to_start_pc_if_not_None(self):
+        mpu = self._make_mpu(pc=0x1234)
+        mpu.reset()
+        self.assertEqual(mpu.pc, 0x1234)
+
+    def test_reset_reads_reset_vector_if_start_pc_is_None(self):
+        mpu = self._make_mpu(pc=None)
+        target = 0xABCD
+        mpu.memory[mpu.RESET+0] = target & 0xff
+        mpu.memory[mpu.RESET+1] = target >> 8
+        mpu.reset()
+        self.assertEqual(mpu.pc, 0xABCD)
+
     # ADC Absolute
 
     def test_adc_bcd_off_absolute_carry_clear_in_accumulator_zeroes(self):

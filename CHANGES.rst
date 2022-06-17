@@ -15,6 +15,9 @@
 - Added ``irq()`` and ``nmi()`` methods to the ``MPU`` class, so that
   interrupts can be simulated. Patch by Irmen de Jong.
 
+- The ``MPU`` class constructor now accepts ``None`` for the initial PC, which
+  will cause it to read the address from the reset vector on ``reset()``.
+
 1.1.0 (2018-07-01)
 ------------------
 

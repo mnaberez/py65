@@ -39,7 +39,7 @@ class MPU:
         if memory is None:
             memory = 0x10000 * [0x00]
         self.memory = memory
-        self.start_pc = pc
+        self.start_pc = pc # if None, reset vector is used
 
         # init
         self.reset()
@@ -67,6 +67,8 @@ class MPU:
 
     def reset(self):
         self.pc = self.start_pc
+        if self.pc is None:
+            self.pc = self.WordAt(self.RESET)
         self.sp = self.byteMask
         self.a = 0
         self.x = 0
