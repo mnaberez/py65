@@ -50,10 +50,14 @@ class MPU:
 
     def __repr__(self):
         flags = itoa(self.p, 2).rjust(self.BYTE_WIDTH, '0')
-        indent = ' ' * (len(self.name) + 2)
+        #indent = ' ' * (len(self.name) + 2)
+        pairs = [''.join(t) for t in zip('NV-BDIZC', flags) if t[0] != '-']
+        return "%s: PC=%04x A=%02x X=%02x Y=%02x SP=%02x FLAGS=<%s>" % (
+            self.name, self.pc, self.a, self.x, self.y, self.sp, ' '.join(pairs)
+        )
 
-        return self.reprformat() % (indent, self.name, self.pc, self.a,
-                                    self.x, self.y, self.sp, flags)
+        #return self.reprformat() % (indent, self.name, self.pc, self.a,
+        #                            self.x, self.y, self.sp, flags)
 
     def step(self):
         instructCode = self.memory[self.pc]

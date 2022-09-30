@@ -53,6 +53,7 @@ class Monitor(cmd.Cmd):
         self._width = 78
         self.prompt = "."
         self._add_shortcuts()
+        self.batch = False
 
         # Save the current system input mode so it can be restored after
         # after processing commands and before exiting.
@@ -196,6 +197,7 @@ class Monitor(cmd.Cmd):
                            'a':    'assemble',
                            'ab':   'add_breakpoint',
                            'al':   'add_label',
+                           'c':    'continue',
                            'd':    'disassemble',
                            'db':   'delete_breakpoint',
                            'dl':   'delete_label',
@@ -205,6 +207,7 @@ class Monitor(cmd.Cmd):
                            'g':    'goto',
                            'h':    'help',
                            '?':    'help',
+                           'i':    'input',
                            'l':    'load',
                            'm':    'mem',
                            'q':    'quit',
@@ -495,6 +498,39 @@ class Monitor(cmd.Cmd):
         self._mpu.pc = self._address_parser.number(args)
         brks = [0x00]  # BRK
         self._run(stopcodes=brks)
+
+    def help_continue(self):
+        self._output("continue")
+        self._output("Continues execution from the current PC")
+
+    def do_continue(self, args):
+        brks = [0x00]  # BRK
+        self._run(stopcodes=brks)
+
+    def help_input(self):
+        self._output("input <commmands>")
+        self._output("Read commands from the specified file")
+
+    def do_input(self, args):
+        try:
+            self.cmdqueue += open(args).read().splitlines()
+            self.batch = True
+        except OSError:
+            self._output("Couldn't read commands from %s" % args)
+
+    def precmd(self, line):
+        if self.batch and line:
+            self._output(line)
+        return line
+
+    def postcmd(self, stop, line):
+        if self.batch and not self.cmdqueue:
+            self.batch = False
+        return stop
+
+    def emptyline(self):
+        if not self.batch:
+            return cmd.Cmd.emptyline(self)
 
     def _run(self, stopcodes):
         stopcodes = set(stopcodes)
