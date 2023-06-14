@@ -2,7 +2,7 @@
 -------------------------
 
 - Support for some older Python versions has been dropped.  On Python 3,
-  Py65 now requires Python 3.4 or later.  On Python 2, Py65 now requires
+  Py65 now requires Python 3.6 or later.  On Python 2, Py65 now requires
   Python 2.7.
 
 - Fixed a bug with character input that would cause characters to be
