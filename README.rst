@@ -60,13 +60,6 @@ simulations that you build.  Its features include:
 - Simple assemble and disassemble capability, including support for labels
   and labels with offsets.
 
-Documentation
--------------
-
-Py65 documentation is written using `Sphinx <http://sphinx.pocoo.org/>`_ and
-is published to `http://py65.readthedocs.org/
-<http://py65.readthedocs.org/>`_.
-
 Contributors
 ------------
 
