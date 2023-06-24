@@ -22,6 +22,8 @@ import shlex
 import sys
 
 from asyncore import compact_traceback
+from urllib.request import urlopen
+
 from py65.devices.mpu6502 import MPU as NMOS6502
 from py65.devices.mpu65c02 import MPU as CMOS65C02
 from py65.devices.mpu65org16 import MPU as V65Org16
@@ -31,11 +33,6 @@ from py65.utils.addressing import AddressParser
 from py65.utils import console
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
-
-try:
-    from urllib2 import urlopen
-except ImportError: # Python 3
-    from urllib.request import urlopen
 
 class Monitor(cmd.Cmd):
 
