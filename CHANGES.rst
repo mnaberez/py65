@@ -18,6 +18,8 @@
 - The ``MPU`` class constructor now accepts ``None`` for the initial PC, which
   will cause it to read the address from the reset vector on ``reset()``.
 
+- The ``py65`` package is no longer a namespace package.
+
 1.1.0 (2018-07-01)
 ------------------
 
