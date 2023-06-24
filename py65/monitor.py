@@ -20,8 +20,8 @@ import os
 import re
 import shlex
 import sys
+import traceback
 
-from asyncore import compact_traceback
 from urllib.request import urlopen
 
 from py65.devices.mpu6502 import MPU as NMOS6502
@@ -160,9 +160,8 @@ class Monitor(cmd.Cmd):
             result = cmd.Cmd.onecmd(self, line)
         except KeyboardInterrupt:
             self._output("Interrupt")
-        except Exception:
-            (file, fun, line), t, v, tbinfo = compact_traceback()
-            error = 'Error: %s, %s: file: %s line: %s' % (t, v, file, line)
+        except Exception as e:
+            error = ''.join(traceback.format_exception(e))
             self._output(error)
 
         if not line.startswith("quit"):
