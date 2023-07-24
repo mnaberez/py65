@@ -10,6 +10,7 @@ Options:
 -l, --load <file>      : Load a file at address 0
 -r, --rom <file>       : Load a rom at the top of address space and reset into it
 -g, --goto <address>   : Perform a goto command after loading any files
+-b, --batch <file>     : Run a batch of commands from file
 -i, --input <address>  : define location of getc (default $f004)
 -o, --output <address> : define location of putc (default $f001)
 """
@@ -37,6 +38,14 @@ try:
 except ImportError: # Python 3
     from urllib.request import urlopen
 
+
+def to_chr(c, enc='ascii7', nonprintable='.'):
+    """Convert a byte to a printable character, based on end scheme"""
+    if enc == 'ascii7':
+        c &= 0x7f
+    return chr(c) if 0x20 <= c < 0x7f else nonprintable
+
+
 class Monitor(cmd.Cmd):
 
     Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02,
@@ -50,7 +59,7 @@ class Monitor(cmd.Cmd):
         self.putc_addr = putc_addr
         self.getc_addr = getc_addr
         self._breakpoints = []
-        self._width = 78
+        self._width = 72
         self.prompt = "."
         self._add_shortcuts()
         self.batch = False
@@ -73,7 +82,7 @@ class Monitor(cmd.Cmd):
 
             if argv is None:
                 argv = sys.argv
-            load, rom, goto = self._parse_args(argv)
+            load, rom, goto, batch = self._parse_args(argv)
 
             self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
 
@@ -82,6 +91,9 @@ class Monitor(cmd.Cmd):
 
             if goto is not None:
                 self.do_goto(goto)
+
+            if batch is not None:
+                self.do_batch(batch)
 
             if rom is not None:
                 # load a ROM and run from the reset vector
@@ -111,15 +123,15 @@ class Monitor(cmd.Cmd):
 
     def _parse_args(self, argv):
         try:
-            shortopts = 'hi:o:m:l:r:g:'
-            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
-            options, args = getopt.getopt(argv[1:], shortopts, longopts)
+            shortopts = 'hi:o:m:l:r:g:b:'
+            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=', 'batch=']
+            options, _ = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
             self._usage()
             self._exit(1)
 
-        load, rom, goto = None, None, None
+        load, rom, goto, batch = None, None, None, None
 
         for opt, value in options:
             if opt in ('-i', '--input'):
@@ -150,7 +162,10 @@ class Monitor(cmd.Cmd):
             if opt in ('-g', '--goto'):
                 goto = value
 
-        return load, rom, goto
+            if opt in ('-b', '--batch'):
+                batch = value
+
+        return load, rom, goto, batch
 
     def _usage(self):
         usage = __doc__ % sys.argv[0]
@@ -197,6 +212,7 @@ class Monitor(cmd.Cmd):
                            'a':    'assemble',
                            'ab':   'add_breakpoint',
                            'al':   'add_label',
+                           'b':    'batch',
                            'c':    'continue',
                            'd':    'disassemble',
                            'db':   'delete_breakpoint',
@@ -207,7 +223,6 @@ class Monitor(cmd.Cmd):
                            'g':    'goto',
                            'h':    'help',
                            '?':    'help',
-                           'i':    'input',
                            'l':    'load',
                            'm':    'mem',
                            'q':    'quit',
@@ -507,11 +522,11 @@ class Monitor(cmd.Cmd):
         brks = [0x00]  # BRK
         self._run(stopcodes=brks)
 
-    def help_input(self):
-        self._output("input <commmands>")
-        self._output("Read commands from the specified file")
+    def help_batch(self):
+        self._output("batch <commmands>")
+        self._output("Read and execute commands from the specified file")
 
-    def do_input(self, args):
+    def do_batch(self, args):
         try:
             self.cmdqueue += open(args).read().splitlines()
             self.batch = True
@@ -819,15 +834,17 @@ class Monitor(cmd.Cmd):
         start, end = self._address_parser.range(split[0])
 
         line = self.addrFmt % start + ":"
+        chrs = ''
         for address in range(start, end + 1):
             byte = self._mpu.memory[address]
-            more = "  " + self.byteFmt % byte
-
-            exceeded = len(line) + len(more) > self._width
+            more = " " + self.byteFmt % byte
+            exceeded = len(line) + len(chrs) + 2 + len(more) > self._width
             if exceeded:
-                self._output(line)
+                self._output(line + '  ' + chrs)
                 line = self.addrFmt % address + ":"
+                chrs = ''
             line += more
+            chrs += to_chr(byte)
         self._output(line)
 
     def help_add_label(self):

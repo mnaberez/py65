@@ -317,13 +317,13 @@ Command Reference
     Breakpoint 1 : $5678
     Breakpoint 2 : $9ABC
 
-.. describe:: input <filename>
+.. describe:: batch <filename>
 
   Read commands from <filename> as if typed interactively,
   except that blank lines are ignored rather than repeating the prior command.
   As usual, text beginning with ; will be treated as a comment and ignored
 
-    .input some.cmd
+    .batch some.cmd
 
 .. describe:: load <filename> <address>
 
