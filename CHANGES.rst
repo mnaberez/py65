@@ -1,9 +1,8 @@
 2.0.0.dev0 (Next Release)
 -------------------------
 
-- Support for some older Python versions has been dropped.  On Python 3,
-  Py65 now requires Python 3.4 or later.  On Python 2, Py65 now requires
-  Python 2.7.
+- Support for some older Python versions has been dropped.  Py65
+  now requires Python 3.6 or later.
 
 - Fixed a bug with character input that would cause characters to be
   dropped when pasting in larger amounts of text.  This makes it possible
@@ -17,6 +16,8 @@
 
 - The ``MPU`` class constructor now accepts ``None`` for the initial PC, which
   will cause it to read the address from the reset vector on ``reset()``.
+
+- The ``py65`` package is no longer a namespace package.
 
 1.1.0 (2018-07-01)
 ------------------

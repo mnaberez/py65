@@ -3,14 +3,9 @@ __version__ = '2.0.0.dev0'
 import sys
 
 py_version = sys.version_info[:2]
-PY3 = py_version[0] == 3
 
-if PY3:
-    if py_version < (3, 4):
-        raise RuntimeError('On Python 3, Py65 requires Python 3.4 or later')
-else:
-    if py_version < (2, 7):
-        raise RuntimeError('On Python 2, Py65 requires Python 2.7 or later')
+if py_version < (3, 6):
+    raise RuntimeError('On Python 3, Py65 requires Python 3.6 or later')
 
 from setuptools import setup, find_packages
 
@@ -24,13 +19,13 @@ CLASSIFIERS = [
     'Natural Language :: English',
     'Operating System :: POSIX',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.4',
-    'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
     'Programming Language :: Assembly',
     'Topic :: Software Development :: Assemblers',
     'Topic :: Software Development :: Disassemblers',
