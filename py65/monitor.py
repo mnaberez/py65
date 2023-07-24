@@ -435,16 +435,11 @@ class Monitor(cmd.Cmd):
                 self.stdout.write("\r$%s  ?Syntax\n" % addr)
 
     def do_disassemble(self, args):
-        splitted = shlex.split(args)
-        if len(splitted) != 1:
+        split = shlex.split(args)
+        if len(split) != 1:
             return self.help_disassemble()
 
-        address_parts = splitted[0].split(":")
-        start = self._address_parser.number(address_parts[0])
-        if len(address_parts) > 1:
-            end = self._address_parser.number(address_parts[1])
-        else:
-            end = start
+        start, end = self._address_parser.range(split[0], self._mpu.pc, False)
 
         max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
         cur_address = start
@@ -784,7 +779,7 @@ class Monitor(cmd.Cmd):
             return self.help_fill()
 
         try:
-            start, end = self._address_parser.range(split[0])
+            start, end = self._address_parser.range(split[0], self._mpu.pc)
             filler = []
             for piece in split[1:]:
                 value = self._address_parser.number(piece)
@@ -831,7 +826,7 @@ class Monitor(cmd.Cmd):
         if len(split) != 1:
             return self.help_mem()
 
-        start, end = self._address_parser.range(split[0])
+        start, end = self._address_parser.range(split[0], self._mpu.pc)
 
         line = self.addrFmt % start + ":"
         chrs = ''

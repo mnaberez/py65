@@ -84,17 +84,25 @@ class AddressParser(object):
         except ValueError:
             raise KeyError("Label not found: %s" % num)
 
-    def range(self, addresses):
-        """Parse a string containing an address or a range of addresses
-        into a tuple of (start address, end address)
+    def range(self, addresses, default_start=0, no_wrap=True):
         """
-        matches = re.match('^([^:,]+)\s*[:,]+\s*([^:,]+)$', addresses)
-        if matches:
-            start, end = map(self.number, matches.groups(0))
+        Parse a string containing an address or a range of addresses
+        into a tuple of (start address, end address).
+        Start should be an address, label or empty implying default, e.g. _mpu.pc
+        A singleton implies a single byte.
+        A range specified with : or , extends to the end address or label
+        A range specified with / interprets end as an offset from start
+        """
+        # split and keep delim, e.g. 123+456 => ['123', '+', '456']
+        parts = re.split(r'([:,/])', addresses.strip())
+        start = self.number(parts[0]) if parts[0] else default_start
+        if len(parts) >= 3:
+            v = self.number(parts[2])
+            end = start + max(0, v-1) if parts[1] == '/' else v
         else:
-            start = end = self.number(addresses)
+            end = start
 
-        if start > end:
+        if no_wrap and start > end:
             start, end = end, start
         return (start, end)
 
