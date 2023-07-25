@@ -56,7 +56,8 @@ class Monitor(cmd.Cmd):
         self.putc_addr = putc_addr
         self.getc_addr = getc_addr
         self._breakpoints = []
-        self._width = 72
+        self._width = 78
+        self._show_ascii = False
         self.prompt = "."
         self._add_shortcuts()
         self.batch = False
@@ -435,7 +436,7 @@ class Monitor(cmd.Cmd):
         if len(split) != 1:
             return self.help_disassemble()
 
-        start, end = self._address_parser.range(split[0], self._mpu.pc, False)
+        start, end = self._address_parser.range(split[0], no_wrap=False)
 
         max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
         cur_address = start
@@ -775,7 +776,7 @@ class Monitor(cmd.Cmd):
             return self.help_fill()
 
         try:
-            start, end = self._address_parser.range(split[0], self._mpu.pc)
+            start, end = self._address_parser.range(split[0])
             filler = []
             for piece in split[1:]:
                 value = self._address_parser.number(piece)
@@ -813,29 +814,49 @@ class Monitor(cmd.Cmd):
         self._output(("Wrote +%d bytes from " + starttoend) % fmt)
 
     def help_mem(self):
-        self._output("mem <address_range>")
+        self._output("mem <address_range> [noascii|ascii]")
         self._output("Display the contents of memory.")
+        self._output("Optional format toggles ascii display.")
         self._output('Range is specified like "<start:end>".')
 
     def do_mem(self, args):
         split = shlex.split(args)
-        if len(split) != 1:
+        if len(split) not in [1, 2]:
             return self.help_mem()
+        if len(split) == 2:
+            flag = split[1].lower()
+            if 'asc' not in flag:
+                return self.help_mem()
+            self._show_ascii = flag.startswith('asc')
 
-        start, end = self._address_parser.range(split[0], self._mpu.pc)
+        start, end = self._address_parser.range(split[0])
 
         line = self.addrFmt % start + ":"
-        chrs = ''
+        if self._show_ascii:
+            pad = " "
+            chrs = "  "
+        else:
+            pad = "  "
+            chrs = ""
+        right_justify = 0
         for address in range(start, end + 1):
             byte = self._mpu.memory[address]
-            more = " " + self.byteFmt % byte
-            exceeded = len(line) + len(chrs) + 2 + len(more) > self._width
+            more = pad + self.byteFmt % byte
+            exceeded = len(line) + len(chrs) + len(more) > self._width
             if exceeded:
-                self._output(line + '  ' + chrs)
+                right_justify = len(line)
+                if self._show_ascii:
+                    line += chrs
+                    chrs = "  "
+                self._output(line)
                 line = self.addrFmt % address + ":"
-                chrs = ''
             line += more
-            chrs += to_chr(byte)
+            if self._show_ascii:
+                chrs += to_chr(byte)
+        if self._show_ascii:
+            if right_justify:
+                line += ' ' * (right_justify - len(line))
+            line += chrs
         self._output(line)
 
     def help_add_label(self):
