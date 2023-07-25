@@ -13,7 +13,7 @@ class AddressParser(object):
         """
         self.radix = radix
         self.maxwidth = maxwidth
-        self._default_start = 0
+        self.next_addr = 0
         self.labels = {}
         for k, v in labels.items():
             self.labels[k] = self._constrain(v)
@@ -95,7 +95,7 @@ class AddressParser(object):
         """
         # split and keep delim, e.g. 123+456 => ['123', '+', '456']
         parts = re.split(r'([:,/])', addresses.strip())
-        start = self.number(parts[0]) if parts[0] else self._default_start
+        start = self.number(parts[0]) if parts[0] else self.next_addr
         if len(parts) >= 3:
             v = self.number(parts[2])
             end = start + max(0, v-1) if parts[1] == '/' else v
@@ -104,7 +104,7 @@ class AddressParser(object):
 
         if no_wrap and start > end:
             start, end = end, start
-        self._default_start = (end + 1) % self._maxaddr
+        self.next_addr = (end + 1) % self._maxaddr
         return (start, end)
 
     def _constrain(self, address):

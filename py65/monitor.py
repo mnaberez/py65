@@ -453,6 +453,7 @@ class Monitor(cmd.Cmd):
                 if start > end and cur_address > max_address:
                     needs_wrap = False
                     cur_address = 0
+        self._address_parser.next_addr = cur_address
 
     def _format_disassembly(self, address, length, disasm):
         cur_address = address
@@ -731,6 +732,7 @@ class Monitor(cmd.Cmd):
                     return (msb << 8) + lsb
             bytes = list(map(format, bytes[0::2], bytes[1::2]))
 
+        self._address_parser.next_addr = start
         self._fill(start, start, bytes)
 
     def help_save(self):
