@@ -153,7 +153,8 @@ class Monitor(cmd.Cmd):
         self._output(usage)
 
     def onecmd(self, line):
-        line = self._preprocess_line(line)
+        if line:
+            line = self._preprocess_line(line)
 
         result = None
         try:
@@ -164,7 +165,7 @@ class Monitor(cmd.Cmd):
             error = ''.join(traceback.format_exception(e))
             self._output(error)
 
-        if not line.startswith("quit"):
+        if line and not line.startswith("quit"):
             self._output_mpu_status()
 
         # Switch back to the previous input mode.
