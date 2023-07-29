@@ -528,7 +528,7 @@ class MPU:
     @instruction(name="BRK", mode="imp", cycles=7)
     def inst_0x00(self):
         # pc has already been increased one
-        pc = (self.pc + 1) & self.addrMask
+        pc = (self.pc) & self.addrMask
         self.stPushWord(pc)
 
         self.p |= self.BREAK
