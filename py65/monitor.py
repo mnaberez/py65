@@ -5,13 +5,14 @@
 Usage: %s [options]
 
 Options:
--h, --help             : Show this message
--m, --mpu <device>     : Choose which MPU device (default is 6502)
--l, --load <file>      : Load a file at address 0
--r, --rom <file>       : Load a rom at the top of address space and reset into it
--g, --goto <address>   : Perform a goto command after loading any files
--i, --input <address>  : define location of getc (default $f004)
--o, --output <address> : define location of putc (default $f001)
+-h,  --help             : Show this message
+-m,  --mpu <device>     : Choose which MPU device (default is 6502)
+-l,  --load <file>      : Load a file at address 0
+-hl, --hexload <file>   : Load an intelhex file as given
+-r,  --rom <file>       : Load a rom at the top of address space and reset into it
+-g,  --goto <address>   : Perform a goto command after loading any files
+-i,  --input <address>  : define location of getc (default $f004)
+-o,  --output <address> : define location of putc (default $f001)
 """
 
 import cmd
@@ -69,9 +70,12 @@ class Monitor(cmd.Cmd):
 
             if argv is None:
                 argv = sys.argv
-            load, rom, goto = self._parse_args(argv)
+            load, rom, goto, hexload = self._parse_args(argv)
 
             self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
+
+            if hexload is not None:
+                self.do_hexload("%r" % hexload)
 
             if load is not None:
                 self.do_load("%r" % load)
@@ -107,15 +111,15 @@ class Monitor(cmd.Cmd):
 
     def _parse_args(self, argv):
         try:
-            shortopts = 'hi:o:m:l:r:g:'
-            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
+            shortopts = 'h:i:o:m:l:r:g:hl'
+            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=', 'hexload=']
             options, args = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
             self._usage()
             self._exit(1)
 
-        load, rom, goto = None, None, None
+        load, rom, goto, hexload = None, None, None, None
 
         for opt, value in options:
             if opt in ('-i', '--input'):
@@ -146,7 +150,11 @@ class Monitor(cmd.Cmd):
             if opt in ('-g', '--goto'):
                 goto = value
 
-        return load, rom, goto
+            if opt in ('-hf', '--hexfile'):
+                hexload = value
+
+
+        return load, rom, goto, hexload
 
     def _usage(self):
         usage = __doc__ % sys.argv[0]
@@ -201,6 +209,7 @@ class Monitor(cmd.Cmd):
                            'g':    'goto',
                            'h':    'help',
                            '?':    'help',
+                           'hl':    'hexload',
                            'l':    'load',
                            'm':    'mem',
                            'q':    'quit',
@@ -625,6 +634,41 @@ class Monitor(cmd.Cmd):
     def do_pwd(self, args=None):
         cwd = os.getcwd()
         self._output(cwd)
+
+    def help_hexload(self):
+        self._output("hexload <filename|url>")
+        self._output("Load a intelhex file into memory.")
+        self._output('Address is provided in the file.')
+
+    def do_hexload(self, args):
+        filename = args
+
+        if "://" in filename:
+            try:
+                f = urlopen(filename)
+                lines = f.readlines()
+                f.close()
+            except Exception as exc:
+                msg = "Cannot fetch remote file: %s" % str(exc)
+                self._output(msg)
+                return
+        else:
+            try:
+                f = open(filename, 'rb')
+                lines = f.readlines()
+                f.close()
+            except (OSError, IOError) as exc:
+                msg = "Cannot load file: [%d] %s" % (exc.errno, exc.strerror)
+                self._output(msg)
+                return
+        
+        for l in lines:
+            start = int(l[3:7], 16)
+            bytesString = l[9:-2]
+            bytes = [bytesString[i*2:i*2+2] for i in range(len(bytesString)//2)]
+            bytes = [int(x, 16) for x in bytes]
+            self._fill(start, start, bytes)
+
 
     def help_load(self):
         self._output("load <filename|url> <address|top>")
