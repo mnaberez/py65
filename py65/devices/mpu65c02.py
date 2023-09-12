@@ -167,7 +167,7 @@ class MPU(mpu6502.MPU):
     def inst_0x5a(self):
         self.stPush(self.y)
 
-    @instruction(name="STZ", mode="imp", cycles=3)
+    @instruction(name="STZ", mode="zpg", cycles=3)
     def inst_0x64(self):
         self.opSTZ(self.ZeroPageAddr)
         self.pc += 1
