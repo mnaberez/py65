@@ -19,6 +19,9 @@
 
 - The ``py65`` package is no longer a namespace package.
 
+- Fixed assembly and disassembly of 65C02 instruction $64 (``STZ $12``).
+  Patch by Patrick Surry.
+
 1.1.0 (2018-07-01)
 ------------------
 
