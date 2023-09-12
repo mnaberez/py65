@@ -501,8 +501,8 @@ class AssemblerTests(unittest.TestCase):
 
     def test_assembles_64_65c02(self):
         mpu = MPU65C02()
-        self.assertEqual([0x64],
-                         self.assemble('STZ', 0x0000, mpu))
+        self.assertEqual([0x64, 0x12],
+                         self.assemble('STZ $12', 0x0000, mpu))
 
     def test_assembles_65(self):
         self.assertEqual([0x65, 0x44],
