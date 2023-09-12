@@ -24,7 +24,10 @@ if sys.platform[:3] == "win":
         is available.  Does not echo the character.  The stdin argument is
         for function signature compatibility and is ignored.
         """
-        return maybedecode(msvcrt.getch())
+        c = msvcrt.getch()
+        if isinstance(c, bytes): # Python 3
+            c = c.decode('latin-1')
+        return c
 
     def getch_noblock(stdin):
         """ Read one character from the Windows console without blocking.
@@ -139,8 +142,38 @@ else:
             # Quietly ignore termios errors, such as stdin not being a tty.
             pass
 
-    def _getchnb(stdin):
+    def getch(stdin):
+        """ Read one character from stdin, blocking until one is available.
+        Does not echo the character.
+        """
+        # Try to get a character with a non-blocking read.
         char = ''
+        noncanonical_mode(stdin)
+        # If we didn't get a character, ask again.
+        while char == '':
+            try:
+                # On OSX, calling read when no data is available causes the
+                # file handle to never return any future data, so we need to
+                # use select to make sure there is at least one char to read.
+                rd,wr,er = select([stdin], [], [], 0.01)
+                if rd != []:
+                    char = stdin.read(1)
+            except KeyboardInterrupt:
+                # Pass along a CTRL-C interrupt.
+                raise
+            except:
+                pass
+        return char
+
+    def getch_noblock(stdin):
+        """ Read one character from stdin without blocking.  Does not echo the
+        character.  If no character is available, an empty string is returned.
+        """
+        char = ''
+
+        # Using non-blocking read
+        noncanonical_mode(stdin)
+
         try:
             # On OSX, calling read when no data is available causes the
             # file handle to never return any future data, so we need to
@@ -153,41 +186,11 @@ else:
             raise
         except:
             pass
-        return maybedecode(char)
-
-    def getch(stdin):
-        """ Read one character from stdin, blocking until one is available.
-        Does not echo the character.
-        """
-        # Try to get a character with a non-blocking read.
-        noncanonical_mode(stdin)
-        # If we didn't get a character, ask again.
-        while True:
-            char = _getchnb(stdin)
-            if len(char):
-                break
-
-        return char
-
-    def getch_noblock(stdin):
-        """ Read one character from stdin without blocking.  Does not echo the
-        character.  If no character is available, an empty string is returned.
-        """
-        # Using non-blocking read
-        noncanonical_mode(stdin)
-
-        char = _getchnb(stdin)
 
         # Convert linefeeds to carriage returns.
         if len(char) and ord(char) == 10:
             char = '\r'
         return char
-
-
-def maybedecode(c):
-    if len(c) and isinstance(c, bytes): # Python 3
-        c = c.decode('latin-1')
-    return c
 
 
 def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
