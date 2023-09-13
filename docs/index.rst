@@ -151,6 +151,13 @@ and then delete breakpoint #1, the next breakpoint you add will be
 breakpoint #3, not #1.  Also, invoking ``reset`` clears breakpoints
 too, not just labels.
 
+Comments
+-----------
+
+Any text following a `;` will be treated as a comment and removed.
+This can be useful for documenting sequences of commands used for `script`.
+
+
 Command Reference
 =================
 
@@ -215,6 +222,12 @@ Command Reference
 
     .cycles
     12
+
+.. describe:: continue
+
+  Continue execution from the current program counter::
+
+    .continue
 
 .. describe:: delete_breakpoint <breakpoint_id>
 
@@ -303,6 +316,14 @@ Command Reference
     Breakpoint 0 : $1234
     Breakpoint 1 : $5678
     Breakpoint 2 : $9ABC
+
+.. describe:: batch <filename>
+
+  Read commands from <filename> as if typed interactively,
+  except that blank lines are ignored rather than repeating the prior command.
+  As usual, text beginning with ; will be treated as a comment and ignored
+
+    .batch some.cmd
 
 .. describe:: load <filename> <address>
 

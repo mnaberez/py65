@@ -10,6 +10,7 @@ Options:
 -l, --load <file>      : Load a file at address 0
 -r, --rom <file>       : Load a rom at the top of address space and reset into it
 -g, --goto <address>   : Perform a goto command after loading any files
+-b, --batch <file>     : Run a batch of commands from file
 -i, --input <address>  : define location of getc (default $f004)
 -o, --output <address> : define location of putc (default $f001)
 """
@@ -34,6 +35,14 @@ from py65.utils import console
 from py65.utils.conversions import itoa
 from py65.memory import ObservableMemory
 
+
+def to_chr(c, enc='ascii7', nonprintable='.'):
+    """Convert a byte to a printable character, based on end scheme"""
+    if enc == 'ascii7':
+        c &= 0x7f
+    return chr(c) if 0x20 <= c < 0x7f else nonprintable
+
+
 class Monitor(cmd.Cmd):
 
     Microprocessors = {'6502': NMOS6502, '65C02': CMOS65C02,
@@ -48,8 +57,10 @@ class Monitor(cmd.Cmd):
         self.getc_addr = getc_addr
         self._breakpoints = []
         self._width = 78
+        self._show_ascii = False
         self.prompt = "."
         self._add_shortcuts()
+        self.batch = False
 
         # Save the current system input mode so it can be restored after
         # after processing commands and before exiting.
@@ -69,7 +80,7 @@ class Monitor(cmd.Cmd):
 
             if argv is None:
                 argv = sys.argv
-            load, rom, goto = self._parse_args(argv)
+            load, rom, goto, batch = self._parse_args(argv)
 
             self._reset(self.mpu_type, self.getc_addr, self.putc_addr)
 
@@ -78,6 +89,9 @@ class Monitor(cmd.Cmd):
 
             if goto is not None:
                 self.do_goto(goto)
+
+            if batch is not None:
+                self.do_batch(batch)
 
             if rom is not None:
                 # load a ROM and run from the reset vector
@@ -107,15 +121,15 @@ class Monitor(cmd.Cmd):
 
     def _parse_args(self, argv):
         try:
-            shortopts = 'hi:o:m:l:r:g:'
-            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=']
-            options, args = getopt.getopt(argv[1:], shortopts, longopts)
+            shortopts = 'hi:o:m:l:r:g:b:'
+            longopts = ['help', 'mpu=', 'input=', 'output=', 'load=', 'rom=', 'goto=', 'batch=']
+            options, _ = getopt.getopt(argv[1:], shortopts, longopts)
         except getopt.GetoptError as exc:
             self._output(exc.args[0])
             self._usage()
             self._exit(1)
 
-        load, rom, goto = None, None, None
+        load, rom, goto, batch = None, None, None, None
 
         for opt, value in options:
             if opt in ('-i', '--input'):
@@ -146,14 +160,18 @@ class Monitor(cmd.Cmd):
             if opt in ('-g', '--goto'):
                 goto = value
 
-        return load, rom, goto
+            if opt in ('-b', '--batch'):
+                batch = value
+
+        return load, rom, goto, batch
 
     def _usage(self):
         usage = __doc__ % sys.argv[0]
         self._output(usage)
 
     def onecmd(self, line):
-        line = self._preprocess_line(line)
+        if line:
+            line = self._preprocess_line(line)
 
         result = None
         try:
@@ -164,7 +182,7 @@ class Monitor(cmd.Cmd):
             error = ''.join(traceback.format_exception(e))
             self._output(error)
 
-        if not line.startswith("quit"):
+        if line and not line.startswith("quit"):
             self._output_mpu_status()
 
         # Switch back to the previous input mode.
@@ -192,6 +210,8 @@ class Monitor(cmd.Cmd):
                            'a':    'assemble',
                            'ab':   'add_breakpoint',
                            'al':   'add_label',
+                           'b':    'batch',
+                           'c':    'continue',
                            'd':    'disassemble',
                            'db':   'delete_breakpoint',
                            'dl':   'delete_label',
@@ -413,16 +433,11 @@ class Monitor(cmd.Cmd):
                 self.stdout.write("\r$%s  ?Syntax\n" % addr)
 
     def do_disassemble(self, args):
-        splitted = shlex.split(args)
-        if len(splitted) != 1:
+        split = shlex.split(args)
+        if len(split) != 1:
             return self.help_disassemble()
 
-        address_parts = splitted[0].split(":")
-        start = self._address_parser.number(address_parts[0])
-        if len(address_parts) > 1:
-            end = self._address_parser.number(address_parts[1])
-        else:
-            end = start
+        start, end = self._address_parser.range(split[0], no_wrap=False)
 
         max_address = (2 ** self._mpu.ADDR_WIDTH) - 1
         cur_address = start
@@ -439,6 +454,7 @@ class Monitor(cmd.Cmd):
                 if start > end and cur_address > max_address:
                     needs_wrap = False
                     cur_address = 0
+        self._address_parser.next_addr = cur_address
 
     def _format_disassembly(self, address, length, disasm):
         cur_address = address
@@ -491,6 +507,39 @@ class Monitor(cmd.Cmd):
         self._mpu.pc = self._address_parser.number(args)
         brks = [0x00]  # BRK
         self._run(stopcodes=brks)
+
+    def help_continue(self):
+        self._output("continue")
+        self._output("Continues execution from the current PC")
+
+    def do_continue(self, args):
+        brks = [0x00]  # BRK
+        self._run(stopcodes=brks)
+
+    def help_batch(self):
+        self._output("batch <commmands>")
+        self._output("Read and execute commands from the specified file")
+
+    def do_batch(self, args):
+        try:
+            self.cmdqueue += open(args).read().splitlines()
+            self.batch = True
+        except OSError:
+            self._output("Couldn't read commands from %s" % args)
+
+    def precmd(self, line):
+        if self.batch and line:
+            self._output(line)
+        return line
+
+    def postcmd(self, stop, line):
+        if self.batch and not self.cmdqueue:
+            self.batch = False
+        return stop
+
+    def emptyline(self):
+        if not self.batch:
+            return cmd.Cmd.emptyline(self)
 
     def _run(self, stopcodes):
         stopcodes = set(stopcodes)
@@ -684,6 +733,7 @@ class Monitor(cmd.Cmd):
                     return (msb << 8) + lsb
             bytes = list(map(format, bytes[0::2], bytes[1::2]))
 
+        self._address_parser.next_addr = start
         self._fill(start, start, bytes)
 
     def help_save(self):
@@ -767,27 +817,49 @@ class Monitor(cmd.Cmd):
         self._output(("Wrote +%d bytes from " + starttoend) % fmt)
 
     def help_mem(self):
-        self._output("mem <address_range>")
+        self._output("mem <address_range> [noascii|ascii]")
         self._output("Display the contents of memory.")
+        self._output("Optional format toggles ascii display.")
         self._output('Range is specified like "<start:end>".')
 
     def do_mem(self, args):
         split = shlex.split(args)
-        if len(split) != 1:
+        if len(split) not in [1, 2]:
             return self.help_mem()
+        if len(split) == 2:
+            flag = split[1].lower()
+            if 'asc' not in flag:
+                return self.help_mem()
+            self._show_ascii = flag.startswith('asc')
 
         start, end = self._address_parser.range(split[0])
 
         line = self.addrFmt % start + ":"
+        if self._show_ascii:
+            pad = " "
+            chrs = "  "
+        else:
+            pad = "  "
+            chrs = ""
+        right_justify = 0
         for address in range(start, end + 1):
             byte = self._mpu.memory[address]
-            more = "  " + self.byteFmt % byte
-
-            exceeded = len(line) + len(more) > self._width
+            more = pad + self.byteFmt % byte
+            exceeded = len(line) + len(chrs) + len(more) > self._width
             if exceeded:
+                right_justify = len(line)
+                if self._show_ascii:
+                    line += chrs
+                    chrs = "  "
                 self._output(line)
                 line = self.addrFmt % address + ":"
             line += more
+            if self._show_ascii:
+                chrs += to_chr(byte)
+        if self._show_ascii:
+            if right_justify:
+                line += ' ' * (right_justify - len(line))
+            line += chrs
         self._output(line)
 
     def help_add_label(self):
