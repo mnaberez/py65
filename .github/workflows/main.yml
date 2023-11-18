@@ -2,13 +2,36 @@ name: Run all tests
 
 on: [push, pull_request]
 
+env:
+  PIP: "env PIP_DISABLE_PIP_VERSION_CHECK=1
+            PYTHONWARNINGS=ignore:DEPRECATION
+            pip --no-cache-dir"
+
 jobs:
-  build:
+  tests_py27:
+    runs-on: ubuntu-20.04
+    container: python:2.7
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Show Python version
+      run: python -V
+
+    - name: Install dependencies
+      run: $PIP install setuptools
+
+    - name: Run the tests
+      run: python setup.py test -q
+
+  build_py3x:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8, 3.9, "3.10", 3.11]
-        os: [ubuntu-20.04, windows-2019]
+        python-version: [3.6, 3.7, 3.8, 3.9, "3.10", 3.11]
+        os: [ubuntu-20.04]
 
     runs-on: ${{ matrix.os }}
 
@@ -22,6 +45,9 @@ jobs:
 
     - name: Show Python version
       run: python -V
+
+    - name: Install dependencies
+      run: $PIP install setuptools
 
     - name: Run the tests
       run: python setup.py test -q
