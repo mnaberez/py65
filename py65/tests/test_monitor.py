@@ -2,10 +2,12 @@ import unittest
 import sys
 import os
 import tempfile
-
-from io import StringIO
-
 from py65.monitor import Monitor
+
+try:
+    from StringIO import StringIO
+except ImportError: # Python 3
+    from io import StringIO
 
 
 class MonitorTests(unittest.TestCase):

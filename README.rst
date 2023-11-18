@@ -20,9 +20,9 @@ Installation
 
 Py65 packages are `available <http://pypi.python.org/pypi/py65>`_ on the
 Python Package Index (PyPI).  You download them from there or you can
-use ``pip3`` to automatically install or upgrade Py65::
+use ``pip`` to automatically install or upgrade Py65::
 
-    $ pip3 install -U py65
+    $ pip install -U py65
 
 Devices
 -------

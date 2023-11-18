@@ -1,8 +1,5 @@
-2.0.0.dev0 (Next Release)
+1.2.0.dev0 (Next Release)
 -------------------------
-
-- Support for some older Python versions has been dropped.  Py65
-  now requires Python 3.6 or later.
 
 - Fixed a bug with character input that would cause characters to be
   dropped when pasting in larger amounts of text.  This makes it possible
