@@ -19,6 +19,8 @@
 - Fixed assembly and disassembly of 65C02 instruction $64 (``STZ $12``).
   Patch by Patrick Surry.
 
+- Removed use of the ``asyncore`` module deprecated in Python 3.10.
+
 1.1.0 (2018-07-01)
 ------------------
 
