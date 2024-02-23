@@ -1,0 +1,359 @@
+ca65 V2.17 - Git N/A
+Main file   : 65C02_decimal_test.c65
+Current file: 65C02_decimal_test.c65
+
+000000r 1               ; Verify decimal mode behavior
+000000r 1               ; Written by Bruce Clark.  This code is public domain.
+000000r 1               ; see http://www.6502.org/tutorials/decimal_mode.html
+000000r 1               ;
+000000r 1               ; Returns:
+000000r 1               ;   ERROR = 0 if the test passed
+000000r 1               ;   ERROR = 1 if the test failed
+000000r 1               ;   modify the code at the DONE label for desired program end
+000000r 1               ;
+000000r 1               ; This routine requires 17 bytes of RAM -- 1 byte each for:
+000000r 1               ;   AR, CF, DA, DNVZC, ERROR, HA, HNVZC, N1, N1H, N1L, N2, N2L, NF, VF, and ZF
+000000r 1               ; and 2 bytes for N2H
+000000r 1               ;
+000000r 1               ; Variables:
+000000r 1               ;   N1 and N2 are the two numbers to be added or subtracted
+000000r 1               ;   N1H, N1L, N2H, and N2L are the upper 4 bits and lower 4 bits of N1 and N2
+000000r 1               ;   DA and DNVZC are the actual accumulator and flag results in decimal mode
+000000r 1               ;   HA and HNVZC are the accumulator and flag results when N1 and N2 are
+000000r 1               ;     added or subtracted using binary arithmetic
+000000r 1               ;   AR, NF, VF, ZF, and CF are the predicted decimal mode accumulator and
+000000r 1               ;     flag results, calculated using binary arithmetic
+000000r 1               ;
+000000r 1               ; This program takes approximately 1 minute at 1 MHz (a few seconds more on
+000000r 1               ; a 65C02 than a 6502 or 65816)
+000000r 1               ;
+000000r 1               
+000000r 1               ; Configuration:
+000000r 1               cputype = 1         ; 0 = 6502, 1 = 65C02, 2 = 65C816
+000000r 1               vld_bcd = 0         ; 0 = allow invalid bcd, 1 = valid bcd only
+000000r 1               chk_a   = 1         ; check accumulator
+000000r 1               chk_n   = 1         ; check sign (negative) flag
+000000r 1               chk_v   = 1         ; check overflow flag
+000000r 1               chk_z   = 1         ; check zero flag
+000000r 1               chk_c   = 1         ; check carry flag
+000000r 1               
+000000r 1               .macro  end_of_test
+000000r 1                   BRK
+000000r 1                   ;    .byte   $db     ;execute 65C02 stop instruction
+000000r 1               .endmacro
+000000r 1               
+000000r 1                       .ZEROPAGE
+000000r 1                       .org    0
+000000  1               ; operands - register Y = carry in
+000000  1  00           N1:     .res    1,0
+000001  1  00           N2:     .res    1,0
+000002  1               ; binary result
+000002  1  00           HA:     .res    1,0
+000003  1  00           HNVZC:  .res    1,0
+000004  1                                   ;04
+000004  1               ; decimal result
+000004  1  00           DA:     .res    1,0
+000005  1  00           DNVZC:  .res    1,0
+000006  1               ; predicted results
+000006  1  00           AR:     .res    1,0
+000007  1  00           NF:     .res    1,0
+000008  1                                   ;08
+000008  1  00           VF:     .res    1,0
+000009  1  00           ZF:     .res    1,0
+00000A  1  00           CF:     .res    1,0
+00000B  1  00           ERROR:  .res    1,0
+00000C  1                                   ;0C
+00000C  1               ; workspace
+00000C  1  00           N1L:    .res    1,0
+00000D  1  00           N1H:    .res    1,0
+00000E  1  00           N2L:    .res    1,0
+00000F  1  00 00        N2H:    .res    2,0
+000011  1               
+000011  1                       .CODE
+000011  1                       .org $200
+000200  1  A0 01        TEST:   ldy #1    ; initialize Y (used to loop through carry flag values)
+000202  1  84 0B                sty ERROR ; store 1 in ERROR until the test passes
+000204  1  A9 00                lda #0    ; initialize N1 and N2
+000206  1  85 00                sta N1
+000208  1  85 01                sta N2
+00020A  1  A5 01        LOOP1:  lda N2    ; N2L = N2 & $0F
+00020C  1  29 0F                and #$0F  ; [1] see text
+00020E  1                       .if vld_bcd = 1
+00020E  1                           cmp #$0a
+00020E  1                           bcs NEXT2
+00020E  1                       .endif
+00020E  1  85 0E                sta N2L
+000210  1  A5 01                lda N2    ; N2H = N2 & $F0
+000212  1  29 F0                and #$F0  ; [2] see text
+000214  1                       .if vld_bcd = 1
+000214  1                           cmp #$a0
+000214  1                           bcs NEXT2
+000214  1                       .endif
+000214  1  85 0F                sta N2H
+000216  1  09 0F                ora #$0F  ; N2H+1 = (N2 & $F0) + $0F
+000218  1  85 10                sta N2H+1
+00021A  1  A5 00        LOOP2:  lda N1    ; N1L = N1 & $0F
+00021C  1  29 0F                and #$0F  ; [3] see text
+00021E  1                       .if vld_bcd = 1
+00021E  1                           cmp #$0a
+00021E  1                           bcs NEXT1
+00021E  1                       .endif
+00021E  1  85 0C                sta N1L
+000220  1  A5 00                lda N1    ; N1H = N1 & $F0
+000222  1  29 F0                and #$F0  ; [4] see text
+000224  1                       .if vld_bcd = 1
+000224  1                           cmp #$a0
+000224  1                           bcs NEXT1
+000224  1                       .endif
+000224  1  85 0D                sta N1H
+000226  1  20 4C 02             jsr ADD
+000229  1  20 EF 02             jsr A6502
+00022C  1  20 CA 02             jsr COMPARE
+00022F  1  D0 1A                bne DONE
+000231  1  20 90 02             jsr SUB
+000234  1  20 F8 02             jsr S6502
+000237  1  20 CA 02             jsr COMPARE
+00023A  1  D0 0F                bne DONE
+00023C  1  E6 00        NEXT1:  inc N1    ; [5] see text
+00023E  1  D0 DA                bne LOOP2 ; loop through all 256 values of N1
+000240  1  E6 01        NEXT2:  inc N2    ; [6] see text
+000242  1  D0 C6                bne LOOP1 ; loop through all 256 values of N2
+000244  1  88                   dey
+000245  1  10 C3                bpl LOOP1 ; loop through both values of the carry flag
+000247  1  A9 00                lda #0    ; test passed, so store 0 in ERROR
+000249  1  85 0B                sta ERROR
+00024B  1               DONE:
+00024B  1  00                   end_of_test
+00024C  1               
+00024C  1               ; Calculate the actual decimal mode accumulator and flags, the accumulator
+00024C  1               ; and flag results when N1 is added to N2 using binary arithmetic, the
+00024C  1               ; predicted accumulator result, the predicted carry flag, and the predicted
+00024C  1               ; V flag
+00024C  1               ;
+00024C  1  F8           ADD:    sed       ; decimal mode
+00024D  1  C0 01                cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+00024F  1  A5 00                lda N1
+000251  1  65 01                adc N2
+000253  1  85 04                sta DA    ; actual accumulator result in decimal mode
+000255  1  08                   php
+000256  1  68                   pla
+000257  1  85 05                sta DNVZC ; actual flags result in decimal mode
+000259  1  D8                   cld       ; binary mode
+00025A  1  C0 01                cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+00025C  1  A5 00                lda N1
+00025E  1  65 01                adc N2
+000260  1  85 02                sta HA    ; accumulator result of N1+N2 using binary arithmetic
+000262  1               
+000262  1  08                   php
+000263  1  68                   pla
+000264  1  85 03                sta HNVZC ; flags result of N1+N2 using binary arithmetic
+000266  1  C0 01                cpy #1
+000268  1  A5 0C                lda N1L
+00026A  1  65 0E                adc N2L
+00026C  1  C9 0A                cmp #$0A
+00026E  1  A2 00                ldx #0
+000270  1  90 06                bcc A1
+000272  1  E8                   inx
+000273  1  69 05                adc #5    ; add 6 (carry is set)
+000275  1  29 0F                and #$0F
+000277  1  38                   sec
+000278  1  05 0D        A1:     ora N1H
+00027A  1               ;
+00027A  1               ; if N1L + N2L <  $0A, then add N2 & $F0
+00027A  1               ; if N1L + N2L >= $0A, then add (N2 & $F0) + $0F + 1 (carry is set)
+00027A  1               ;
+00027A  1  75 0F                adc N2H,x
+00027C  1  08                   php
+00027D  1  B0 04                bcs A2
+00027F  1  C9 A0                cmp #$A0
+000281  1  90 03                bcc A3
+000283  1  69 5F        A2:     adc #$5F  ; add $60 (carry is set)
+000285  1  38                   sec
+000286  1  85 06        A3:     sta AR    ; predicted accumulator result
+000288  1  08                   php
+000289  1  68                   pla
+00028A  1  85 0A                sta CF    ; predicted carry result
+00028C  1  68                   pla
+00028D  1               ;
+00028D  1               ; note that all 8 bits of the P register are stored in VF
+00028D  1               ;
+00028D  1  85 08                sta VF    ; predicted V flags
+00028F  1  60                   rts
+000290  1               
+000290  1               ; Calculate the actual decimal mode accumulator and flags, and the
+000290  1               ; accumulator and flag results when N2 is subtracted from N1 using binary
+000290  1               ; arithmetic
+000290  1               ;
+000290  1  F8           SUB:    sed       ; decimal mode
+000291  1  C0 01                cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+000293  1  A5 00                lda N1
+000295  1  E5 01                sbc N2
+000297  1  85 04                sta DA    ; actual accumulator result in decimal mode
+000299  1  08                   php
+00029A  1  68                   pla
+00029B  1  85 05                sta DNVZC ; actual flags result in decimal mode
+00029D  1  D8                   cld       ; binary mode
+00029E  1  C0 01                cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+0002A0  1  A5 00                lda N1
+0002A2  1  E5 01                sbc N2
+0002A4  1  85 02                sta HA    ; accumulator result of N1-N2 using binary arithmetic
+0002A6  1               
+0002A6  1  08                   php
+0002A7  1  68                   pla
+0002A8  1  85 03                sta HNVZC ; flags result of N1-N2 using binary arithmetic
+0002AA  1  60                   rts
+0002AB  1               
+0002AB  1                       .if cputype <> 1
+0002AB  1               ; Calculate the predicted SBC accumulator result for the 6502 and 65816
+0002AB  1               ;
+0002AB  1               SUB1:       cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+0002AB  1                           lda N1L
+0002AB  1                           sbc N2L
+0002AB  1                           ldx #0
+0002AB  1                           bcs S11
+0002AB  1                           inx
+0002AB  1                           sbc #5    ; subtract 6 (carry is clear)
+0002AB  1                           and #$0F
+0002AB  1                           clc
+0002AB  1               S11:        ora N1H
+0002AB  1               ;
+0002AB  1               ; if N1L - N2L >= 0, then subtract N2 & $F0
+0002AB  1               ; if N1L - N2L <  0, then subtract (N2 & $F0) + $0F + 1 (carry is clear)
+0002AB  1               ;
+0002AB  1                           sbc N2H,x
+0002AB  1                           bcs S12
+0002AB  1                           sbc #$5F  ; subtract $60 (carry is clear)
+0002AB  1               S12:        sta AR
+0002AB  1                           rts
+0002AB  1                       .endif
+0002AB  1               
+0002AB  1                       .if cputype = 1
+0002AB  1               ; Calculate the predicted SBC accumulator result for the 6502 and 65C02
+0002AB  1               ;
+0002AB  1  C0 01        SUB2:       cpy #1    ; set carry if Y = 1, clear carry if Y = 0
+0002AD  1  A5 0C                    lda N1L
+0002AF  1  E5 0E                    sbc N2L
+0002B1  1  A2 00                    ldx #0
+0002B3  1  B0 04                    bcs S21
+0002B5  1  E8                       inx
+0002B6  1  29 0F                    and #$0F
+0002B8  1  18                       clc
+0002B9  1  05 0D        S21:        ora N1H
+0002BB  1               ;
+0002BB  1               ; if N1L - N2L >= 0, then subtract N2 & $F0
+0002BB  1               ; if N1L - N2L <  0, then subtract (N2 & $F0) + $0F + 1 (carry is clear)
+0002BB  1               ;
+0002BB  1  F5 0F                    sbc N2H,x
+0002BD  1  B0 02                    bcs S22
+0002BF  1  E9 5F                    sbc #$5F   ; subtract $60 (carry is clear)
+0002C1  1  E0 00        S22:        cpx #0
+0002C3  1  F0 02                    beq S23
+0002C5  1  E9 06                    sbc #6
+0002C7  1  85 06        S23:        sta AR     ; predicted accumulator result
+0002C9  1  60                       rts
+0002CA  1                       .endif
+0002CA  1               
+0002CA  1               ; Compare accumulator actual results to predicted results
+0002CA  1               ;
+0002CA  1               ; Return:
+0002CA  1               ;   Z flag = 1 (BEQ branch) if same
+0002CA  1               ;   Z flag = 0 (BNE branch) if different
+0002CA  1               ;
+0002CA  1               COMPARE:
+0002CA  1                       .if chk_a = 1
+0002CA  1  A5 04                    lda DA
+0002CC  1  C5 06                    cmp AR
+0002CE  1  D0 1E                    bne C1
+0002D0  1                       .endif
+0002D0  1                       .if chk_n = 1
+0002D0  1  A5 05                    lda DNVZC ; [7] see text
+0002D2  1  45 07                    eor NF
+0002D4  1  29 80                    and #$80  ; mask off N flag
+0002D6  1  D0 16                    bne C1
+0002D8  1                       .endif
+0002D8  1                       .if chk_v = 1
+0002D8  1  A5 05                    lda DNVZC ; [8] see text
+0002DA  1  45 08                    eor VF
+0002DC  1  29 40                    and #$40  ; mask off V flag
+0002DE  1  D0 0E                    bne C1    ; [9] see text
+0002E0  1                       .endif
+0002E0  1                       .if chk_z = 1
+0002E0  1  A5 05                    lda DNVZC
+0002E2  1  45 09                    eor ZF    ; mask off Z flag
+0002E4  1  29 02                    and #2
+0002E6  1  D0 06                    bne C1    ; [10] see text
+0002E8  1                       .endif
+0002E8  1                       .if chk_c = 1
+0002E8  1  A5 05                    lda DNVZC
+0002EA  1  45 0A                    eor CF
+0002EC  1  29 01                    and #1    ; mask off C flag
+0002EE  1                       .endif
+0002EE  1  60           C1:     rts
+0002EF  1               
+0002EF  1               ; These routines store the predicted values for ADC and SBC for the 6502,
+0002EF  1               ; 65C02, and 65816 in AR, CF, NF, VF, and ZF
+0002EF  1               
+0002EF  1                       .if cputype = 0
+0002EF  1               
+0002EF  1               A6502:      lda VF      ; 6502
+0002EF  1               ;
+0002EF  1               ; since all 8 bits of the P register were stored in VF, bit 7 of VF contains
+0002EF  1               ; the N flag for NF
+0002EF  1               ;
+0002EF  1                           sta NF
+0002EF  1                           lda HNVZC
+0002EF  1                           sta ZF
+0002EF  1                           rts
+0002EF  1               
+0002EF  1               S6502:      jsr SUB1
+0002EF  1                           lda HNVZC
+0002EF  1                           sta NF
+0002EF  1                           sta VF
+0002EF  1                           sta ZF
+0002EF  1                           sta CF
+0002EF  1                           rts
+0002EF  1               
+0002EF  1                       .endif
+0002EF  1                       .if  cputype = 1
+0002EF  1               
+0002EF  1  A5 06        A6502:      lda AR      ; 65C02
+0002F1  1  08                       php
+0002F2  1  68                       pla
+0002F3  1  85 07                    sta NF
+0002F5  1  85 09                    sta ZF
+0002F7  1  60                       rts
+0002F8  1               
+0002F8  1  20 AB 02     S6502:      jsr SUB2
+0002FB  1  A5 06                    lda AR
+0002FD  1  08                       php
+0002FE  1  68                       pla
+0002FF  1  85 07                    sta NF
+000301  1  85 09                    sta ZF
+000303  1  A5 03                    lda HNVZC
+000305  1  85 08                    sta VF
+000307  1  85 0A                    sta CF
+000309  1  60                       rts
+00030A  1               
+00030A  1                       .endif
+00030A  1                       .if  cputype = 2
+00030A  1               
+00030A  1               A6502:      lda AR      ; 65C816
+00030A  1                           php
+00030A  1                           pla
+00030A  1                           sta NF
+00030A  1                           sta ZF
+00030A  1                           rts
+00030A  1               
+00030A  1               S6502:      jsr SUB1
+00030A  1                           lda AR
+00030A  1                           php
+00030A  1                           pla
+00030A  1                           sta NF
+00030A  1                           sta ZF
+00030A  1                           lda HNVZC
+00030A  1                           sta VF
+00030A  1                           sta CF
+00030A  1                           rts
+00030A  1               
+00030A  1                       .endif
+00030A  1               
