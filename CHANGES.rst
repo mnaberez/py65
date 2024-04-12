@@ -1,5 +1,5 @@
-1.2.0.dev0 (Next Release)
--------------------------
+1.2.0 (2024-04-12)
+------------------
 
 - Fixed a bug with character input that would cause characters to be
   dropped when pasting in larger amounts of text.  This makes it possible
