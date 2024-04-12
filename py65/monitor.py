@@ -163,8 +163,8 @@ class Monitor(cmd.Cmd):
             result = cmd.Cmd.onecmd(self, line)
         except KeyboardInterrupt:
             self._output("Interrupt")
-        except Exception as e:
-            error = ''.join(traceback.format_exception(e))
+        except Exception:
+            error = ''.join(traceback.format_exception(*sys.exc_info()))
             self._output(error)
 
         if not line.startswith("quit"):
