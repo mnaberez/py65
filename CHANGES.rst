@@ -5,6 +5,8 @@
   dropped when pasting in larger amounts of text.  This makes it possible
   to paste programs into EhBASIC and Taliforth.  Patch by SamCoVT.
 
+- Fixed regular expression warnings on Python 3.12.
+
 - The ``fill`` command in the monitor now shows an error message if an
   address or value is out of range.
 

@@ -239,7 +239,7 @@ class Monitor(cmd.Cmd):
                 line = command
                 break
 
-            pattern = '^%s\s+' % re.escape(shortcut)
+            pattern = r'^%s\s+' % re.escape(shortcut)
             matches = re.match(pattern, line)
             if matches:
                 start, end = matches.span()
@@ -580,7 +580,7 @@ class Monitor(cmd.Cmd):
         if args == '':
             return
 
-        pairs = re.findall('([^=,\s]*)=([^=,\s]*)', args)
+        pairs = re.findall(r'([^=,\s]*)=([^=,\s]*)', args)
         if pairs == []:
             return self._output("Syntax error: %s" % args)
 

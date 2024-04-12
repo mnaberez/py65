@@ -61,7 +61,7 @@ class AddressParser(object):
                 return self.labels[num]
 
             else:
-                matches = re.match('^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
+                matches = re.match(r'^([^\s+-]+)\s*([+\-])\s*([$+%]?\d+)$', num)
                 if matches:
                     label, sign, offset = matches.groups()
 
@@ -88,7 +88,7 @@ class AddressParser(object):
         """Parse a string containing an address or a range of addresses
         into a tuple of (start address, end address)
         """
-        matches = re.match('^([^:,]+)\s*[:,]+\s*([^:,]+)$', addresses)
+        matches = re.match(r'^([^:,]+)\s*[:,]+\s*([^:,]+)$', addresses)
         if matches:
             start, end = map(self.number, matches.groups(0))
         else:
