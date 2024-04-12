@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Show Python version
       run: python -V
@@ -33,7 +33,12 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v3 
+    # does not work with actions/checkout@v4:
+    #   /usr/bin/docker exec  289170dbefc90d2ba94a09f3dcb70c42c1e1b29a5e877cd533b26ebf73ca82fa sh -c "cat /etc/*release | grep ^ID"
+    #   /__e/node20/bin/node: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.27' not found (required by /__e/node20/bin/node)
+    #   /__e/node20/bin/node: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.28' not found (required by /__e/node20/bin/node)
+    #   /__e/node20/bin/node: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.25' not found (required by /__e/node20/bin/node)
 
     - name: Show Python version
       run: python -V
@@ -51,7 +56,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Show Python version
       run: python -V
@@ -72,10 +77,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
