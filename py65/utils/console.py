@@ -1,5 +1,7 @@
 import sys
 
+from py65.compat import as_string
+
 if sys.platform[:3] == "win":
     import msvcrt
 
@@ -24,10 +26,7 @@ if sys.platform[:3] == "win":
         is available.  Does not echo the character.  The stdin argument is
         for function signature compatibility and is ignored.
         """
-        c = msvcrt.getch()
-        if isinstance(c, bytes): # Python 3
-            c = c.decode('latin-1')
-        return c
+        return as_string(msvcrt.getch())
 
     def getch_noblock(stdin):
         """ Read one character from the Windows console without blocking.
@@ -36,8 +35,8 @@ if sys.platform[:3] == "win":
         available, an empty string is returned.
         """
         if msvcrt.kbhit():
-            return getch(stdin)
-        return ''
+            return as_string(getch(stdin))
+        return u''
 
 else:
     import termios
@@ -157,7 +156,7 @@ else:
                 # use select to make sure there is at least one char to read.
                 rd,wr,er = select([stdin], [], [], 0.01)
                 if rd != []:
-                    char = stdin.read(1)
+                    char = as_string(stdin.read(1))
             except KeyboardInterrupt:
                 # Pass along a CTRL-C interrupt.
                 raise
@@ -180,7 +179,7 @@ else:
             # use select to make sure there is at least one char to read.
             rd,wr,er = select([stdin], [], [], 0.01)
             if rd != []:
-                char = stdin.read(1)
+                char = as_string(stdin.read(1))
         except KeyboardInterrupt:
             # Pass along a CTRL-C interrupt.
             raise
@@ -200,6 +199,7 @@ def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
     is useful in modes like the interactive assembler.
     """
     stdout.write(prompt)
+    stdout.flush()
     line = ''
     while True:
         char = getch(stdin)
@@ -211,6 +211,7 @@ def line_input(prompt='', stdin=sys.stdin, stdout=sys.stdout):
                 line = line[:-1]
                 stdout.write("\r%s\r%s%s" %
                              (' ' * (len(prompt + line) + 5), prompt, line))
+                stdout.flush()
         elif code == 0x1b:  # escape
             pass
         else:

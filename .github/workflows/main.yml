@@ -21,10 +21,13 @@ jobs:
       run: python -V
 
     - name: Install dependencies
-      run: $PIP install setuptools
+      run: $PIP install setuptools pexpect
 
     - name: Run the tests
       run: python setup.py test -q
+
+    - name: Run the end-to-end tests
+      run: END_TO_END=1 python setup.py test -q
 
   build_py34:
     runs-on: ubuntu-20.04
@@ -44,10 +47,13 @@ jobs:
       run: python -V
 
     - name: Install dependencies
-      run: $PIP install setuptools
+      run: $PIP install setuptools pexpect
 
     - name: Run the tests
       run: python setup.py test -q
+
+    - name: Run the end-to-end tests
+      run: END_TO_END=1 python setup.py test -q
 
   build_py35:
     runs-on: ubuntu-20.04
@@ -62,10 +68,13 @@ jobs:
       run: python -V
 
     - name: Install dependencies
-      run: $PIP install setuptools
+      run: $PIP install setuptools pexpect
 
     - name: Run the tests
       run: python setup.py test -q
+
+    - name: Run the end-to-end tests
+      run: END_TO_END=1 python setup.py test -q
 
   build_py3x:
     strategy:
@@ -88,7 +97,10 @@ jobs:
       run: python -V
 
     - name: Install dependencies
-      run: $PIP install setuptools
+      run: $PIP install setuptools pexpect
 
     - name: Run the tests
       run: python setup.py test -q
+
+    - name: Run the end-to-end tests
+      run: END_TO_END=1 python setup.py test -q
