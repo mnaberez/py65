@@ -8,11 +8,11 @@ class MPU(mpu6502.MPU):
         self.name = '65C02'
         self.waiting = False
 
-    def step(self):
+    def step(self, trace=False):
         if self.waiting:
             self.processorCycles += 1
         else:
-            mpu6502.MPU.step(self)
+            mpu6502.MPU.step(self, trace)
         return self
 
     # Make copies of the lists
@@ -62,6 +62,12 @@ class MPU(mpu6502.MPU):
         if z == 0:
             self.p |= self.ZERO
         self.memory[address] = m & ~self.a
+
+    def opADC(self, x):
+        return self._opADC(x, decimal_flags_use_adjusted_result=True)
+
+    def opSBC(self, x):
+        return self._opSBC(x, decimal_flags_use_adjusted_result=True)
 
     # instructions
 
