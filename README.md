@@ -37,7 +37,7 @@ The following devices are simulated:
 
 - `mpu65org16` simulates the 65Org16, a 6502-like microprocessor with a
   16-bit data bus and 32-bit address bus.  This microprocessor is a project
-  of the [6502.org community](http://forum.6502.org/viewtopic.php?t=1824)
+  of the [6502.org community](https://6502.org/forum/viewtopic.php?t=1824)
   and a [Verilog core](https://github.com/BigEd/verilog-6502/wiki) for it
   has been implemented.
 
