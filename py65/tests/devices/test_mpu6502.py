@@ -409,26 +409,6 @@ class Common6502Tests:
         self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.CARRY)
 
-    def test_adc_bcd_on_immediate_9c_plus_9d(self):
-        mpu = self._make_mpu()
-        mpu.p |= mpu.DECIMAL
-        mpu.p &= ~(mpu.CARRY)
-        mpu.a = 0x9c
-        # $0000 ADC #$9d
-        # $0002 ADC #$9d
-        self._write(mpu.memory, 0x0000, (0x69, 0x9d))
-        self._write(mpu.memory, 0x0002, (0x69, 0x9d))
-        mpu.step()
-        self.assertEqual(0x9f, mpu.a)
-        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
-        mpu.step()
-        self.assertEqual(0x0004, mpu.pc)
-        self.assertEqual(0x93, mpu.a)
-        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
-        self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)
-        self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
-
     # ADC Absolute, X-Indexed
 
     def test_adc_bcd_off_abs_x_carry_clear_in_accumulator_zeroes(self):
@@ -4741,20 +4721,6 @@ class Common6502Tests:
         self.assertEqual(0, mpu.p & mpu.ZERO)
         self.assertEqual(0, mpu.p & mpu.CARRY)
 
-    def test_sbc_bcd_on_immediate_20_minus_0a_carry_unset(self):
-        mpu = self._make_mpu()
-        mpu.p |= mpu.DECIMAL
-        mpu.a = 0x20
-        # $0000 SBC #$00
-        self._write(mpu.memory, 0x0000, (0xe9, 0x0a))
-        mpu.step()
-        self.assertEqual(0x0002, mpu.pc)
-        self.assertEqual(0x1f, mpu.a)
-        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
-        self.assertEqual(0, mpu.p & mpu.OVERFLOW)
-        self.assertEqual(0, mpu.p & mpu.ZERO)
-        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
-
     # SBC Absolute, X-Indexed
 
     def test_sbc_abs_x_all_zeros_and_no_borrow_is_zero(self):
@@ -6053,6 +6019,42 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         mpu.memory[0x0012] = 0x03 # read if page wrapped
         mpu.step()
         self.assertEqual(0x3f, mpu.a)
+
+    # Different undefined BCD behaviour between 6502 and 65C02
+
+    def test_adc_bcd_on_immediate_9c_plus_9d(self):
+        mpu = self._make_mpu()
+        mpu.p |= mpu.DECIMAL
+        mpu.p &= ~(mpu.CARRY)
+        mpu.a = 0x9c
+        # $0000 ADC #$9d
+        # $0002 ADC #$9d
+        self._write(mpu.memory, 0x0000, (0x69, 0x9d))
+        self._write(mpu.memory, 0x0002, (0x69, 0x9d))
+        mpu.step()
+        self.assertEqual(0x9f, mpu.a)
+        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
+        mpu.step()
+        self.assertEqual(0x0004, mpu.pc)
+        self.assertEqual(0x93, mpu.a)
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+        self.assertEqual(mpu.OVERFLOW, mpu.p & mpu.OVERFLOW)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
+
+    def test_sbc_bcd_on_immediate_20_minus_0a_carry_unset(self):
+        mpu = self._make_mpu()
+        mpu.p |= mpu.DECIMAL
+        mpu.a = 0x20
+        # $0000 SBC #$00
+        self._write(mpu.memory, 0x0000, (0xe9, 0x0a))
+        mpu.step()
+        self.assertEqual(0x0002, mpu.pc)
+        self.assertEqual(0x1f, mpu.a)
+        self.assertEqual(0, mpu.p & mpu.NEGATIVE)
+        self.assertEqual(0, mpu.p & mpu.OVERFLOW)
+        self.assertEqual(0, mpu.p & mpu.ZERO)
+        self.assertEqual(mpu.CARRY, mpu.p & mpu.CARRY)
 
     def _get_target_class(self):
         return py65.devices.mpu6502.MPU
