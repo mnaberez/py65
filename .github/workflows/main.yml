@@ -8,99 +8,31 @@ env:
             pip --no-cache-dir"
 
 jobs:
-  tests_py27:
-    runs-on: ubuntu-20.04
-    container: python:2.7
-    strategy:
-      fail-fast: false
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Show Python version
-      run: python -V
-
-    - name: Install dependencies
-      run: $PIP install setuptools pexpect
-
-    - name: Run the tests
-      run: python setup.py test -q
-
-    - name: Run the end-to-end tests
-      run: END_TO_END=1 python setup.py test -q
-
-  build_py34:
-    runs-on: ubuntu-20.04
-    container: python:3.4
-    strategy:
-      fail-fast: false
-
-    steps:
-    - uses: actions/checkout@v3 
-    # does not work with actions/checkout@v4:
-    #   /usr/bin/docker exec  289170dbefc90d2ba94a09f3dcb70c42c1e1b29a5e877cd533b26ebf73ca82fa sh -c "cat /etc/*release | grep ^ID"
-    #   /__e/node20/bin/node: /lib/x86_64-linux-gnu/libm.so.6: version `GLIBC_2.27' not found (required by /__e/node20/bin/node)
-    #   /__e/node20/bin/node: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.28' not found (required by /__e/node20/bin/node)
-    #   /__e/node20/bin/node: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.25' not found (required by /__e/node20/bin/node)
-
-    - name: Show Python version
-      run: python -V
-
-    - name: Install dependencies
-      run: $PIP install setuptools pexpect
-
-    - name: Run the tests
-      run: python setup.py test -q
-
-    - name: Run the end-to-end tests
-      run: END_TO_END=1 python setup.py test -q
-
-  build_py35:
-    runs-on: ubuntu-20.04
-    container: python:3.5
-    strategy:
-      fail-fast: false
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Show Python version
-      run: python -V
-
-    - name: Install dependencies
-      run: $PIP install setuptools pexpect
-
-    - name: Run the tests
-      run: python setup.py test -q
-
-    - name: Run the end-to-end tests
-      run: END_TO_END=1 python setup.py test -q
-
-  build_py3x:
+  test:
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, "3.10", 3.11, 3.12]
-        os: [ubuntu-20.04]
-
-    runs-on: ${{ matrix.os }}
+        python-version: [3.8, 3.9, "3.10", 3.11, 3.12, 3.13, 3.14, "pypy-3.11"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Show Python version
       run: python -V
 
-    - name: Install dependencies
-      run: $PIP install setuptools pexpect
+    - name: Install the package
+      run: $PIP install .
 
     - name: Run the tests
-      run: python setup.py test -q
+      run: python -m unittest discover py65.tests
 
     - name: Run the end-to-end tests
-      run: END_TO_END=1 python setup.py test -q
+      run: |
+        $PIP install pexpect
+        END_TO_END=1 python -m unittest discover py65.tests
