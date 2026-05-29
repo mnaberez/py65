@@ -1,5 +1,8 @@
 ## 2.0.0.dev0 (Next Release)
 
+- Py65 now requires Python 3.8 or later.  Support for older Python 3
+  versions and Python 2.7 has been removed.
+
 ## 1.2.0 (2024-04-12)
 
 - Fixed a bug with character input that would cause characters to be

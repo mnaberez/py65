@@ -1,7 +1,5 @@
 import sys
 
-from py65.compat import as_string
-
 if sys.platform[:3] == "win":
     import msvcrt
 
@@ -26,7 +24,7 @@ if sys.platform[:3] == "win":
         is available.  Does not echo the character.  The stdin argument is
         for function signature compatibility and is ignored.
         """
-        return as_string(msvcrt.getch())
+        return msvcrt.getch().decode('utf-8')
 
     def getch_noblock(stdin):
         """ Read one character from the Windows console without blocking.
@@ -35,8 +33,8 @@ if sys.platform[:3] == "win":
         available, an empty string is returned.
         """
         if msvcrt.kbhit():
-            return as_string(getch(stdin))
-        return u''
+            return getch(stdin)
+        return ''
 
 else:
     import termios
@@ -156,7 +154,7 @@ else:
                 # use select to make sure there is at least one char to read.
                 rd,wr,er = select([stdin], [], [], 0.01)
                 if rd != []:
-                    char = as_string(stdin.read(1))
+                    char = stdin.read(1).decode('utf-8')
             except KeyboardInterrupt:
                 # Pass along a CTRL-C interrupt.
                 raise
@@ -179,7 +177,7 @@ else:
             # use select to make sure there is at least one char to read.
             rd,wr,er = select([stdin], [], [], 0.01)
             if rd != []:
-                char = as_string(stdin.read(1))
+                char = stdin.read(1).decode('utf-8')
         except KeyboardInterrupt:
             # Pass along a CTRL-C interrupt.
             raise
