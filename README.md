@@ -1,5 +1,4 @@
-Py65
-====
+# Py65
 
 Py65 provides tools for simulating hardware based on 6502-like
 microprocessors.  It has the following goals:
@@ -15,41 +14,37 @@ microprocessors.  It has the following goals:
   by Py65 may not always be perfect, their behavior is verified through
   tests so unexpected results are minimized.
 
-Installation
-------------
+## Installation
 
-Py65 packages are `available <http://pypi.python.org/pypi/py65>`_ on the
+Py65 packages are [available](http://pypi.python.org/pypi/py65) on the
 Python Package Index (PyPI).  You download them from there or you can
-use ``pip`` to install Py65::
+use `pip` to install Py65:
 
     $ pip install setuptools py65
 
-Devices
--------
+## Devices
 
 The following devices are simulated at this time:
 
-- ``mpu6502`` simulates the original NMOS 6502 microprocessor from MOS
-  Technology, later known as Commodore Semiconductor Group (CSG). At this
-  time, all of the documented opcodes are supported.  Support for the
-  illegal opcodes is planned for the future.
+- `mpu6502` simulates the original NMOS 6502 microprocessor from MOS
+  Technology, later known as Commodore Semiconductor Group (CSG). All
+  of the documented opcodes are supported.
 
-- ``mpu65c02`` simulates a generic CMOS 65C02 microprocessor. There were
+- `mpu65c02` simulates a generic CMOS 65C02 microprocessor. There were
   several 65C02 versions from various manufacturers, some with more
   opcodes than others. This simulation is based on the W65C02S from the
   Western Design Center (WDC).
 
-- ``mpu65org16`` simulates the 65Org16, a 6502-like microprocessor with a
+- `mpu65org16` simulates the 65Org16, a 6502-like microprocessor with a
   16-bit data bus and 32-bit address bus.  This microprocessor is a project
-  of the `6502.org community <http://forum.6502.org/viewtopic.php?t=1824>`_
-  and a `Verilog core <https://github.com/BigEd/verilog-6502/wiki>`_ for it
+  of the [6502.org community](http://forum.6502.org/viewtopic.php?t=1824)
+  and a [Verilog core](https://github.com/BigEd/verilog-6502/wiki) for it
   has been implemented.
 
-Monitor
--------
+## Monitor
 
 Py65 includes a console-based machine language monitor (sometimes also called
-a debugger).  This program, ``py65mon``, allows you to interact with the
+a debugger).  This program, `py65mon`, allows you to interact with the
 simulations that you build.  Its features include:
 
 - Commands that are largely compatible with those used in the monitor of
@@ -60,25 +55,24 @@ simulations that you build.  Its features include:
 - Simple assemble and disassemble capability, including support for labels
   and labels with offsets.
 
-Contributors
-------------
+## Contributors
 
 These people are responsible for Py65:
 
-- `Mike Naberezny <https://github.com/mnaberez>`_ is the original author of
+- [Mike Naberezny](https://github.com/mnaberez) is the original author of
   Py65 and is the primary maintainer.
 
-- `Oscar Lindberg <https://github.com/offe>`_ started the 65C02 simulation
+- [Oscar Lindberg](https://github.com/offe) started the 65C02 simulation
   module and contributed greatly to its implementation.
 
-- `Ed Spittles <https://github.com/biged>`_ wrote the 65Org16 simulation
+- [Ed Spittles](https://github.com/biged) wrote the 65Org16 simulation
   module and provided many useful issue reports and patches.
 
-- `David Beazley <https://github.com/dabeaz>`_ did the initial port of Py65
+- [David Beazley](https://github.com/dabeaz) did the initial port of Py65
   to Python 3.
 
-- `Alessandro Gatti <https://github.com/agatti>`_ added support for
+- [Alessandro Gatti](https://github.com/agatti) added support for
   breakpoints in the monitor.
 
-- `Mario Keller <https://github.com/mkeller0815>`_ added support for
-  configuring ``getc``/``putc`` and fixed bugs in command line option parsing.
+- [Mario Keller](https://github.com/mkeller0815) added support for
+  configuring `getc`/`putc` and fixed bugs in command line option parsing.

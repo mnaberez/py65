@@ -1,8 +1,6 @@
-1.3.0.dev0 (Next Release)
--------------------------
+## 2.0.0.dev0 (Next Release)
 
-1.2.0 (2024-04-12)
-------------------
+## 1.2.0 (2024-04-12)
 
 - Fixed a bug with character input that would cause characters to be
   dropped when pasting in larger amounts of text.  This makes it possible
@@ -12,71 +10,65 @@
 
 - Fixed regular expression warnings on Python 3.12.
 
-- The ``fill`` command in the monitor now shows an error message if an
+- The `fill` command in the monitor now shows an error message if an
   address or value is out of range.
 
-- Added ``irq()`` and ``nmi()`` methods to the ``MPU`` class, so that
+- Added `irq()` and `nmi()` methods to the `MPU` class, so that
   interrupts can be simulated. Patch by Irmen de Jong.
 
-- The ``MPU`` class constructor now accepts ``None`` for the initial PC, which
-  will cause it to read the address from the reset vector on ``reset()``.
+- The `MPU` class constructor now accepts `None` for the initial PC, which
+  will cause it to read the address from the reset vector on `reset()`.
 
-- The ``py65`` package is no longer a namespace package.
+- The `py65` package is no longer a namespace package.
 
-- Fixed assembly and disassembly of 65C02 instruction $64 (``STZ $12``).
+- Fixed assembly and disassembly of 65C02 instruction $64 (`STZ $12`).
   Patch by Patrick Surry.
 
-- Removed use of the ``asyncore`` module deprecated in Python 3.10.
+- Removed use of the `asyncore` module deprecated in Python 3.10.
 
-1.1.0 (2018-07-01)
-------------------
+## 1.1.0 (2018-07-01)
 
-- The ``Monitor`` class now allows the default memory to be supplied in
+- The `Monitor` class now allows the default memory to be supplied in
   the constructor.  Patch by Irmen de Jong.
 
-- Fixed a bug where setting the MPU via ``py65mon`` command line arguments
+- Fixed a bug where setting the MPU via `py65mon` command line arguments
   would have no effect.  Reported by Michael A. Morris, patch by Ed Spittles.
 
-- The ``itoa()`` function in ``conversions.py`` now raises an error when an
+- The `itoa()` function in `conversions.py` now raises an error when an
   unsupported base is given.  Patch by Scot W. Stevenson.
 
 - The unused hexdump loader utility has been removed.
 
-1.0.0 (2017-05-11)
-------------------
+## 1.0.0 (2017-05-11)
 
-- Fixed a bug where the ordering of ``py65mon`` command line arguments
+- Fixed a bug where the ordering of `py65mon` command line arguments
   produced different results.  Arguments can now be specified in any
   order.  Patch by Mario Keller.
 
-- Added new ``--input`` and ``--output`` arguments to ``py65mon`` that
-  allow the addresses of the ``getc`` and ``putc`` handlers to be
+- Added new `--input` and `--output` arguments to `py65mon` that
+  allow the addresses of the `getc` and `putc` handlers to be
   changed.  Patch by Mario Keller.
 
 - Fixed a 65C02 bug where the TSB and TRB instructions did not set
   the Z flag correctly.  Thanks to Kris Kennaway for reporting it.
 
-0.24 (2015-03-31)
------------------
+## 0.24 (2015-03-31)
 
 - Released as a universal wheel.
 
-0.23 (2015-02-10)
------------------
+## 0.23 (2015-02-10)
 
 - Added a workaround to $F001 output to catch encoding errors and
   display a "?" instead of crashing.  This condition can occur if
   the 6502 program sends bytes to $F001 that aren't compatible with
   the terminal's character encoding.
 
-0.22 (2015-02-09)
------------------
+## 0.22 (2015-02-09)
 
-- Fixed a bug where ``py65mon --rom`` would raise an exception
+- Fixed a bug where `py65mon --rom` would raise an exception
   on Python 3.
 
-0.21 (2015-02-09)
------------------
+## 0.21 (2015-02-09)
 
 - Added support for breakpoints in the monitor.  Contributed by
   Alessandro Gatti.
@@ -86,15 +78,13 @@
 
 - Fixed console input when run under Python 3 on Windows.  Closes #27.
 
-0.20 (2014-05-08)
------------------
+## 0.20 (2014-05-08)
 
 - Page wrapping for indexed indirect (X) operations on 65C02 has been
   restored.  This reverts the change introduced in 0.18.  We now believe
   that this mode works the same on the 65C02 as it does on the 6502.
 
-0.19 (2014-03-12)
------------------
+## 0.19 (2014-03-12)
 
 - Fixed 65C02 opcode $D2: CMP Zero Page, Indirect.
 
@@ -103,8 +93,7 @@
   and it uses this address for another purpose.  Examples that depended
   on $F005 have been changed to use $F004.
 
-0.18 (2014-01-30)
------------------
+## 0.18 (2014-01-30)
 
 - Fixed a bug in RTS where popping $FFFF off the stack would cause
   the program counter to overflow to $10000.  It now wraps around
@@ -119,19 +108,16 @@
 
 - Removed page wrap bug from indexed indirect (X) operations on 65C02.
 
-0.17 (2013-10-26)
------------------
+## 0.17 (2013-10-26)
 
 - Added support for Python 3.2 and 3.3 based on work by David Beazley.
 
-0.16 (2013-04-03)
------------------
+## 0.16 (2013-04-03)
 
 - Fixed a bug in the monitor that caused loading from the command
   line with "--rom" to crash.
 
-0.15 (2013-01-06)
------------------
+## 0.15 (2013-01-06)
 
 - Disassembling can now wrap around memory if the start address
   given is greater than the end address.
@@ -139,8 +125,7 @@
 - Fixed the disassembler to accept a range of "start:end" instead of
   "start:end+1" for consistency with the other commands.
 
-0.14 (2012-11-30)
------------------
+## 0.14 (2012-11-30)
 
 - Assembling now detects syntax errors, overflows, and bad labels
   separately and shows specific error messages.
@@ -163,16 +148,14 @@
 - Fixed a bug in the disassembler where instructions that wrap past
   the top of memory would not be displayed properly.
 
-0.13 (2012-11-15)
------------------
+## 0.13 (2012-11-15)
 
 - Fixed a bug where negative numbers could be entered
   for addresses in the monitor.
 
-0.12 (2012-02-16)
------------------
+## 0.12 (2012-02-16)
 
-- Fixed a bug that caused ``help cd`` to raise an exception
+- Fixed a bug that caused `help cd` to raise an exception
   in the monitor.
 
 - Fixed a bug in the 65C02 simulation where the opcode 0x7A
@@ -184,20 +167,18 @@
 
 - Added "h" as a monitor shortcut for "help".
 
-0.11 (2012-01-07)
------------------
+## 0.11 (2012-01-07)
 
 - Added a new 65Org16 MPU simulation written by Ed Spittles.
 
 - The monitor now accepts command line arguments.  See
-  ``py65mon --help`` for usage.  Contributed by Ed Spittles.
+  `py65mon --help` for usage.  Contributed by Ed Spittles.
 
 - The monitor's load command can now fetch URLs.
 
 - Python versions earlier than 2.6 are no longer supported.
 
-0.10 (2011-08-27)
------------------
+## 0.10 (2011-08-27)
 
 - Fixed long-standing bugs in relative branch calculations in the
   assembler and disassembler.  Based on a patch by Ed Spittles.
@@ -205,8 +186,7 @@
 - Zero page operations now have the correct page wrap around.
   Patch by Martti Kühne.
 
-0.9 (2011-03-27)
-----------------
+## 0.9 (2011-03-27)
 
 - Fixed two monitor tests that were broken under Windows.  Thanks
   to Oscar Lindberg for reporting this.
@@ -217,8 +197,7 @@
   ported Bruce Clark's tests to find failures and then rewrote
   the decimal handling code.
 
-0.8 (2010-03-08)
-----------------
+## 0.8 (2010-03-08)
 
 - Fixed deprecation warnings on Python 2.6
 
@@ -234,8 +213,7 @@
 - Added ">" as a monitor shortcut for the fill command for
   consistency with VICE.
 
-0.7 (2009-09-03)
-----------------
+## 0.7 (2009-09-03)
 
 - When using the monitor, the nonblocking character input at
   $F004 should now work on the Microsoft Windows platform.
@@ -274,8 +252,7 @@
 - A new "save" command has been added to the monitor that will save
   a range of memory to a binary file.
 
-0.6 (2009-08-11)
-----------------
+## 0.6 (2009-08-11)
 
 - Added monitor shortcut "a" for "assemble".
 
@@ -288,21 +265,18 @@
   Falvo II.  http://bitbucket.org/kc5tja/lib65816/src/tip/src/cputable.h
   Closes #3.
 
-0.5 (2009-08-06)
-----------------
+## 0.5 (2009-08-06)
 
 - Fixed signatures of getc/putc callbacks in monitor that were broken
   when the ObservableMemory interface changed in 0.3.  Closes #1.
 
 - Fixed that ROL would not properly set the Z flag.  Closes #2.
 
-0.4 (2009-06-06)
-----------------
+## 0.4 (2009-06-06)
 
 - Added ez_setup.py to bootstrap setuptools installation.
 
-0.3 (2009-06-03)
-----------------
+## 0.3 (2009-06-03)
 
 - Added shortcuts for monitor commands such as "m" for "memory".  These
   are mostly the same as the VICE monitor shortcuts.
@@ -331,8 +305,7 @@
 
 - Python 2.4 or later is now required.
 
-0.2 (2008-11-09)
-----------------
+## 0.2 (2008-11-09)
 
 - Added a new "disassemble" command to the monitor.  It can disassemble
   any range of memory ("disassemble c000:c010").  If labels have been
@@ -358,7 +331,6 @@
 - Documented all remaining monitor commands.  In the monitor, use the
   command "help command" for help on any command.
 
-0.1 (2008-11-21)
-----------------
+## 0.1 (2008-11-21)
 
 - First release.

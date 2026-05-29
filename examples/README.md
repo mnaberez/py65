@@ -1,6 +1,6 @@
 Some example code and usage:
 
-$ py65mon -m 65Org16 -r examples/65Org16.boot.rom
+    $ py65mon -m 65Org16 -r examples/65Org16.boot.rom
 
 Then paste in a hex file, such as examples/swapcase.hex
 
