@@ -20,11 +20,11 @@ Py65 packages are [available](http://pypi.python.org/pypi/py65) on the
 Python Package Index (PyPI).  You download them from there or you can
 use `pip` to install Py65:
 
-    $ pip install setuptools py65
+    $ pip install py65
 
 ## Devices
 
-The following devices are simulated at this time:
+The following devices are simulated:
 
 - `mpu6502` simulates the original NMOS 6502 microprocessor from MOS
   Technology, later known as Commodore Semiconductor Group (CSG). All
