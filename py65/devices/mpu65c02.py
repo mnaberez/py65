@@ -65,6 +65,18 @@ class MPU(mpu6502.MPU):
 
     # instructions
 
+    def irq(self):
+        # 65C02 clears the decimal flag on IRQ, NMOS 6502 does not
+        if self.p & self.INTERRUPT:
+            return
+        mpu6502.MPU.irq(self)
+        self.p &= ~self.DECIMAL
+
+    def nmi(self):
+        # 65C02 clears the decimal flag on NMI, NMOS 6502 does not
+        mpu6502.MPU.nmi(self)
+        self.p &= ~self.DECIMAL
+
     @instruction(name="BRK", mode="imp", cycles=7)
     def inst_0x00(self):
         # pc has already been increased one
