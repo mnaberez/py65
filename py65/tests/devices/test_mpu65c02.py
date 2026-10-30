@@ -452,6 +452,24 @@ class MPUTests(unittest.TestCase, Common6502Tests):
         self.assertEqual(mpu.BREAK, mpu.p & mpu.BREAK)
         self.assertEqual(0, mpu.p & mpu.DECIMAL)
 
+    def test_irq_clears_decimal_flag(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.DECIMAL
+        mpu.memory[0xFFFE:0xFFFF + 1] = (0x00, 0x80)
+        mpu.pc = 0xC000
+        mpu.irq()
+        self.assertEqual(0x8000, mpu.pc)
+        self.assertEqual(0, mpu.p & mpu.DECIMAL)
+
+    def test_nmi_clears_decimal_flag(self):
+        mpu = self._make_mpu()
+        mpu.p = mpu.DECIMAL
+        mpu.memory[0xFFFA:0xFFFB + 1] = (0x00, 0x80)
+        mpu.pc = 0xC000
+        mpu.nmi()
+        self.assertEqual(0x8000, mpu.pc)
+        self.assertEqual(0, mpu.p & mpu.DECIMAL)
+
     # CMP Zero Page, Indirect
 
     def test_cmp_zpi_sets_z_flag_if_equal(self):
