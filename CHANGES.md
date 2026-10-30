@@ -3,6 +3,9 @@
 - Py65 now requires Python 3.8 or later.  Support for older Python 3
   versions and Python 2.7 has been removed.
 
+- Fixed a bug where the 65C02 did not clear the decimal flag on IRQ
+  or NMI entry. Patch by Ayushman Bhattacharya.
+
 ## 1.2.0 (2024-04-12)
 
 - Fixed a bug with character input that would cause characters to be
