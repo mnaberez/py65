@@ -1130,7 +1130,7 @@ class MPU:
         self.opCMPR(self.AbsoluteAddr, self.a)
         self.pc += 2
 
-    @instruction(name="DEC", mode="abs", cycles=3)
+    @instruction(name="DEC", mode="abs", cycles=6)
     def inst_0xce(self):
         self.opDECR(self.AbsoluteAddr)
         self.pc += 2

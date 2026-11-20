@@ -2195,6 +2195,7 @@ class Common6502Tests:
         mpu.memory[0xABCD] = 0x10
         mpu.step()
         self.assertEqual(0x0003, mpu.pc)
+        self.assertEqual(6, mpu.processorCycles)
         self.assertEqual(0x0F, mpu.memory[0xABCD])
         self.assertEqual(0, mpu.p & mpu.NEGATIVE)
         self.assertEqual(0, mpu.p & mpu.ZERO)

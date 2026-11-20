@@ -6,6 +6,9 @@
 - Fixed a bug where the 65C02 did not clear the decimal flag on IRQ
   or NMI entry. Patch by Ayushman Bhattacharya.
 
+- Fixed a bug where `DEC` absolute (opcode `$CE`) took 3 cycles instead
+  of 6 on the 6502 and 65C02.
+
 ## 1.2.0 (2024-04-12)
 
 - Fixed a bug with character input that would cause characters to be
